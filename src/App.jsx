@@ -8,6 +8,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Modulos from './pages/Modulos';
 import Repositorio from './pages/Repositorio';
+import Informacion from './pages/Informacion';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         />
         
         <Route path="/modulos" element={<Modulos />} />
+        <Route path="/informacion" element={<Informacion />} />
       </Routes>
     </MainLayout>
   );

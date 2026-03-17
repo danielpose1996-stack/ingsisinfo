@@ -6,7 +6,14 @@ import EventItem from '../components/EventItem';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
-import { ArrowRight, Image as ImageIcon, Sparkles, Download, FileText, ChevronRight } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Image as ImageIcon, 
+  Sparkles, 
+  Download, 
+  FileText, 
+  ChevronRight
+} from 'lucide-react';
 
 export default function Home() {
   const [noticias, setNoticias] = useState([]);
@@ -80,7 +87,10 @@ export default function Home() {
             <button className="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold transition-all transform hover:scale-105 shadow-lg shadow-emerald-500/20">
               Explorar Módulos
             </button>
-            <button className="px-8 py-4 rounded-xl bg-card hover:bg-card/80 text-foreground font-bold border border-card-border transition-all backdrop-blur-sm">
+            <button 
+              onClick={() => window.location.href = '/informacion'}
+              className="px-8 py-4 rounded-xl bg-card hover:bg-card/80 text-foreground font-bold border border-card-border transition-all backdrop-blur-sm"
+            >
               Saber más
             </button>
           </div>
