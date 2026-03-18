@@ -18,6 +18,7 @@ import {
   eliminarOva,
   subirArchivoOva
 } from '../lib/supabase';
+import { sanitizeText } from '../lib/security';
 import { useEmailValidation } from '../hooks/useEmailValidation';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
@@ -170,18 +171,23 @@ export default function AdminDashboard() {
       if (isEditMode) {
         // Lógica de actualización
         const updates = {
-          nombre: newUser.nombre,
-          apellido: newUser.apellido,
+          nombre: sanitizeText(newUser.nombre),
+          apellido: sanitizeText(newUser.apellido),
           email: normalizedEmail,
           rol: newUser.rol,
           linea_investigacion: newUser.rol === 'docente' ? (newUser.linea_investigacion || 'Ingeniería de Software') : null
         };
 
-        await actualizarPerfil(editingProfileId, updates, true); // Pasar flag de que es profileId
+        await actualizarPerfil(editingProfileId, updates, true);
         alert('Usuario actualizado con éxito.');
       } else {
         // Lógica de creación (existente)
-        const result = await registrarUsuario({ ...newUser, email: normalizedEmail });
+        const result = await registrarUsuario({ 
+          ...newUser, 
+          nombre: sanitizeText(newUser.nombre),
+          apellido: sanitizeText(newUser.apellido),
+          email: normalizedEmail 
+        });
 
         if (result.isBypass) {
           alert('MODO DESARROLLO ACTIVADO: Usuario creado directamente en la base de datos (sin correo). \n\nImportante: Por favor usa la contraseña ' + (newUser.password || '"password123"') + ' para iniciar sesión con esta cuenta.');
@@ -256,6 +262,16 @@ export default function AdminDashboard() {
     try {
       const dataToSave = {
         ...ovaForm,
+        titulo: sanitizeText(ovaForm.titulo),
+        descripcion: sanitizeText(ovaForm.descripcion),
+        objetivo: sanitizeText(ovaForm.objetivo),
+        introduccion: sanitizeText(ovaForm.introduccion),
+        actividad_final: sanitizeText(ovaForm.actividad_final),
+        contenido: ovaForm.contenido.map(c => ({
+          ...c,
+          titulo: sanitizeText(c.titulo),
+          contenido: sanitizeText(c.contenido)
+        })),
         modulo_id: selectedModuloAula.id
       };
 

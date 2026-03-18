@@ -11,6 +11,7 @@ import {
   eliminarProyecto,
   descargarArchivo
 } from '../lib/supabase';
+import { sanitizeText } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -99,7 +100,7 @@ export default function StudentDashboard() {
     setIsSubmitting(true);
     try {
       const proyecto = await crearProyecto({
-        nombre: newProject.nombre,
+        nombre: sanitizeText(newProject.nombre),
         estado: newProject.estado,
         estudianteId: perfil.id,
         docenteId: newProject.docenteId,
@@ -149,8 +150,8 @@ export default function StudentDashboard() {
     setIsSubmitting(true);
     try {
       await actualizarPerfil(user.id, {
-        nombre: editProfileData.nombre,
-        apellido: editProfileData.apellido,
+        nombre: sanitizeText(editProfileData.nombre),
+        apellido: sanitizeText(editProfileData.apellido),
         semestre: parseInt(editProfileData.semestre),
         linea_investigacion: editProfileData.linea_investigacion
       });

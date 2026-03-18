@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo } from '../lib/supabase';
+import { sanitizeHTML } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -40,8 +41,8 @@ export default function Modulos() {
   const [selectedOva, setSelectedOva] = useState(null);
   const [ovas, setOvas] = useState([]);
   
-  const { user, perfil } = useAuth();
-  const isAdminOrTeacherOrStudent = perfil && ['admin', 'docente', 'estudiante'].includes(perfil.rol);
+  const { user, perfil, isAdmin } = useAuth();
+  const isAdminOrTeacherOrStudent = isAdmin || (perfil && ['admin', 'docente', 'estudiante'].includes(perfil.rol));
 
   useEffect(() => {
     loadModulos();
@@ -310,7 +311,7 @@ export default function Modulos() {
                     <div className="col-span-full py-20 text-center bg-white/[0.02] rounded-3xl border border-card-border border-dashed">
                       <Lock className="w-12 h-12 text-amber-500/30 mx-auto mb-4" />
                       <p className="text-amber-500/70 italic font-bold">Contenido Protegido</p>
-                      <p className="text-gray-600 text-xs mt-2 italic">Debes iniciar sesión como estudiante o docente para acceder a los OVAs.</p>
+                      <p className="text-gray-600 text-xs mt-2 italic">Debes iniciar sesión como administrador, estudiante o docente para acceder a los OVAs.</p>
                     </div>
                   ) : ovas.length > 0 ? (
                     ovas.map(ova => (
@@ -438,7 +439,7 @@ export default function Modulos() {
         <div className="space-y-6">
           <div 
             className="prose dark:prose-invert max-w-none text-foreground/60 text-sm leading-relaxed italic"
-            dangerouslySetInnerHTML={{ __html: selectedSubpage?.html_contenido || '<p>Contenido en proceso de redacción...</p>' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(selectedSubpage?.html_contenido) || '<p>Contenido en proceso de redacción...</p>' }}
           />
           <div className="pt-4 border-t border-card-border">
             <Button onClick={() => setSelectedSubpage(null)} className="w-full font-bold tracking-widest italic">CERRAR PÁGINA</Button>
@@ -555,7 +556,7 @@ export default function Modulos() {
                        <GlassCard className="p-10 border-card-border bg-card">
                          <div 
                            className="prose dark:prose-invert max-w-none text-foreground/80 text-lg italic leading-relaxed"
-                           dangerouslySetInnerHTML={{ __html: currentStep.content.contenido.replace(/\n/g, '<br/>') }}
+                           dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentStep.content.contenido.replace(/\n/g, '<br/>')) }}
                          />
                        </GlassCard>
 

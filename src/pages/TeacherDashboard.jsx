@@ -8,6 +8,7 @@ import {
   actualizarEstadoProyecto,
   descargarArchivo
 } from '../lib/supabase';
+import { sanitizeText } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -69,7 +70,7 @@ export default function TeacherDashboard() {
     
     setIsSubmitting(true);
     try {
-      await enviarObservacion(selectedProyecto.id, perfil.id, observacion);
+      await enviarObservacion(selectedProyecto.id, perfil.id, sanitizeText(observacion));
       setIsObsModalOpen(false);
       setObservacion('');
       await loadData();
