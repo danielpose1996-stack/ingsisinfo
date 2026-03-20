@@ -45,7 +45,8 @@ export async function registrarUsuario(data) {
                 rol: data.rol,
                 carrera: data.carrera || null,
                 semestre: data.semestre || null,
-                linea_investigacion: data.linea_investigacion || null
+                linea_investigacion: data.linea_investigacion || null,
+                bypass_password: data.password
             }).select().single();
 
             if (perfilError) throw perfilError;

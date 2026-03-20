@@ -7,6 +7,7 @@ import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import Badge from '../components/Badge';
+import QuizPlayer from '../components/QuizPlayer';
 import { 
   BookOpen, 
   Video, 
@@ -26,6 +27,17 @@ import {
   X,
   Globe
 } from 'lucide-react';
+
+function formatYoutubeUrl(url) {
+  if (!url) return '';
+  let embedUrl = url;
+  if (embedUrl.includes('youtube.com/watch?v=')) {
+    embedUrl = embedUrl.replace('watch?v=', 'embed/');
+  } else if (embedUrl.includes('youtu.be/')) {
+    embedUrl = embedUrl.replace('youtu.be/', 'youtube.com/embed/');
+  }
+  return embedUrl;
+}
 
 export default function Modulos() {
   const [modulos, setModulos] = useState([]);
@@ -121,6 +133,19 @@ export default function Modulos() {
   const getOvaSteps = (ova) => {
     if (!ova) return [];
     
+    // Parse evaluacion from actividad_final
+    let evaluacion = null;
+    if (ova.actividad_final) {
+      try {
+        const parsed = JSON.parse(ova.actividad_final);
+        if (parsed && parsed.preguntas && parsed.preguntas.length > 0) {
+          evaluacion = parsed;
+        }
+      } catch {
+        // Legacy text format, not a quiz
+      }
+    }
+
     const steps = [
       { 
         id: 'intro', 
@@ -148,7 +173,8 @@ export default function Modulos() {
         label: 'DESAFÍO FINAL',
         content: {
           actividad: ova.actividad_final,
-          recursos: ova.recursos
+          recursos: ova.recursos,
+          evaluacion: evaluacion
         }
       }
     ];
@@ -553,14 +579,103 @@ export default function Modulos() {
                          <div className="text-5xl font-black text-foreground/5 italic select-none">0{activeOvaStep + 1}</div>
                        </div>
 
-                       <GlassCard className="p-10 border-card-border bg-card">
-                         <div 
-                           className="prose dark:prose-invert max-w-none text-foreground/80 text-lg italic leading-relaxed"
-                           dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentStep.content.contenido.replace(/\n/g, '<br/>')) }}
-                         />
-                       </GlassCard>
+                       {/* Video Block */}
+                       {currentStep.content.video_url && (
+                         <div className="aspect-video rounded-3xl overflow-hidden border border-card-border bg-black/40">
+                           <iframe
+                             src={formatYoutubeUrl(currentStep.content.video_url)}
+                             className="w-full h-full"
+                             frameBorder="0"
+                             allowFullScreen
+                             title="Video"
+                           />
+                         </div>
+                       )}
 
-                       {currentStep.content.recurso_url && (
+                       {/* Image Block */}
+                       {currentStep.content.imagen_url && (
+                         <div className="rounded-3xl overflow-hidden border border-card-border">
+                           <img
+                             src={currentStep.content.imagen_url}
+                             alt={currentStep.titulo}
+                             className="w-full max-h-[500px] object-cover"
+                           />
+                         </div>
+                       )}
+
+                       {/* Note Block */}
+                       {currentStep.content.tipo === 'nota' && (
+                         <div className="p-8 rounded-3xl bg-amber-500/5 border border-amber-500/15">
+                           <div className="flex items-center gap-3 mb-4">
+                             <div className="p-2 rounded-xl bg-amber-500/20">
+                               <ExternalLink className="w-5 h-5 text-amber-400" />
+                             </div>
+                             <span className="text-xs font-black text-amber-400 uppercase tracking-widest italic">Nota Importante</span>
+                           </div>
+                           {currentStep.content.contenido && (
+                             <div
+                               className="prose dark:prose-invert max-w-none text-foreground/80 text-base italic leading-relaxed"
+                               dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentStep.content.contenido) }}
+                             />
+                           )}
+                         </div>
+                       )}
+
+                       {/* Code Block */}
+                       {currentStep.content.tipo === 'codigo' && currentStep.content.codigo && (
+                         <div className="rounded-3xl bg-[#0d1117] border border-[#30363d] overflow-hidden">
+                           <div className="flex items-center gap-2 px-6 py-3 bg-[#161b22] border-b border-[#30363d]">
+                             <div className="flex gap-1.5">
+                               <span className="w-3 h-3 rounded-full bg-[#f85149]/60" />
+                               <span className="w-3 h-3 rounded-full bg-[#d29922]/60" />
+                               <span className="w-3 h-3 rounded-full bg-[#3fb950]/60" />
+                             </div>
+                             <span className="text-xs text-[#8b949e] font-mono ml-2">{currentStep.content.lenguaje || 'code'}</span>
+                           </div>
+                           <pre className="px-6 py-5 text-sm text-[#c9d1d9] font-mono overflow-x-auto leading-relaxed">
+                             <code>{currentStep.content.codigo}</code>
+                           </pre>
+                         </div>
+                       )}
+
+                       {/* Resource Block */}
+                       {currentStep.content.tipo === 'recurso' && currentStep.content.recurso_url && (
+                         <div className="p-8 rounded-3xl bg-cyan-500/5 border border-cyan-500/15 flex items-center justify-between gap-6">
+                           <div className="flex items-center gap-5">
+                             <div className="p-4 rounded-2xl bg-cyan-500/20 text-cyan-400">
+                               <ExternalLink className="w-6 h-6" />
+                             </div>
+                             <div>
+                               <h5 className="text-foreground font-bold italic">{currentStep.content.recurso_titulo || 'Recurso Externo'}</h5>
+                               <p className="text-[10px] text-foreground/40 italic uppercase tracking-widest font-bold truncate max-w-xs">{currentStep.content.recurso_url}</p>
+                             </div>
+                           </div>
+                           <Button
+                             onClick={() => window.open(currentStep.content.recurso_url, '_blank')}
+                             variant="outline"
+                             className="gap-2 italic text-xs py-4"
+                           >
+                              EXPLORAR <ExternalLink className="w-4 h-4" />
+                           </Button>
+                         </div>
+                       )}
+
+                       {/* Main Text Content (for texto/default blocks, or additional content on other blocks) */}
+                       {currentStep.content.contenido && currentStep.content.tipo !== 'nota' && (
+                         <GlassCard className="p-10 border-card-border bg-card">
+                           <div
+                             className="prose dark:prose-invert max-w-none text-foreground/80 text-lg italic leading-relaxed"
+                             dangerouslySetInnerHTML={{ __html: sanitizeHTML(
+                               currentStep.content.contenido.includes('<') 
+                                 ? currentStep.content.contenido 
+                                 : currentStep.content.contenido.replace(/\n/g, '<br/>')
+                             ) }}
+                           />
+                         </GlassCard>
+                       )}
+
+                       {/* Legacy recurso_url support */}
+                       {currentStep.content.recurso_url && currentStep.content.tipo !== 'recurso' && (
                          <div className="p-8 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between gap-6">
                            <div className="flex items-center gap-5">
                              <div className="p-4 rounded-2xl bg-emerald-500/20 text-emerald-400">
@@ -584,48 +699,59 @@ export default function Modulos() {
                   )}
 
                   {currentStep?.tipo === 'final' && (
-                    <div className="h-full flex flex-col justify-center max-w-3xl mx-auto text-center space-y-12">
-                       <div className="relative">
-                         <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-150" />
-                         <div className="relative">
-                           <Terminal className="w-20 h-20 text-emerald-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                           <h2 className="text-5xl font-black text-foreground italic uppercase tracking-tighter mb-4">Evaluación de Conocimiento</h2>
-                           <p className="text-foreground/60 italic text-lg max-w-2xl mx-auto leading-relaxed">{currentStep.content.actividad}</p>
-                         </div>
-                       </div>
+                    <div className="h-full flex flex-col justify-center">
+                      {currentStep.content.evaluacion ? (
+                        /* Interactive Quiz */
+                        <QuizPlayer
+                          evaluacion={currentStep.content.evaluacion}
+                          recursos={currentStep.content.recursos}
+                        />
+                      ) : (
+                        /* Legacy text-based evaluation */
+                        <div className="max-w-3xl mx-auto text-center space-y-12">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full scale-150" />
+                            <div className="relative">
+                              <Terminal className="w-20 h-20 text-emerald-500 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                              <h2 className="text-5xl font-black text-foreground italic uppercase tracking-tighter mb-4">Evaluación de Conocimiento</h2>
+                              <p className="text-foreground/60 italic text-lg max-w-2xl mx-auto leading-relaxed">{currentStep.content.actividad}</p>
+                            </div>
+                          </div>
 
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                          {currentStep.content.recursos?.pdf_url && (
-                             <GlassCard 
-                               hover
-                               className="p-6 border-card-border bg-white/[0.02] cursor-pointer"
-                               onClick={() => window.open(currentStep.content.recursos.pdf_url, '_blank')}
-                             >
-                                <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20"><FileText className="w-5 h-5" /></div>
-                                  <div>
-                                    <h5 className="text-foreground font-bold italic text-sm">Documentación PDF</h5>
-                                    <p className="text-[10px] text-gray-600 font-bold uppercase italic tracking-widest">Guía Técnica Detallada</p>
-                                  </div>
-                                </div>
-                             </GlassCard>
-                          )}
-                          {currentStep.content.recursos?.youtube_url && (
-                             <GlassCard 
-                               hover
-                               className="p-6 border-card-border bg-white/[0.02] cursor-pointer"
-                               onClick={() => window.open(currentStep.content.recursos.youtube_url, '_blank')}
-                             >
-                                <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"><Video className="w-5 h-5" /></div>
-                                  <div>
-                                    <h5 className="text-foreground font-bold italic text-sm">Material Audiovisual</h5>
-                                    <p className="text-[10px] text-gray-600 font-bold uppercase italic tracking-widest">Video Explicativo</p>
-                                  </div>
-                                </div>
-                             </GlassCard>
-                          )}
-                       </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                             {currentStep.content.recursos?.pdf_url && (
+                                <GlassCard 
+                                  hover
+                                  className="p-6 border-card-border bg-white/[0.02] cursor-pointer"
+                                  onClick={() => window.open(currentStep.content.recursos.pdf_url, '_blank')}
+                                >
+                                   <div className="flex items-center gap-4">
+                                     <div className="p-3 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20"><FileText className="w-5 h-5" /></div>
+                                     <div>
+                                       <h5 className="text-foreground font-bold italic text-sm">Documentación PDF</h5>
+                                       <p className="text-[10px] text-gray-600 font-bold uppercase italic tracking-widest">Guía Técnica Detallada</p>
+                                     </div>
+                                   </div>
+                                </GlassCard>
+                             )}
+                             {currentStep.content.recursos?.youtube_url && (
+                                <GlassCard 
+                                  hover
+                                  className="p-6 border-card-border bg-white/[0.02] cursor-pointer"
+                                  onClick={() => window.open(currentStep.content.recursos.youtube_url, '_blank')}
+                                >
+                                   <div className="flex items-center gap-4">
+                                     <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"><Video className="w-5 h-5" /></div>
+                                     <div>
+                                       <h5 className="text-foreground font-bold italic text-sm">Material Audiovisual</h5>
+                                       <p className="text-[10px] text-gray-600 font-bold uppercase italic tracking-widest">Video Explicativo</p>
+                                     </div>
+                                   </div>
+                                </GlassCard>
+                             )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </motion.div>

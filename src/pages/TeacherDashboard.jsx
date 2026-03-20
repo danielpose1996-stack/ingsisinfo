@@ -6,13 +6,20 @@ import {
   finalizarProyecto,
   subirDocumento,
   actualizarEstadoProyecto,
-  descargarArchivo
+  descargarArchivo,
+  obtenerModulos,
+  obtenerOvasModulo,
+  crearOva,
+  actualizarOva,
+  eliminarOva,
+  subirArchivoOva
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
+import OvaEditor from './OvaEditor';
 import { 
   Users, 
   BookOpen, 
@@ -25,7 +32,13 @@ import {
   History,
   AlertCircle,
   FileText,
-  X
+  X,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  GraduationCap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -46,6 +59,14 @@ export default function TeacherDashboard() {
   const [finalFile, setFinalFile] = useState(null);
   const [confirmPass, setConfirmPass] = useState('');
 
+  // Aula Virtual State
+  const [docenteModulo, setDocenteModulo] = useState(null);
+  const [ovas, setOvas] = useState([]);
+  const [loadingOvas, setLoadingOvas] = useState(false);
+  const [ovaForm, setOvaForm] = useState(null);
+  const [editingOva, setEditingOva] = useState(null);
+  const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
+
   useEffect(() => {
     if (user && perfil) {
       loadData();
@@ -57,12 +78,129 @@ export default function TeacherDashboard() {
     try {
       const data = await obtenerProyectosDocente(perfil.id);
       setProyectos(data);
+
+      // Auto-detect module for Aula Virtual
+      const modulos = await obtenerModulos();
+      const match = modulos.find(m => m.nombre === perfil.linea_investigacion);
+      if (match) {
+        setDocenteModulo(match);
+        await loadOvas(match.id);
+      }
     } catch (error) {
       console.error("Error loading teacher data:", error);
     } finally {
       setLoading(false);
     }
   }
+
+  const loadOvas = async (moduloId) => {
+    setLoadingOvas(true);
+    try {
+      const data = await obtenerOvasModulo(moduloId);
+      setOvas(data);
+    } catch (error) {
+      console.error('Error loading OVAs:', error);
+    } finally {
+      setLoadingOvas(false);
+    }
+  };
+
+  // ─── OVA Handlers ───
+  const handleCreateOva = () => {
+    setEditingOva(null);
+    setOvaForm({
+      titulo: '',
+      descripcion: '',
+      imagen_portada: '',
+      objetivo: '',
+      introduccion: '',
+      contenido: [{ _id: `section-${Date.now()}-0`, titulo: '', contenido: '', recurso_url: '', tipo: 'texto' }],
+      recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
+      actividad_final: '',
+      evaluacion: { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 },
+      estado: 'borrador'
+    });
+    setIsOvaFormOpen(true);
+  };
+
+  const handleEditOva = (ova) => {
+    setEditingOva(ova);
+    let evaluacion = { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
+    if (ova.actividad_final) {
+      try {
+        const parsed = JSON.parse(ova.actividad_final);
+        if (parsed && parsed.preguntas) evaluacion = parsed;
+      } catch { evaluacion.instrucciones = ova.actividad_final; }
+    }
+    setOvaForm({
+      ...ova,
+      contenido: (ova.contenido || []).map((s, i) => ({ ...s, _id: s._id || `section-${Date.now()}-${i}`, tipo: s.tipo || 'texto' })),
+      recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
+      evaluacion,
+    });
+    setIsOvaFormOpen(true);
+  };
+
+  const handleSaveOva = async () => {
+    if (!ovaForm.titulo.trim()) return alert('El título es obligatorio.');
+    try {
+      const cleanedContenido = ovaForm.contenido.map(({ _id, ...c }) => ({ ...c, titulo: sanitizeText(c.titulo) }));
+      const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
+      const dataToSave = {
+        titulo: sanitizeText(ovaForm.titulo),
+        descripcion: sanitizeText(ovaForm.descripcion),
+        imagen_portada: ovaForm.imagen_portada || '',
+        objetivo: sanitizeText(ovaForm.objetivo),
+        introduccion: ovaForm.introduccion || '',
+        actividad_final: JSON.stringify(evaluacionData),
+        contenido: cleanedContenido,
+        recursos: ovaForm.recursos || {},
+        estado: ovaForm.estado || 'borrador',
+        modulo_id: docenteModulo.id
+      };
+      if (editingOva) {
+        await actualizarOva(editingOva.id, dataToSave);
+      } else {
+        await crearOva(dataToSave);
+      }
+      setIsOvaFormOpen(false);
+      loadOvas(docenteModulo.id);
+    } catch (error) {
+      alert('Error al guardar OVA: ' + error.message);
+    }
+  };
+
+  const handleDeleteOva = async (id) => {
+    if (!confirm('¿Estás seguro de eliminar este OVA?')) return;
+    try {
+      await eliminarOva(id);
+      loadOvas(docenteModulo.id);
+    } catch (error) { console.error('Error deleting OVA:', error); }
+  };
+
+  const handleToggleOvaStatus = async (ova) => {
+    try {
+      await actualizarOva(ova.id, { estado: ova.estado === 'publicado' ? 'borrador' : 'publicado' });
+      loadOvas(docenteModulo.id);
+    } catch (error) { console.error('Error toggling status:', error); }
+  };
+
+  const handleOvaFileUpload = async (e, type, sectionIndex = -1) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const url = await subirArchivoOva(file, `ovas/${Date.now()}`);
+      if (type === 'portada') {
+        setOvaForm({ ...ovaForm, imagen_portada: url });
+      } else if (type === 'pdf') {
+        setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: url } });
+      } else if (type === 'seccion_imagen' && sectionIndex >= 0) {
+        const newContenido = [...ovaForm.contenido];
+        newContenido[sectionIndex] = { ...newContenido[sectionIndex], imagen_url: url };
+        setOvaForm({ ...ovaForm, contenido: newContenido });
+      }
+    } catch (error) { alert('Error al subir archivo: ' + error.message); }
+  };
 
   const handleSendObservation = async (e) => {
     e.preventDefault();
@@ -148,6 +286,12 @@ export default function TeacherDashboard() {
             className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'terminados' ? 'bg-blue-500 text-foreground shadow-lg shadow-blue-500/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
           >
             <CheckCircle className="w-4 h-4" /> Historial ({terminados.length})
+          </button>
+          <button 
+            onClick={() => { setActiveTab('aula'); setIsOvaFormOpen(false); }}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'aula' ? 'bg-emerald-500 text-foreground shadow-lg shadow-emerald-500/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
+          >
+            <GraduationCap className="w-4 h-4" /> Aula Virtual
           </button>
         </div>
       </div>
@@ -266,6 +410,110 @@ export default function TeacherDashboard() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* ═══════════════════════════════════════ */}
+      {/* AULA VIRTUAL TAB                        */}
+      {/* ═══════════════════════════════════════ */}
+      {activeTab === 'aula' && (
+        <div className="space-y-6">
+          {!docenteModulo ? (
+            <GlassCard className="p-20 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center text-gray-600">
+                <GraduationCap className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground italic">Sin Módulo Asignado</h3>
+              <p className="text-foreground/40 italic max-w-sm leading-relaxed">
+                No se encontró un módulo de Aula Virtual asociado a tu línea de investigación ({perfil?.linea_investigacion || 'No definida'}). Contacta a un administrador.
+              </p>
+            </GlassCard>
+          ) : isOvaFormOpen && ovaForm ? (
+            <OvaEditor
+              ovaForm={ovaForm}
+              setOvaForm={setOvaForm}
+              editingOva={editingOva}
+              onSave={handleSaveOva}
+              onCancel={() => setIsOvaFormOpen(false)}
+              onFileUpload={handleOvaFileUpload}
+            />
+          ) : (
+            <div className="space-y-6">
+              {/* Module Header + Create Button */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-foreground italic tracking-tight uppercase">
+                    {docenteModulo.nombre}
+                  </h3>
+                  <p className="text-xs text-foreground/40 italic font-mono uppercase tracking-widest">Gestión de Objetos Virtuales de Aprendizaje</p>
+                </div>
+                <Button onClick={handleCreateOva} className="gap-2 italic py-3 px-8 text-xs font-black tracking-[0.2em]">
+                  <Plus className="w-4 h-4" /> CREAR OVA
+                </Button>
+              </div>
+
+              {/* OVA List */}
+              {loadingOvas ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map(i => <div key={i} className="h-64 rounded-3xl bg-card animate-pulse" />)}
+                </div>
+              ) : ovas.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {ovas.map(ova => (
+                    <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-emerald-500/30 transition-all duration-500">
+                      <div className="flex justify-between items-start mb-6">
+                        <Badge variant={ova.estado === 'publicado' ? 'emerald' : 'amber'}>
+                          {ova.estado?.toUpperCase()}
+                        </Badge>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleToggleOvaStatus(ova)}
+                            title={ova.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
+                            className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-emerald-400"
+                          >
+                            {ova.estado === 'publicado' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                          <button
+                            onClick={() => handleEditOva(ova)}
+                            className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-foreground"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteOva(ova.id)}
+                            className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-foreground/60 hover:text-red-400"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-emerald-400 transition-colors tracking-tight leading-tight">
+                        {ova.titulo}
+                      </h4>
+
+                      <div className="space-y-4 pt-4 border-t border-card-border">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-foreground/40 font-bold uppercase tracking-widest italic font-mono">Última Modificación</span>
+                          <span className="text-foreground/60">{new Date(ova.updated_at).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-foreground/40 font-bold uppercase tracking-widest italic font-mono">Secciones</span>
+                          <span className="text-foreground/60">{ova.contenido?.length || 0} bloques</span>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  ))}
+                </div>
+              ) : (
+                <GlassCard className="p-20 flex flex-col items-center justify-center text-center space-y-4">
+                  <GraduationCap className="w-12 h-12 text-foreground/10" />
+                  <h3 className="text-lg font-bold text-foreground/40 italic">Sin OVAs creados</h3>
+                  <p className="text-foreground/30 italic text-sm max-w-sm">Crea tu primer Objeto Virtual de Aprendizaje para esta línea de investigación.</p>
+                </GlassCard>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* --- MODALS --- */}
       

@@ -10,9 +10,10 @@ export function sanitizeHTML(html) {
     ALLOWED_TAGS: [
       'p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br', 
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span', 'blockquote',
-      'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td'
+      'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+      'u', 's', 'pre', 'code', 'hr'
     ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'class']
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'class', 'style', 'rel']
   });
 }
 

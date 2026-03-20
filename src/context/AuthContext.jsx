@@ -121,19 +121,16 @@ export const AuthProvider = ({ children }) => {
                         return { user: { id: p.user_id }, session: {} };
                     } else {
                         console.warn("Bypass fallido: Contraseña incorrecta.");
-                        // Si la contraseña no coincide, lanzamos un error específico
-                        throw new Error("Contraseña incorrecta. (Nota: Si es bypass, usa 'password123' o la que definiste)");
+                        throw new Error("Credenciales incorrectas.");
                     }
                 } else {
                     console.warn("Bypass fallido: Usuario no encontrado en perfiles.");
-                    // Si ni siquiera existe el perfil, lanzamos el error original
                 }
             } catch (bypassErr) {
                 console.error("Error crítico en bypass:", bypassErr.message);
                 throw bypassErr;
             }
             
-            throw error;
             throw error;
         }
     };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import OvaEditor from './OvaEditor';
 import { useAuth } from '../context/AuthContext';
 import { 
   obtenerEstadisticasAdmin, 
@@ -234,9 +235,10 @@ export default function AdminDashboard() {
       imagen_portada: '',
       objetivo: '',
       introduccion: '',
-      contenido: [{ titulo: '', contenido: '', recurso_url: '' }],
+      contenido: [{ _id: `section-${Date.now()}-0`, titulo: '', contenido: '', recurso_url: '', tipo: 'texto' }],
       recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
       actividad_final: '',
+      evaluacion: { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 },
       estado: 'borrador'
     });
     setIsOvaFormOpen(true);
@@ -244,10 +246,28 @@ export default function AdminDashboard() {
 
   const handleEditOva = (ova) => {
     setEditingOva(ova);
+    // Parse evaluacion: try JSON from actividad_final, fallback to legacy text
+    let evaluacion = { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
+    if (ova.actividad_final) {
+      try {
+        const parsed = JSON.parse(ova.actividad_final);
+        if (parsed && parsed.preguntas) {
+          evaluacion = parsed;
+        }
+      } catch {
+        // Legacy: actividad_final is plain text/HTML, not a quiz
+        evaluacion.instrucciones = ova.actividad_final;
+      }
+    }
     setOvaForm({
       ...ova,
-      contenido: ova.contenido || [],
-      recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' }
+      contenido: (ova.contenido || []).map((s, i) => ({
+        ...s,
+        _id: s._id || `section-${Date.now()}-${i}`,
+        tipo: s.tipo || 'texto',
+      })),
+      recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
+      evaluacion,
     });
     setIsOvaFormOpen(true);
   };
@@ -260,18 +280,33 @@ export default function AdminDashboard() {
     }
 
     try {
+      // Clean internal _id fields before saving to DB, but keep rich HTML content
+      const cleanedContenido = ovaForm.contenido.map(({ _id, ...c }) => ({
+        ...c,
+        titulo: sanitizeText(c.titulo),
+      }));
+
+      // Serialize evaluacion (quiz) into actividad_final as JSON
+      const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
+      // Clean _id from questions before saving
+      const cleanedEvaluacion = {
+        ...evaluacionData,
+        preguntas: (evaluacionData.preguntas || []).map(({ _id, ...q }) => ({
+          ...q,
+          _id: _id, // keep _id for quiz questions (needed for player keying)
+        })),
+      };
+
       const dataToSave = {
-        ...ovaForm,
         titulo: sanitizeText(ovaForm.titulo),
         descripcion: sanitizeText(ovaForm.descripcion),
+        imagen_portada: ovaForm.imagen_portada || '',
         objetivo: sanitizeText(ovaForm.objetivo),
-        introduccion: sanitizeText(ovaForm.introduccion),
-        actividad_final: sanitizeText(ovaForm.actividad_final),
-        contenido: ovaForm.contenido.map(c => ({
-          ...c,
-          titulo: sanitizeText(c.titulo),
-          contenido: sanitizeText(c.contenido)
-        })),
+        introduccion: ovaForm.introduccion || '',
+        actividad_final: JSON.stringify(cleanedEvaluacion),
+        contenido: cleanedContenido,
+        recursos: ovaForm.recursos || {},
+        estado: ovaForm.estado || 'borrador',
         modulo_id: selectedModuloAula.id
       };
 
@@ -309,18 +344,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddSection = () => {
-    setOvaForm({
-      ...ovaForm,
-      contenido: [...ovaForm.contenido, { titulo: '', contenido: '', recurso_url: '' }]
-    });
-  };
 
-  const handleRemoveSection = (index) => {
-    const newContenido = [...ovaForm.contenido];
-    newContenido.splice(index, 1);
-    setOvaForm({ ...ovaForm, contenido: newContenido });
-  };
 
   const handleFileUpload = async (e, type, sectionIndex = -1) => {
     const file = e.target.files[0];
@@ -335,6 +359,10 @@ export default function AdminDashboard() {
       } else if (type === 'seccion' && sectionIndex >= 0) {
         const newContenido = [...ovaForm.contenido];
         newContenido[sectionIndex].recurso_url = url;
+        setOvaForm({ ...ovaForm, contenido: newContenido });
+      } else if (type === 'seccion_imagen' && sectionIndex >= 0) {
+        const newContenido = [...ovaForm.contenido];
+        newContenido[sectionIndex].imagen_url = url;
         setOvaForm({ ...ovaForm, contenido: newContenido });
       }
     } catch (error) {
@@ -711,268 +739,14 @@ export default function AdminDashboard() {
                        </p>
                      </GlassCard>
                    ) : isOvaFormOpen ? (
-                     <GlassCard className="p-8 border-card-border">
-                       {/* OVA FORM */}
-                       <div className="flex items-center justify-between mb-8 pb-4 border-b border-card-border">
-                         <div className="flex items-center gap-4">
-                           <button
-                             onClick={() => setIsOvaFormOpen(false)}
-                             className="p-2 rounded-lg bg-cardard hover:bg-white/10 text-foreground/60 transition-colors"
-                           >
-                             <ArrowLeft className="w-5 h-5" />
-                           </button>
-                           <h3 className="text-xl font-bold text-foreground italic">
-                             {editingOva ? 'Editar OVA' : 'Crear nuevo OVA'}
-                           </h3>
-                         </div>
-                         <div className="flex gap-3">
-                           <Button
-                             onClick={() => setOvaForm({...ovaForm, estado: 'borrador'})}
-                             variant="outline"
-                             className={`text-xs italic py-2 px-6 ${ovaForm.estado === 'borrador' ? 'border-amber-500 text-amber-500 bg-cardmber-500/5' : ''}`}
-                           >
-                             SOLO BORRADOR
-                           </Button>
-                           <Button
-                             onClick={() => setOvaForm({...ovaForm, estado: 'publicado'})}
-                             variant="secondary"
-                             className={`text-xs italic py-2 px-6 ${ovaForm.estado === 'publicado' ? 'bg-emerald-500 text-black' : ''}`}
-                           >
-                             LISTO PARA PUBLICAR
-                           </Button>
-                           <Button onClick={handleSaveOva} className="gap-2 italic text-xs py-2 px-8">
-                             <Save className="w-4 h-4" /> GUARDAR OVA
-                           </Button>
-                         </div>
-                       </div>
-
-                       <div className="space-y-12">
-                         {/* DATOS GENERALES */}
-                         <section className="space-y-6">
-                           <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Datos Generales
-                           </h4>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <div className="space-y-4 md:col-span-2">
-                               <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Título del OVA *</label>
-                               <input
-                                 type="text"
-                                 placeholder="Ingrese un título impactante..."
-                                 value={ovaForm.titulo}
-                                 onChange={(e) => setOvaForm({...ovaForm, titulo: e.target.value})}
-                                 className="w-full bg-cardard border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic font-bold"
-                               />
-                             </div>
-                             <div className="space-y-4">
-                               <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Objetivo Pedagógico *</label>
-                               <textarea
-                                 placeholder="¿Qué aprenderá el estudiante?"
-                                 value={ovaForm.objetivo}
-                                 onChange={(e) => setOvaForm({...ovaForm, objetivo: e.target.value})}
-                                 className="w-full bg-cardard border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic h-32 resize-none"
-                               />
-                             </div>
-                             <div className="space-y-4">
-                               <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Imagen de Portada</label>
-                               <div className="flex flex-col gap-4">
-                                 {ovaForm.imagen_portada ? (
-                                   <div className="relative group rounded-xl overflow-hidden border border-card-border aspect-video">
-                                     <img src={ovaForm.imagen_portada} className="w-full h-full object-cover" />
-                                     <div className="absolute inset-0 bg-backgroundlack/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                       <button onClick={() => setOvaForm({...ovaForm, imagen_portada: ''})} className="p-2 bg-red-500 text-foreground rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                                     </div>
-                                   </div>
-                                 ) : (
-                                   <label className="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-xl border-2 border-dashed border-card-border hover:border-emerald-500/30 bg-card/20 cursor-pointer transition-all">
-                                      <ImageIcon className="w-6 h-6 text-gray-600" />
-                                      <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">Subir Imagen .JPG / .PNG</span>
-                                      <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'portada')} className="hidden" />
-                                   </label>
-                                 )}
-                               </div>
-                             </div>
-                             <div className="space-y-4 md:col-span-2">
-                               <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Descripción Breve</label>
-                               <input
-                                 type="text"
-                                 placeholder="Resumen del contenido del OVA..."
-                                 value={ovaForm.descripcion}
-                                 onChange={(e) => setOvaForm({...ovaForm, descripcion: e.target.value})}
-                                 className="w-full bg-cardard border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic"
-                               />
-                             </div>
-                           </div>
-                         </section>
-
-                         {/* CONTENIDO DÍNAMICO */}
-                         <section className="space-y-8">
-                           <div className="flex justify-between items-center">
-                             <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Estructura de Contenido
-                             </h4>
-                             <button
-                               onClick={handleAddSection}
-                               className="flex items-center gap-2 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-widest italic"
-                             >
-                               <PlusCircle className="w-4 h-4" /> Añadir Sección
-                             </button>
-                           </div>
-
-                           <div className="space-y-4">
-                              <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Introducción</label>
-                              <textarea
-                                placeholder="Escribe el marco introductorio aquí..."
-                                value={ovaForm.introduccion}
-                                onChange={(e) => setOvaForm({...ovaForm, introduccion: e.target.value})}
-                                className="w-full bg-cardard border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic h-24 resize-none"
-                              />
-                           </div>
-
-                           <div className="space-y-12">
-                             {ovaForm.contenido.map((section, idx) => (
-                               <div key={idx} className="relative p-8 rounded-3xl bg-card/20 border border-card-border space-y-6">
-                                 <button
-                                   onClick={() => handleRemoveSection(idx)}
-                                   className="absolute top-4 right-4 p-2 text-gray-600 hover:text-red-400 transition-colors"
-                                 >
-                                   <Trash2 className="w-4 h-4" />
-                                 </button>
-
-                                 <div className="flex items-center gap-4 mb-4">
-                                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-black italic text-sm">
-                                     0{idx + 1}
-                                   </div>
-                                   <input
-                                     type="text"
-                                     placeholder="Título de la sección..."
-                                     value={section.titulo}
-                                     onChange={(e) => {
-                                       const newContenido = [...ovaForm.contenido];
-                                       newContenido[idx].titulo = e.target.value;
-                                       setOvaForm({...ovaForm, contenido: newContenido});
-                                     }}
-                                     className="bg-transparent border-b border-card-border py-2 text-lg font-bold text-foreground focus:border-emerald-500 outline-none transition-all italic w-full"
-                                   />
-                                 </div>
-
-                                 <textarea
-                                   placeholder="Contenido teórico y práctico de esta sección..."
-                                   value={section.contenido}
-                                   onChange={(e) => {
-                                     const newContenido = [...ovaForm.contenido];
-                                     newContenido[idx].contenido = e.target.value;
-                                     setOvaForm({...ovaForm, contenido: newContenido});
-                                   }}
-                                   className="w-full bg-transparent border border-card-border rounded-2xl py-4 px-5 text-sm text-gray-300 focus:border-emerald-500 outline-none transition-all italic h-48 resize-none leading-relaxed"
-                                 />
-
-                                 <div className="pt-4 flex flex-wrap gap-4 items-center">
-                                   {section.recurso_url ? (
-                                      <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
-                                        <ExternalLink className="w-4 h-4" /> Recurso Subido OK
-                                        <button onClick={() => {
-                                          const nc = [...ovaForm.contenido];
-                                          nc[idx].recurso_url = '';
-                                          setOvaForm({...ovaForm, contenido: nc});
-                                        }} className="ml-2 hover:text-red-400"><X className="w-3 h-3" /></button>
-                                      </div>
-                                   ) : (
-                                      <label className="flex items-center gap-2 px-6 py-2 rounded-xl bg-cardard border border-card-border text-foreground/60 hover:text-foreground hover:bg-white/10 cursor-pointer transition-all text-[10px] font-bold uppercase tracking-widest italic">
-                                        <Plus className="w-4 h-4" /> Adjuntar Recurso Adicional
-                                        <input type="file" onChange={(e) => handleFileUpload(e, 'seccion', idx)} className="hidden" />
-                                      </label>
-                                   )}
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                         </section>
-
-                         {/* RECURSOS Y ACTIVIDAD */}
-                         <section className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                            <div className="space-y-6">
-                              <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Material Complementario
-                              </h4>
-                              <div className="space-y-4">
-                                <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-3">
-                                  <label className="flex items-center gap-2 text-[10px] text-foreground/40 font-bold italic uppercase tracking-widest">
-                                    <FileDown className="w-3 h-3" /> Guía PDF
-                                  </label>
-                                  {ovaForm.recursos.pdf_url ? (
-                                    <div className="flex items-center justify-between text-xs text-foreground bg-emerald-500/10 p-2 rounded-lg italic">
-                                      <span>Archivo cargado</span>
-                                      <button onClick={() => setOvaForm({...ovaForm, recursos: {...ovaForm.recursos, pdf_url: ''}})} className="text-red-400"><X className="w-4 h-4" /></button>
-                                    </div>
-                                  ) : (
-                                    <input type="file" accept=".pdf" onChange={(e) => handleFileUpload(e, 'pdf')} className="w-full text-xs text-foreground/60" />
-                                  )}
-                                </div>
-                                <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-3">
-                                  <label className="flex items-center gap-2 text-[10px] text-foreground/40 font-bold italic uppercase tracking-widest">
-                                    <Youtube className="w-3 h-3" /> Link YouTube
-                                  </label>
-                                  <input
-                                    type="text"
-                                    placeholder="https://youtube.com/..."
-                                    value={ovaForm.recursos.youtube_url}
-                                    onChange={(e) => setOvaForm({...ovaForm, recursos: {...ovaForm.recursos, youtube_url: e.target.value}})}
-                                    className="w-full bg-transparent border-b border-card-border py-1 text-xs text-foreground focus:border-red-500 outline-none italic"
-                                  />
-                                </div>
-                                <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-3">
-                                  <label className="flex items-center gap-2 text-[10px] text-foreground/40 font-bold italic uppercase tracking-widest">
-                                    <Globe className="w-3 h-3" /> Enlace Externo
-                                  </label>
-                                  <input
-                                    type="text"
-                                    placeholder="https://..."
-                                    value={ovaForm.recursos.link_externo}
-                                    onChange={(e) => setOvaForm({...ovaForm, recursos: {...ovaForm.recursos, link_externo: e.target.value}})}
-                                    className="w-full bg-transparent border-b border-card-border py-1 text-xs text-foreground focus:border-blue-500 outline-none italic"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-6">
-                              <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Evaluación Final
-                              </h4>
-                              <div className="space-y-4">
-                                <label className="text-[10px] text-foreground/40 font-bold uppercase italic ml-1">Instrucciones de Actividad</label>
-                                <textarea
-                                  placeholder="Describe los pasos finales para validar el aprendizaje..."
-                                  value={ovaForm.actividad_final}
-                                  onChange={(e) => setOvaForm({...ovaForm, actividad_final: e.target.value})}
-                                  className="w-full bg-cardard border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic h-48 resize-none"
-                                />
-                                <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-4">
-                                  <div className="p-2 bg-emerald-500/10 rounded-xl">
-                                    <AlertCircle className="w-5 h-5 text-emerald-400" />
-                                  </div>
-                                  <p className="text-[10px] text-foreground/40 italic leading-relaxed">
-                                    Recuerda que una actividad clara incentiva la <span className="text-emerald-400 font-bold">participación</span> y el compromiso del estudiante con la línea de investigación.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                         </section>
-
-                         <div className="pt-12 border-t border-card-border flex justify-end gap-4 pb-10">
-                            <Button
-                              onClick={() => setIsOvaFormOpen(false)}
-                              variant="outline"
-                              className="italic uppercase tracking-widest py-3 px-10"
-                            >
-                              Cancelar
-                            </Button>
-                            <Button onClick={handleSaveOva} className="gap-2 italic uppercase tracking-widest py-3 px-16">
-                              <Save className="w-4 h-4" /> Finalizar y Guardar OVA
-                            </Button>
-                         </div>
-                       </div>
-                     </GlassCard>
+                      <OvaEditor
+                        ovaForm={ovaForm}
+                        setOvaForm={setOvaForm}
+                        editingOva={editingOva}
+                        onSave={handleSaveOva}
+                        onCancel={() => setIsOvaFormOpen(false)}
+                        onFileUpload={handleFileUpload}
+                      />
                    ) : (
                      <div className="space-y-6">
                        {/* LIST OF OVAs */}
