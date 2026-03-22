@@ -52,7 +52,7 @@ function evaluateAnswer(question, answer) {
   }
 }
 
-export default function QuizPlayer({ evaluacion, recursos }) {
+export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -97,7 +97,22 @@ export default function QuizPlayer({ evaluacion, recursos }) {
     setIsSubmitted(true);
     setShowResults(true);
     clearTimeout(timerRef.current);
-  }, []);
+
+    // Calculate once to notify parent
+    const finalResults = preguntas.map(q => ({
+      question: q,
+      answer: answers[q._id],
+      isCorrect: evaluateAnswer(q, answers[q._id]),
+      puntos: q.puntos || 10,
+    }));
+    const finalScore = finalResults.filter(r => r.isCorrect).reduce((sum, r) => sum + r.puntos, 0);
+    const finalPercentage = totalPuntos > 0 ? Math.round((finalScore / totalPuntos) * 100) : 0;
+    const finalPassed = finalPercentage >= (evaluacion.nota_minima || 60);
+
+    if (onComplete) {
+      onComplete(finalScore, finalPercentage, finalPassed);
+    }
+  }, [preguntas, answers, totalPuntos, evaluacion.nota_minima, onComplete]);
 
   const handleRestart = () => {
     setAnswers({});

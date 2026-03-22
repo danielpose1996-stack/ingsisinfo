@@ -1,7 +1,17 @@
-import React from 'react';
 import { Mail, Phone, MapPin, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Footer() {
+  const navigate = useNavigate();
+
+  const handleAdminGateway = (e) => {
+    // Hidden click handler for admins
+    if (e.detail === 2) { // Double click as extra layer of "discretion"
+      sessionStorage.setItem('admin_access_gate', 'true');
+      navigate('/admin/login');
+    }
+  };
+
   return (
     <footer className="bg-card border-t border-card-border pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +56,11 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-card-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[10px] text-foreground/60 font-bold uppercase tracking-tighter italic">
+          <p 
+            className="text-[10px] text-foreground/60 font-bold uppercase tracking-tighter italic cursor-default select-none"
+            onClick={handleAdminGateway}
+            title="© SISINFO"
+          >
             © {new Date().getFullYear()} SISINFO - UNIPAZ. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">

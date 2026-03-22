@@ -7,58 +7,19 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // AUTH
 export async function registrarUsuario(data) {
-    try {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: data.email,
-            password: data.password,
-        });
-        
-        if (authError) {
-            // Si es error de rate limit, lanzamos para manejarlo en el catch
-            if (authError.message.includes('rate limit')) throw authError;
-            throw authError;
-        }
-
-        const { error: perfilError } = await supabase.from('perfiles').insert({
-            user_id: authData.user.id,
-            nombre: data.nombre,
-            apellido: data.apellido,
-            email: data.email,
-            rol: data.rol,
-            carrera: data.carrera || null,
-            semestre: data.semestre || null,
-            linea_investigacion: data.linea_investigacion || null,
-        });
-        if (perfilError) throw perfilError;
-
-        return authData;
-    } catch (error) {
-        if (error.message.includes('rate limit')) {
-            console.warn("Rate limit excedido. Creando perfil en modo bypass...");
-            // Crear un ID temporal para el bypass
-            const tempUserId = crypto.randomUUID();
-            const { data: perfil, error: perfilError } = await supabase.from('perfiles').insert({
-                user_id: tempUserId,
-                nombre: data.nombre,
-                apellido: data.apellido,
-                email: data.email,
-                rol: data.rol,
-                carrera: data.carrera || null,
-                semestre: data.semestre || null,
-                linea_investigacion: data.linea_investigacion || null,
-                bypass_password: data.password
-            }).select().single();
-
-            if (perfilError) throw perfilError;
-            
-            return { 
-                user: { id: tempUserId, email: data.email }, 
-                isBypass: true,
-                message: "Usuario creado en modo desarrollo (bypass) debido a límites de Supabase."
-            };
-        }
+    const { data: responseData, error } = await supabase.functions.invoke('create-user', {
+        body: data
+    });
+    
+    if (error) {
         throw error;
     }
+    
+    if (responseData && responseData.error) {
+        throw new Error(responseData.error);
+    }
+    
+    return responseData;
 }
 
 export async function iniciarSesion(email, password) {
@@ -105,18 +66,6 @@ export async function actualizarPerfil(id, updates, isProfileId = false) {
         }
 
         if (!data || data.length === 0) {
-            // Último recurso: intentar por email si tenemos el email en updates
-            if (updates.email) {
-                console.warn("No se encontró el perfil, intentando por email...");
-                const { data: dataEmail, error: errorEmail } = await supabase
-                    .from('perfiles')
-                    .update(updates)
-                    .ilike('email', updates.email)
-                    .select();
-                
-                if (errorEmail) throw errorEmail;
-                return dataEmail?.[0];
-            }
             throw new Error("No se pudo encontrar el perfil para actualizar.");
         }
 
@@ -622,5 +571,62 @@ export async function subirArchivoOva(file, pathPrefix = 'ovas') {
         .getPublicUrl(fileName);
     
     return urlData.publicUrl;
+}
+
+// SEGUIMIENTO OVAs
+export async function registrarResultadoOva(perfilId, ovaId, puntaje, aprobado) {
+    try {
+        // Primero obtener el registro actual si existe para manejar el "mejor puntaje" e "intentos"
+        const { data: current } = await supabase
+            .from('resultados_ovas')
+            .select('mejor_puntaje, intentos')
+            .eq('perfil_id', perfilId)
+            .eq('ova_id', ovaId)
+            .single();
+
+        const intentos = (current?.intentos || 0) + 1;
+        const mejorPuntaje = Math.max(current?.mejor_puntaje || 0, puntaje);
+
+        const { data, error } = await supabase
+            .from('resultados_ovas')
+            .upsert({
+                perfil_id: perfilId,
+                ova_id: ovaId,
+                intentos,
+                mejor_puntaje: mejorPuntaje,
+                ultima_calificacion: puntaje,
+                completado: aprobado || (current?.completado || false),
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'perfil_id, ova_id'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error("Error al registrar resultado OVA:", err.message);
+        throw err;
+    }
+}
+
+export async function obtenerSeguimientoOvas() {
+    try {
+        const { data, error } = await supabase
+            .from('resultados_ovas')
+            .select(`
+                *,
+                perfil:perfil_id ( nombre, apellido, email ),
+                ova:ova_id ( titulo, modulo_id, modulos:modulo_id ( nombre ) )
+            `)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error("Error al obtener seguimiento OVAs:", err.message);
+        throw err;
+    }
 }
 

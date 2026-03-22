@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { obtenerProyectosFinalizados } from '../lib/supabase';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
-import { Download, FileText, Search, Filter, BookOpen, User as UserIcon, Calendar } from 'lucide-react';
+import { 
+  Download, FileText, Search, Filter, BookOpen, 
+  User as UserIcon, Calendar, Lock, LogIn 
+} from 'lucide-react';
 
 export default function Repositorio() {
+  const { user, loading: authLoading } = useAuth();
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterLinea, setFilterLinea] = useState('');
   const [searchNombre, setSearchNombre] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     async function loadData() {
       try {
         const proys = await obtenerProyectosFinalizados();
-        setProyectos(proys);
+        setProyectos(proys || []);
       } catch (error) {
         console.error("Error loading repository data:", error);
       } finally {
@@ -24,7 +36,7 @@ export default function Repositorio() {
       }
     }
     loadData();
-  }, []);
+  }, [user, authLoading]);
 
   const filteredProyectos = proyectos
     .filter(p => !filterLinea || p.linea_investigacion === filterLinea)
@@ -33,7 +45,7 @@ export default function Repositorio() {
       p.nombre.toLowerCase().includes(searchNombre.toLowerCase())
     );
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="animate-pulse space-y-8">
@@ -42,6 +54,53 @@ export default function Repositorio() {
             {[1, 2, 3].map(i => <div key={i} className="h-64 bg-card rounded-3xl" />)}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // Vista restringida para usuarios no registrados
+  if (!user) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-2xl"
+        >
+          <GlassCard className="p-12 text-center relative overflow-hidden text-balance">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] -z-10" />
+            
+            <div className="mb-8 flex justify-center">
+              <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
+                <Lock className="w-12 h-12 text-emerald-400" />
+              </div>
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6 italic tracking-tight">
+              ACCESO <span className="text-emerald-400">RESTRINGIDO</span>
+            </h2>
+            
+            <p className="text-foreground/60 text-lg mb-10 italic max-w-md mx-auto leading-relaxed">
+              El archivo histórico de proyectos es exclusivo para miembros de la comunidad SISINFO. 
+              Por favor, inicia sesión para explorar el repositorio.
+            </p>
+
+            <Link to="/login">
+              <Button size="lg" className="gap-3 px-10 py-6 rounded-2xl shadow-2xl shadow-emerald-500/20">
+                <LogIn className="w-5 h-5" />
+                INICIAR SESIÓN AHORA
+              </Button>
+            </Link>
+
+            <div className="mt-12 grid grid-cols-3 gap-4 border-t border-white/5 pt-8">
+              {['Estudiantes', 'Docentes', 'Admin'].map((role) => (
+                <div key={role} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                  <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">{role}</p>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
       </div>
     );
   }

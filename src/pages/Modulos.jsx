@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo } from '../lib/supabase';
+import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo, registrarResultadoOva } from '../lib/supabase';
 import { sanitizeHTML } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
@@ -193,6 +193,17 @@ export default function Modulos() {
   const handlePrevStep = () => {
     if (activeOvaStep > 0) {
       setActiveOvaStep(prev => prev - 1);
+    }
+  };
+
+  const handleQuizComplete = async (score, percentage, passed) => {
+    if (!user || !perfil) return;
+    
+    try {
+      await registrarResultadoOva(perfil.id, selectedOva.id, percentage, passed);
+      console.log("Resultado OVA registrado con éxito");
+    } catch (error) {
+      console.error("Error al registrar resultado OVA:", error);
     }
   };
 
@@ -705,6 +716,7 @@ export default function Modulos() {
                         <QuizPlayer
                           evaluacion={currentStep.content.evaluacion}
                           recursos={currentStep.content.recursos}
+                          onComplete={handleQuizComplete}
                         />
                       ) : (
                         /* Legacy text-based evaluation */

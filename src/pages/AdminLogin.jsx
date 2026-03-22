@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
-import { ShieldAlert, User, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldAlert, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,8 +21,8 @@ export default function AdminLogin() {
     setIsSubmitting(true);
 
     // Pequeño delay artificial para seguridad y feedback visual
-    setTimeout(() => {
-      const success = loginAdmin(username, password);
+    setTimeout(async () => {
+      const success = await loginAdmin(email, password);
       
       if (success) {
         setIsSuccess(true);
@@ -70,16 +70,16 @@ export default function AdminLogin() {
             <div className="space-y-4">
               <div className="relative">
                 <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">
-                  Usuario Administrador
+                  Correo Administrador
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
                   <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all font-mono"
-                    placeholder="Admin username"
+                    placeholder="admin@unipaz.edu.co"
                     required
                   />
                 </div>

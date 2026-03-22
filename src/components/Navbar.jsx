@@ -15,8 +15,10 @@ export default function Navbar() {
   const location = useLocation();
 
   const handleLogout = async () => {
+    setIsDropdownOpen(false);
     if (isAdmin) {
       logoutAdmin();
+      window.location.href = '/login';
     } else {
       await cerrarSesion();
     }
@@ -99,7 +101,7 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-2 w-56 rounded-xl bg-card border border-card-border shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-3 border-b border-card-border">
                       <p className="text-sm font-semibold text-foreground truncate">
-                        {isAdmin ? 'Administrador' : `${perfil?.nombre} ${perfil?.apellido || ''}`}
+                        {isAdmin ? 'Administrador' : (perfil?.nombre ? `${perfil.nombre} ${perfil.apellido || ''}`.trim() : 'Usuario')}
                       </p>
                       <p className="text-xs text-gray-400 capitalize">
                         {isAdmin ? 'Sistema' : perfil?.rol || 'Usuario'}

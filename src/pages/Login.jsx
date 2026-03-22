@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import GlassCard from '../components/GlassCard';
 import RoleSelector from '../components/RoleSelector';
@@ -13,33 +14,79 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { iniciarSesion } = useAuth();
+  const [showFailsafe, setShowFailsafe] = useState(false);
+  const { user, perfil } = useAuth();
   const navigate = useNavigate();
+
+  // Failsafe timer if it hangs in "Verificando..."
+  React.useEffect(() => {
+    let timer;
+    if (isSubmitting) {
+      timer = setTimeout(() => setShowFailsafe(true), 4000);
+    } else {
+      setShowFailsafe(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isSubmitting]);
+
+  const handleNavigate = (p) => {
+    if (!p) return;
+    if (p.rol === 'admin') navigate('/dashboard/admin');
+    else navigate(p.rol === 'docente' ? '/dashboard/docente' : '/dashboard/estudiante');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
+    setShowFailsafe(false);
 
     try {
       const cleanEmail = getNormalizedEmail();
       const cleanPassword = password.trim();
       
-      const data = await iniciarSesion(cleanEmail, cleanPassword);
-      
-      if (data) {
+      // 1. Auth directo
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPassword
+      });
+
+      if (authError) throw authError;
+
+      // 2. Fetch de perfil inmediato (Speedy pattern)
+      const { data: p, error: pError } = await supabase
+        .from('perfiles')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (p) {
+        handleNavigate(p);
+      } else {
+        // Si no hay perfil inmediato, esperamos al AuthContext
+        console.warn("Perfil no encontrado inmediatamente, esperando a context...");
         setTimeout(() => {
-          navigate(role === 'estudiante' ? '/dashboard/estudiante' : '/dashboard/docente');
-        }, 500);
+          if (!perfil) {
+            setError('Tu cuenta no tiene un perfil asociado. Contacta al administrador.');
+            setIsSubmitting(false);
+          }
+        }, 3000);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError('Credenciales incorrectas o error en el inicio de sesión.');
-    } finally {
+      setError(err.message === 'Invalid login credentials' 
+        ? 'Correo o contraseña incorrectos.' 
+        : 'Error en el inicio de sesión: ' + err.message);
       setIsSubmitting(false);
     }
   };
+
+  // Fallback si el perfil llega por el contexto tarde
+  React.useEffect(() => {
+    if (isSubmitting && perfil) {
+      handleNavigate(perfil);
+    }
+  }, [perfil, isSubmitting]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -108,9 +155,20 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in duration-300">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <p>{error}</p>
+              <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in duration-300">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+                {showFailsafe && (
+                  <button 
+                    type="button" 
+                    onClick={() => window.location.reload()}
+                    className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 hover:text-emerald-400 mt-1 text-left px-6"
+                  >
+                    ¿Sigue cargando? Haz clic aquí para reintentar
+                  </button>
+                )}
               </div>
             )}
 
@@ -128,6 +186,18 @@ export default function Login() {
               )}
             </Button>
           </form>
+
+          {showFailsafe && !error && (
+            <div className="mt-4 text-center">
+              <button 
+                type="button"
+                onClick={() => window.location.reload()}
+                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 bg-emerald-500/5 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
+              >
+                ¿Demora mucho? Click para recargar sesión
+              </button>
+            </div>
+          )}
 
           <p className="mt-8 text-center text-xs text-foreground/50 italic px-4">
             ¿Olvidaste tu contraseña? Contacta con el administrador del semillero.

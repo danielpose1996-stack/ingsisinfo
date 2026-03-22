@@ -204,15 +204,19 @@ export default function TeacherDashboard() {
 
   const handleSendObservation = async (e) => {
     e.preventDefault();
-    if (!observacion.trim()) return;
+    if (!observacion.trim() || !perfil?.id) return;
     
     setIsSubmitting(true);
     try {
       await enviarObservacion(selectedProyecto.id, perfil.id, sanitizeText(observacion));
       setIsObsModalOpen(false);
       setObservacion('');
-      await loadData();
+      // Recargar datos solo si aún tenemos perfil
+      if (perfil?.id) {
+        await loadData();
+      }
     } catch (error) {
+      console.error("Error al enviar observación:", error);
       alert('Error al enviar observación: ' + error.message);
     } finally {
       setIsSubmitting(false);

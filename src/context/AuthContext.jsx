@@ -25,65 +25,79 @@ export const AuthProvider = ({ children }) => {
         if (p) setPerfil(p);
     };
 
+    // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
-        // Carga inicial
-        const initSession = async () => {
-            const data = await obtenerSesionActual();
-            if (data) {
-                setUser(data.session.user);
-                setPerfil(data.perfil);
-            } else {
-                // Check if there's a bypass profile persisted
-                const savedBypass = sessionStorage.getItem('bypassProfile');
-                if (savedBypass) {
-                    try {
-                        const p = JSON.parse(savedBypass);
-                        setUser({ id: p.user_id, email: p.email });
-                        setPerfil(p);
-                    } catch (e) {
-                        sessionStorage.removeItem('bypassProfile');
-                    }
-                }
-            }
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log("Auth Event:", event, "User:", session?.user?.email);
             
-            // Check admin persistence (simulated like in vanilla)
-            const adminSession = sessionStorage.getItem('isAdminLoggedIn');
-            if (adminSession === 'true') setIsAdmin(true);
-            
-            setLoading(false);
-        };
-
-        initSession();
-
-        // Escuchar cambios de auth
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 setUser(session.user);
-                const { data: p } = await supabase
-                    .from('perfiles')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .single();
-                setPerfil(p);
+                // Solo activamos loading si aún no tenemos el perfil
+                setLoading(prev => !perfil); 
             } else {
-                // Solo limpiar si no hay una sesión de bypass activa
-                if (!sessionStorage.getItem('bypassProfile')) {
-                    setUser(null);
-                    setPerfil(null);
-                }
+                setUser(null);
+                setPerfil(null);
+                setIsAdmin(false);
+                setLoading(false);
+                sessionStorage.removeItem('isAdminLoggedIn');
             }
-            setLoading(false);
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, []); // Array VACÍO para estabilidad total
 
-    const loginAdmin = (username, password) => {
-        // Credenciales administrativas predeterminadas (simuladas como en vanilla)
-        if (username === 'admin' && password === 'admin123') {
-            setIsAdmin(true);
-            sessionStorage.setItem('isAdminLoggedIn', 'true');
-            return true;
+    // 2. Efecto separado para cargar el perfil cuando cambia el usuario
+    useEffect(() => {
+        async function loadProfile() {
+            if (!user) return;
+            
+            try {
+                console.log("Buscando perfil para:", user.email);
+                const { data: p, error: pError } = await supabase
+                    .from('perfiles')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+                
+                if (pError && pError.code === 'PGRST116') {
+                    console.warn("No se encontró perfil, cerrando...");
+                    await supabaseLogout();
+                    setUser(null);
+                    setPerfil(null);
+                    setIsAdmin(false);
+                } else {
+                    setPerfil(p || null);
+                    setIsAdmin(p?.rol === 'admin');
+                    
+                    // Persistence admin
+                    if (p?.rol === 'admin' || sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+                        setIsAdmin(true);
+                    }
+                }
+            } catch (err) {
+                console.error("Error cargando perfil:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadProfile();
+    }, [user]);
+
+    const loginAdmin = async (email, password) => {
+        // Compatibility wrapper for admin login
+        const data = await supabaseLogin(email, password);
+        if (data) {
+            const { data: p } = await supabase.from('perfiles').select('rol').eq('user_id', data.user.id).single();
+            if (p?.rol === 'admin') {
+                setIsAdmin(true);
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                return true;
+            } else {
+                // Not an admin, sign out immediately
+                await supabaseLogout();
+                return false;
+            }
         }
         return false;
     };
@@ -94,53 +108,31 @@ export const AuthProvider = ({ children }) => {
     };
 
     const iniciarSesion = async (email, password) => {
-        try {
-            return await supabaseLogin(email, password);
-        } catch (error) {
-            console.error("Supabase Auth Error:", error.message);
-            // FALLBACK PARA DESARROLLO: Intento de bypass si falla Auth normal
-            console.warn("MODO DESARROLLO: Intentando bypass para", email);
-            
-            try {
-                // Buscar en la tabla perfiles si existe este correo (case-insensitive)
-                const { data: p, error: perfilError } = await supabase
-                    .from('perfiles')
-                    .select('*')
-                    .ilike('email', email.trim())
-                    .single();
-
-                if (p && !perfilError) {
-                    // Verificar si el password coincide con el guardado en bypass o el maestro
-                    const isCorrectPassword = password === 'password123' || (p.bypass_password && password === p.bypass_password);
-                    
-                    if (isCorrectPassword) {
-                        console.log("Bypass exitoso: Usuario encontrado y contraseña válida.");
-                        setUser({ id: p.user_id, email: p.email });
-                        setPerfil(p);
-                        sessionStorage.setItem('bypassProfile', JSON.stringify(p));
-                        return { user: { id: p.user_id }, session: {} };
-                    } else {
-                        console.warn("Bypass fallido: Contraseña incorrecta.");
-                        throw new Error("Credenciales incorrectas.");
-                    }
-                } else {
-                    console.warn("Bypass fallido: Usuario no encontrado en perfiles.");
-                }
-            } catch (bypassErr) {
-                console.error("Error crítico en bypass:", bypassErr.message);
-                throw bypassErr;
-            }
-            
-            throw error;
-        }
+        return await supabaseLogin(email, password);
     };
 
     const cerrarSesion = async () => {
-        await supabaseLogout();
-        // Limpiar manualmente para el modo bypass
-        setUser(null);
-        setPerfil(null);
-        sessionStorage.removeItem('bypassProfile');
+        try {
+            // Limpieza optimista (inmediata) de sesión
+            setUser(null);
+            setPerfil(null);
+            setIsAdmin(false);
+            sessionStorage.removeItem('isAdminLoggedIn');
+            sessionStorage.removeItem('bypassProfile');
+            
+            // Forzar limpieza de Supabase en LocalStorage inmediatamente
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('sb-')) localStorage.removeItem(key);
+            });
+
+            // Llamada de red a Supabase para invalidar token en el servidor
+            await supabaseLogout();
+        } catch (err) {
+            console.error("Error logging out of Supabase:", err.message);
+        } finally {
+            // Forzar recarga limpia para destruir la instancia en memoria de Supabase
+            window.location.href = '/login';
+        }
     };
 
     return (

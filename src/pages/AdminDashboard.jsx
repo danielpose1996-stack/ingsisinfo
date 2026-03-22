@@ -17,7 +17,8 @@ import {
   crearOva,
   actualizarOva,
   eliminarOva,
-  subirArchivoOva
+  subirArchivoOva,
+  obtenerSeguimientoOvas
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
 import { useEmailValidation } from '../hooks/useEmailValidation';
@@ -65,6 +66,7 @@ export default function AdminDashboard() {
   const [usuarios, setUsuarios] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [modulos, setModulos] = useState([]);
+  const [seguimientoOvas, setSeguimientoOvas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal states
@@ -183,18 +185,14 @@ export default function AdminDashboard() {
         alert('Usuario actualizado con éxito.');
       } else {
         // Lógica de creación (existente)
-        const result = await registrarUsuario({ 
+        await registrarUsuario({ 
           ...newUser, 
           nombre: sanitizeText(newUser.nombre),
           apellido: sanitizeText(newUser.apellido),
           email: normalizedEmail 
         });
 
-        if (result.isBypass) {
-          alert('MODO DESARROLLO ACTIVADO: Usuario creado directamente en la base de datos (sin correo). \n\nImportante: Por favor usa la contraseña ' + (newUser.password || '"password123"') + ' para iniciar sesión con esta cuenta.');
-        } else {
-          alert('Usuario creado con éxito. Se ha enviado un correo de confirmación.');
-        }
+        alert('Usuario creado con éxito. Se ha enviado un correo de confirmación.');
       }
 
       setIsUserModalOpen(false);
@@ -377,8 +375,31 @@ export default function AdminDashboard() {
     { id: 'users', label: 'Usuarios', icon: Users },
     { id: 'proyectos', label: 'Proyectos', icon: FolderTree },
     { id: 'aula', label: 'Aula Virtual', icon: BookOpen },
+    { id: 'seguimiento', label: 'Seguimiento', icon: TrendingUp },
     { id: 'publico', label: 'Inicio', icon: Settings },
   ];
+
+  useEffect(() => {
+    if (activeTab === 'seguimiento') {
+      loadSeguimiento();
+    }
+  }, [activeTab]);
+
+  async function loadSeguimiento() {
+    setLoading(true);
+    try {
+      const data = await obtenerSeguimientoOvas();
+      setSeguimientoOvas(data);
+    } catch (error) {
+      console.error("Error loading seguimiento:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Tracking filters
+  const [searchEstudiante, setSearchEstudiante] = useState('');
+  const [filterOva, setFilterOva] = useState('');
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-backgroundackground">
@@ -860,6 +881,110 @@ export default function AdminDashboard() {
                 </section>
               </div>
             )}
+            {activeTab === 'seguimiento' && (
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
+                      <input
+                        type="text"
+                        placeholder="Buscar estudiante..."
+                        value={searchEstudiante}
+                        onChange={(e) => setSearchEstudiante(e.target.value)}
+                        className="bg-card border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-emerald-500/50 min-w-[280px] outline-none italic transition-all"
+                      />
+                    </div>
+                    <select
+                      className="bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-emerald-500/50 outline-none italic"
+                      value={filterOva}
+                      onChange={(e) => setFilterOva(e.target.value)}
+                    >
+                      <option value="">Todas las OVAs</option>
+                      {[...new Set(seguimientoOvas.map(s => s.ova?.titulo))].filter(Boolean).map(titulo => (
+                        <option key={titulo} value={titulo}>{titulo}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={loadSeguimiento} className="gap-2 italic text-[10px] tracking-widest font-black">
+                    <TrendingUp className="w-3 h-3" /> ACTUALIZAR DATOS
+                  </Button>
+                </div>
+
+                <GlassCard className="p-0 overflow-hidden border-card-border">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-card/50 border-b border-card-border">
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">Estudiante / Usuario</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">OVA / Módulo</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Intentos</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Puntaje Máximo</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Última Nota</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Estado</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-right">Actualización</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-card-border">
+                        {seguimientoOvas
+                          .filter(s => {
+                            const matchSearch = (s.perfil?.nombre + ' ' + s.perfil?.apellido).toLowerCase().includes(searchEstudiante.toLowerCase()) || 
+                                              s.perfil?.email.toLowerCase().includes(searchEstudiante.toLowerCase());
+                            const matchOva = !filterOva || s.ova?.titulo === filterOva;
+                            return matchSearch && matchOva;
+                          })
+                          .map(s => (
+                            <tr key={s.id} className="hover:bg-white/[0.01] transition-colors group">
+                              <td className="px-6 py-5">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[10px] font-black text-emerald-500 border border-emerald-500/20 italic">
+                                    {s.perfil?.nombre?.[0]}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-bold text-foreground italic">{s.perfil?.nombre} {s.perfil?.apellido}</p>
+                                    <p className="text-[10px] text-foreground/30 font-medium">{s.perfil?.email}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
+                                <p className="text-sm font-bold text-foreground italic leading-tight">{s.ova?.titulo}</p>
+                                <p className="text-[10px] text-emerald-500/50 font-black uppercase tracking-widest italic">{s.ova?.modulos?.nombre}</p>
+                              </td>
+                              <td className="px-6 py-5 text-center">
+                                <span className="text-sm font-black text-foreground/60 italic font-mono">{s.intentos}</span>
+                              </td>
+                              <td className="px-6 py-5 text-center">
+                                <span className={`text-base font-black italic ${s.mejor_puntaje >= 60 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {s.mejor_puntaje}%
+                                </span>
+                              </td>
+                              <td className="px-6 py-5 text-center">
+                                <span className="text-sm font-bold text-foreground/40 italic">{s.ultima_calificacion}%</span>
+                              </td>
+                              <td className="px-6 py-5 text-center">
+                                <Badge variant={s.completado ? 'emerald' : 'amber'} size="sm" className="italic">
+                                  {s.completado ? 'COMPLETADO' : 'PENDIENTE'}
+                                </Badge>
+                              </td>
+                              <td className="px-6 py-5 text-right text-[10px] text-foreground/30 font-bold italic uppercase tracking-tighter">
+                                {new Date(s.updated_at).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        {seguimientoOvas.length === 0 && !loading && (
+                          <tr>
+                            <td colSpan="7" className="px-6 py-20 text-center text-foreground/30 italic">
+                              <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                              No se han registrado resultados de evaluaciones todavía.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </GlassCard>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -887,7 +1012,7 @@ export default function AdminDashboard() {
               placeholder="Primer Nombre"
               value={newUser.nombre}
               onChange={(e) => setNewUser({...newUser, nombre: e.target.value})}
-              className="bg-cardard border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
               required
             />
             <input
@@ -895,7 +1020,7 @@ export default function AdminDashboard() {
               placeholder="Apellidos"
               value={newUser.apellido}
               onChange={(e) => setNewUser({...newUser, apellido: e.target.value})}
-              className="bg-cardard border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
               required
             />
           </div>
@@ -908,7 +1033,7 @@ export default function AdminDashboard() {
                 handleEmailChange(e);
                 // setNewUser({...newUser, email: e.target.value}); // Removed as email is managed by hook
               }}
-              className={`w-full bg-cardard border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none transition-all ${
+              className={`w-full bg-card border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none transition-all ${
                 emailError
                   ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20'
                   : 'border-card-border focus:border-emerald-500'
@@ -925,7 +1050,7 @@ export default function AdminDashboard() {
             <select
               value={newUser.rol}
               onChange={(e) => setNewUser({...newUser, rol: e.target.value})}
-              className="bg-[#1a1c22] border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500"
             >
               <option value="estudiante">Estudiante</option>
               <option value="docente">Docente</option>
@@ -935,7 +1060,7 @@ export default function AdminDashboard() {
               placeholder={isEditMode ? "Nueva Contraseña (opcional)" : "Contraseña"}
               value={newUser.password}
               onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-              className="bg-cardard border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
               required={!isEditMode}
             />
           </div>
@@ -946,7 +1071,7 @@ export default function AdminDashboard() {
               <select
                 value={newUser.linea_investigacion}
                 onChange={(e) => setNewUser({...newUser, linea_investigacion: e.target.value})}
-                className="w-full bg-[#1a1c22] border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500"
                 required
               >
                 <option value="">Seleccione una línea...</option>
