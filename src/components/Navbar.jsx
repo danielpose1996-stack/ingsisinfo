@@ -16,12 +16,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
-    if (isAdmin) {
-      logoutAdmin();
-      window.location.href = '/login';
-    } else {
-      await cerrarSesion();
-    }
+    await cerrarSesion();
   };
 
   const navLinks = [
