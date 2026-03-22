@@ -25,6 +25,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: hsl(220, 10%, 5%);       /* #0a0b0d */
   --text: hsl(0, 0%, 100%);              /* #ffffff */
   --card-bg: hsla(0, 0%, 100%, 0.03);
