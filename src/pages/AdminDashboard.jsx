@@ -137,6 +137,8 @@ export default function AdminDashboard() {
   // Filtering states
   const [filterLinea, setFilterLinea] = useState('');
   const [filterFase, setFilterFase] = useState('');
+  const [searchUserTerm, setSearchUserTerm] = useState('');
+  const [filterUserRol, setFilterUserRol] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
@@ -715,12 +717,21 @@ export default function AdminDashboard() {
                       <input
                         type="text"
                         placeholder="Buscar por nombre o email..."
+                        value={searchUserTerm}
+                        onChange={(e) => setSearchUserTerm(e.target.value)}
                         className="bg-background border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 min-w-[320px] shadow-inner transition-all"
                       />
                     </div>
-                    <Button variant="outline" size="sm" className="gap-2 italic text-xs uppercase tracking-tight">
-                      <Filter className="w-3 h-3" /> Filtrar
-                    </Button>
+                    <select
+                      value={filterUserRol}
+                      onChange={(e) => setFilterUserRol(e.target.value)}
+                      className="bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 outline-none italic shadow-sm transition-all"
+                    >
+                      <option value="">TODOS LOS ROLES</option>
+                      <option value="admin">ADMINISTRADORES</option>
+                      <option value="docente">DOCENTES</option>
+                      <option value="estudiante">ESTUDIANTES</option>
+                    </select>
                   </div>
                   <Button variant="secondary" size="sm" onClick={() => setIsUserModalOpen(true)} className="italic font-bold tracking-widest px-6">
                     + AÑADIR USUARIO
@@ -739,7 +750,30 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-card-border">
-                      {usuarios.map(u => (
+                      {(() => {
+                        const filteredUsers = usuarios.filter(u => {
+                          const fullName = `${u.nombre} ${u.apellido}`;
+                          const term = normalize(searchUserTerm);
+                          const matchesSearch = !term || 
+                            normalize(fullName).includes(term) || 
+                            normalize(u.email).includes(term);
+                          
+                          const matchesRol = !filterUserRol || u.rol === filterUserRol;
+                          
+                          return matchesSearch && matchesRol;
+                        });
+
+                        if (filteredUsers.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="5" className="px-6 py-20 text-center text-foreground/30 italic">
+                                No se encontraron usuarios que coincidan con la búsqueda.
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filteredUsers.map(u => (
                         <tr key={u.id} className="hover:bg-background/40 transition-colors group">
                           <td className="px-6 py-5">
                             <div className="flex items-center gap-3">
@@ -780,7 +814,8 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        ));
+                      })()}
                     </tbody>
                   </table>
                 </div>
