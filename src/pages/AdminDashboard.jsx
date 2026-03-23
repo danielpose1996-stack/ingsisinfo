@@ -71,6 +71,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminDashboard() {
+  const { user, perfil } = useAuth();
   const [activeTab, setActiveTab] = useState('stats');
   const [stats, setStats] = useState({ totalUsers: 0, totalProjects: 0, pendingProjects: 0, totalFinalized: 0 });
   const [usuarios, setUsuarios] = useState([]);
