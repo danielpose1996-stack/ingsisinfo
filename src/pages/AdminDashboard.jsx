@@ -70,6 +70,16 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Helper to normalize strings for robust comparison (removes accents/spaces/case)
+const normalize = (str) => {
+  if (!str) return '';
+  return str.toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+};
+
 export default function AdminDashboard() {
   const { user, perfil } = useAuth();
   const [activeTab, setActiveTab] = useState('stats');
@@ -774,39 +784,71 @@ export default function AdminDashboard() {
 
             {activeTab === 'proyectos' && (
               <div className="space-y-6">
-                <div className="flex grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <select
-                    className="bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
-                    onChange={(e) => setFilterLinea(e.target.value)}
+                <div className="flex flex-col sm:flex-row gap-4 items-end justify-between">
+                  <div className="flex flex-wrap gap-4 flex-1">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Línea</label>
+                      <select
+                        value={filterLinea}
+                        className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
+                        onChange={(e) => setFilterLinea(e.target.value)}
+                      >
+                        <option value="">Todas las Líneas</option>
+                        <option value="Ingeniería de Software">Ingeniería de Software</option>
+                        <option value="Robótica">Robótica</option>
+                        <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
+                        <option value="Redes y Telemática">Redes y Telemática</option>
+                        <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+                      </select>
+                    </div>
+
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Fase</label>
+                      <select
+                        value={filterFase}
+                        className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
+                        onChange={(e) => setFilterFase(e.target.value)}
+                      >
+                        <option value="">Todas las Fases</option>
+                        <option value="propuesta">Propuesta</option>
+                        <option value="desarrollo">Desarrollo</option>
+                        <option value="aplicacion">Aplicación</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    onClick={() => loadAdminData()} 
+                    className="gap-2 italic py-3 px-6 h-[46px] border-emerald-500/10 hover:bg-emerald-500/5"
+                    disabled={loading}
                   >
-                    <option value="">Línea: Todas</option>
-                    <option value="Ingeniería de Software">Ingeniería de Software</option>
-                    <option value="Robótica">Robótica</option>
-                    <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
-                    <option value="Redes y Telemática">Redes y Telemática</option>
-                    <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
-                  </select>
-                   <select
-                    className="bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
-                    onChange={(e) => setFilterFase(e.target.value)}
-                  >
-                    <option value="">Fase: Todas</option>
-                    <option value="propuesta">Propuesta</option>
-                    <option value="desarrollo">Desarrollo</option>
-                    <option value="aplicacion">Aplicación</option>
-                  </select>
+                    <TrendingUp className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    ACTUALIZAR
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {(() => {
                     const filteredProyectos = proyectos
-                      .filter(p => !filterLinea || p.linea_investigacion === filterLinea)
-                      .filter(p => !filterFase || p.estado?.toLowerCase() === filterFase.toLowerCase());
+                      .filter(p => !filterLinea || normalize(p.linea_investigacion) === normalize(filterLinea))
+                      .filter(p => !filterFase || normalize(p.estado) === normalize(filterFase));
 
                     if (filteredProyectos.length === 0) {
                       return (
-                        <div className="col-span-full py-12 text-center text-foreground/40 italic bg-card border border-dashed border-card-border rounded-2xl">
-                          No se encontraron proyectos para los filtros seleccionados.
+                        <div className="col-span-full py-20 flex flex-col items-center justify-center space-y-6 bg-card/50 border border-dashed border-card-border rounded-3xl animate-in fade-in duration-700">
+                          <div className="p-4 rounded-2xl bg-background/50 border border-card-border">
+                             <FolderTree className="w-10 h-10 text-foreground/20" />
+                          </div>
+                          <div className="space-y-2 text-center">
+                            <h3 className="text-lg font-bold text-foreground italic">No se encontraron proyectos</h3>
+                            <p className="text-sm text-foreground/40 italic max-w-xs mx-auto">
+                              Intenta cambiar los filtros o verifica los permisos en Supabase si crees que deberían aparecer más registros.
+                            </p>
+                          </div>
+                          <Button variant="secondary" onClick={() => { setFilterFase(''); setFilterLinea(''); }} className="text-[10px] py-2 px-6">
+                            LIMPIAR FILTROS
+                          </Button>
                         </div>
                       );
                     }
