@@ -24,3 +24,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scripts de prueba locales y reportes
+test-*.js
+test-*.cjs
+create-new-test-accounts.cjs
+build_error.txt
+lint_report.txt
