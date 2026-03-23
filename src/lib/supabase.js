@@ -630,3 +630,19 @@ export async function obtenerSeguimientoOvas() {
     }
 }
 
+export async function eliminarResultadoOva(id) {
+    const { error } = await supabase
+        .from('resultados_ovas')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+}
+
+export async function eliminarTodoSeguimiento() {
+    const { error } = await supabase
+        .from('resultados_ovas')
+        .delete()
+        .neq('id', 0);
+    if (error) throw error;
+}
+

@@ -16,9 +16,10 @@ import {
   obtenerOvasModulo,
   crearOva,
   actualizarOva,
-  eliminarOva,
   subirArchivoOva,
-  obtenerSeguimientoOvas
+  obtenerSeguimientoOvas,
+  eliminarResultadoOva,
+  eliminarTodoSeguimiento
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
 import { useEmailValidation } from '../hooks/useEmailValidation';
@@ -396,6 +397,29 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   }
+
+  const handleDeleteSeguimiento = async (id) => {
+    if (!confirm('¿Estás seguro de eliminar este registro de seguimiento?')) return;
+    try {
+      await eliminarResultadoOva(id);
+      await loadSeguimiento();
+    } catch (error) {
+      alert('Error al eliminar registro: ' + error.message);
+    }
+  };
+
+  const handleDeleteAllSeguimiento = async () => {
+    if (!confirm('🚨 ADVERTENCIA CRÍTICA: ¿Estás seguro de eliminar TODO el historial de seguimiento? Esta acción es irreversible y borrará el progreso de todos los estudiantes.')) return;
+    if (!confirm('Por favor confirma una vez más que deseas realizar esta acción destructiva.')) return;
+    
+    try {
+      await eliminarTodoSeguimiento();
+      await loadSeguimiento();
+      alert('Se ha limpiado todo el historial de seguimiento correctamente.');
+    } catch (error) {
+      alert('Error al limpiar seguimiento: ' + error.message);
+    }
+  };
 
   // Tracking filters
   const [searchEstudiante, setSearchEstudiante] = useState('');
@@ -906,9 +930,19 @@ export default function AdminDashboard() {
                       ))}
                     </select>
                   </div>
-                  <Button variant="outline" size="sm" onClick={loadSeguimiento} className="gap-2 italic text-[10px] tracking-widest font-black">
-                    <TrendingUp className="w-3 h-3" /> ACTUALIZAR DATOS
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDeleteAllSeguimiento} 
+                      className="gap-2 italic text-[10px] tracking-widest font-black text-red-500 hover:bg-red-500/10 border-red-500/20"
+                    >
+                      <Trash2 className="w-3 h-3" /> LIMPIAR TODO
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={loadSeguimiento} className="gap-2 italic text-[10px] tracking-widest font-black">
+                      <TrendingUp className="w-3 h-3" /> ACTUALIZAR DATOS
+                    </Button>
+                  </div>
                 </div>
 
                 <GlassCard className="p-0 overflow-hidden border-card-border">
@@ -923,6 +957,7 @@ export default function AdminDashboard() {
                           <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Última Nota</th>
                           <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Estado</th>
                           <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-right">Actualización</th>
+                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-right">Acciones</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-card-border">
@@ -968,6 +1003,15 @@ export default function AdminDashboard() {
                               </td>
                               <td className="px-6 py-5 text-right text-[10px] text-foreground/30 font-bold italic uppercase tracking-tighter">
                                 {new Date(s.updated_at).toLocaleString()}
+                              </td>
+                              <td className="px-6 py-5 text-right">
+                                <button
+                                  onClick={() => handleDeleteSeguimiento(s.id)}
+                                  className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-foreground/20 hover:text-red-500 border border-red-500/10 transition-all"
+                                  title="Eliminar registro"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </td>
                             </tr>
                           ))}
