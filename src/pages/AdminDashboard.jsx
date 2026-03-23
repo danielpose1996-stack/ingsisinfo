@@ -139,6 +139,7 @@ export default function AdminDashboard() {
   const [filterFase, setFilterFase] = useState('');
   const [searchUserTerm, setSearchUserTerm] = useState('');
   const [filterUserRol, setFilterUserRol] = useState('');
+  const [filterLineaSeguimiento, setFilterLineaSeguimiento] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
@@ -1230,6 +1231,16 @@ export default function AdminDashboard() {
                         <option key={titulo} value={titulo}>{titulo}</option>
                       ))}
                     </select>
+                    <select
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-emerald-500/50 outline-none italic shadow-sm transition-all"
+                      value={filterLineaSeguimiento}
+                      onChange={(e) => setFilterLineaSeguimiento(e.target.value)}
+                    >
+                      <option value="">Todas las Líneas</option>
+                      {[...new Set(modulos.map(m => m.nombre))].filter(Boolean).map(nombre => (
+                        <option key={nombre} value={nombre}>{nombre}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="flex gap-2">
                     <Button 
@@ -1244,6 +1255,32 @@ export default function AdminDashboard() {
                       <TrendingUp className="w-3 h-3" /> ACTUALIZAR DATOS
                     </Button>
                   </div>
+                </div>
+
+                {/* Metrics Highlight */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <GlassCard className="p-6 border-emerald-500/20 bg-emerald-500/5">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <FileCheck className="w-6 h-6 text-emerald-500" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-black text-foreground italic leading-none">
+                          {(() => {
+                            const filtered = seguimientoOvas.filter(s => {
+                              const matchSearch = (s.perfil?.nombre + ' ' + s.perfil?.apellido).toLowerCase().includes(searchEstudiante.toLowerCase()) || 
+                                                s.perfil?.email.toLowerCase().includes(searchEstudiante.toLowerCase());
+                              const matchOva = !filterOva || s.ova?.titulo === filterOva;
+                              const matchLinea = !filterLineaSeguimiento || s.ova?.modulos?.nombre === filterLineaSeguimiento;
+                              return matchSearch && matchOva && matchLinea;
+                            });
+                            return new Set(filtered.filter(s => s.completado).map(s => s.perfil?.id)).size;
+                          })()}
+                        </p>
+                        <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic mt-1">Usuarios Completados</p>
+                      </div>
+                    </div>
+                  </GlassCard>
                 </div>
 
                 <GlassCard className="p-0 overflow-hidden border-card-border">
@@ -1267,7 +1304,8 @@ export default function AdminDashboard() {
                             const matchSearch = (s.perfil?.nombre + ' ' + s.perfil?.apellido).toLowerCase().includes(searchEstudiante.toLowerCase()) || 
                                               s.perfil?.email.toLowerCase().includes(searchEstudiante.toLowerCase());
                             const matchOva = !filterOva || s.ova?.titulo === filterOva;
-                            return matchSearch && matchOva;
+                            const matchLinea = !filterLineaSeguimiento || s.ova?.modulos?.nombre === filterLineaSeguimiento;
+                            return matchSearch && matchOva && matchLinea;
                           })
                           .map(s => (
                             <tr key={s.id} className="hover:bg-white/[0.01] transition-colors group">
