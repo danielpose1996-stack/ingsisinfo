@@ -177,8 +177,29 @@ export async function actualizarEstadoProyecto(proyectoId, estado) {
     return data;
 }
 
+// HELPERS DE SEGURIDAD
+const FILE_LIMIT_MB = 10;
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'svg', 'gif', 'webp'];
+
+function validarArchivo(file) {
+    if (!file) throw new Error("No se ha proporcionado ningún archivo");
+    
+    // Validación de tamaño
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > FILE_LIMIT_MB) {
+        throw new Error(`El archivo es demasiado grande (Máximo ${FILE_LIMIT_MB}MB)`);
+    }
+
+    // Validación de extensión
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        throw new Error(`Extensión de archivo .${ext} no permitida`);
+    }
+}
+
 // VERSIONES
 export const subirDocumento = async (file, proyectoId, estudianteId, comentario = null) => {
+    validarArchivo(file);
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${proyectoId}.${fileExt}`;
 
@@ -573,6 +594,7 @@ export async function eliminarOva(id) {
 }
 
 export async function subirArchivoOva(file, pathPrefix = 'ovas') {
+    validarArchivo(file);
     const fileExt = file.name.split('.').pop();
     const fileName = `${pathPrefix}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 

@@ -28,7 +28,8 @@ export const AuthProvider = ({ children }) => {
     // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log("Auth Event:", event, "User:", session?.user?.email);
+            // Log de evento sin PII (seguridad)
+            console.log("Auth Event:", event);
             
             if (session) {
                 setUser(session.user);
@@ -52,7 +53,6 @@ export const AuthProvider = ({ children }) => {
             if (!user) return;
             
             try {
-                console.log("Buscando perfil para:", user.email);
                 const { data: p, error: pError } = await supabase
                     .from('perfiles')
                     .select('*')
