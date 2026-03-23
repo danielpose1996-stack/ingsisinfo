@@ -402,6 +402,14 @@ export async function obtenerTodosProyectos() {
     return data;
 }
 
+export async function eliminarProyecto(id) {
+    const { error } = await supabase
+        .from('proyectos')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+}
+
 export async function obtenerProyectosFinalizados() {
     const { data, error } = await supabase
         .from('proyectos')

@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { obtenerProyectosFinalizados } from '../lib/supabase';
+import { obtenerProyectosFinalizados, eliminarProyecto } from '../lib/supabase';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { 
   Download, FileText, Search, Filter, BookOpen, 
-  User as UserIcon, Calendar, Lock, LogIn 
+  User as UserIcon, Calendar, Lock, LogIn, Trash2
 } from 'lucide-react';
 
 export default function Repositorio() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterLinea, setFilterLinea] = useState('');
@@ -37,6 +37,19 @@ export default function Repositorio() {
     }
     loadData();
   }, [user, authLoading]);
+
+  const handleDelete = async (id, nombre) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar el proyecto "${nombre}" permanentemente?`)) return;
+    
+    try {
+      await eliminarProyecto(id);
+      setProyectos(prev => prev.filter(p => p.id !== id));
+      alert('Proyecto eliminado exitosamente');
+    } catch (error) {
+      console.error("Error al eliminar proyecto:", error);
+      alert('Error al eliminar el proyecto');
+    }
+  };
 
   const filteredProyectos = proyectos
     .filter(p => !filterLinea || p.linea_investigacion === filterLinea)
@@ -175,8 +188,19 @@ export default function Repositorio() {
                   <div className="p-8 flex-grow">
                     <div className="flex justify-between items-start mb-6">
                       <Badge variant="emerald" className="px-3 py-1 text-[10px] tracking-widest">PRODUCTO FINAL</Badge>
-                      <div className="p-2 bg-emerald-500/10 rounded-lg">
-                        <FileText className="w-5 h-5 text-emerald-400" />
+                      <div className="flex gap-2">
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDelete(p.id, p.nombre)}
+                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                            title="Eliminar Proyecto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        <div className="p-2 bg-emerald-500/10 rounded-lg">
+                          <FileText className="w-5 h-5 text-emerald-400" />
+                        </div>
                       </div>
                     </div>
                     
