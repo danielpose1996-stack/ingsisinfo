@@ -54,6 +54,33 @@ export async function obtenerSesionActual() {
 // PERFILES
 export async function actualizarPerfil(id, updates, isProfileId = false) {
     try {
+        // 1. Si hay una contraseña, primero intentamos actualizar las credenciales de Auth
+        // Nota: Solo se puede hacer vía Edge Function con Service Role desde el cliente anon
+        if (updates.password) {
+            const { password, ...otherUpdates } = updates;
+            
+            // Obtenemos el user_id si estamos usando profile ID
+            let userId = id;
+            if (isProfileId) {
+                const { data: p } = await supabase.from('perfiles').select('user_id').eq('id', id).single();
+                userId = p?.user_id;
+            }
+
+            if (userId) {
+                await supabase.functions.invoke('create-user', { // Reutilizamos o expandimos la función de creación
+                    body: { 
+                        action: 'update',
+                        user_id: userId,
+                        password: password,
+                        ...otherUpdates 
+                    }
+                });
+            }
+            
+            // Ya no necesitamos la contraseña en los updates de la tabla perfiles
+            updates = otherUpdates;
+        }
+
         const query = supabase.from('perfiles').update(updates);
         
         if (isProfileId) {

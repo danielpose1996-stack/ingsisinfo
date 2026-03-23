@@ -227,8 +227,13 @@ export default function AdminDashboard() {
           linea_investigacion: newUser.rol === 'docente' ? (newUser.linea_investigacion || 'Ingeniería de Software') : null
         };
 
+        // Si se ingresó una contraseña, la incluimos para actualizar Auth
+        if (newUser.password) {
+          updates.password = newUser.password;
+        }
+
         await actualizarPerfil(editingProfileId, updates, true);
-        alert('Usuario actualizado con éxito.');
+        alert('Usuario actualizado con éxito (Perfil y Credenciales).');
       } else {
         // Lógica de creación (existente)
         await registrarUsuario({ 
