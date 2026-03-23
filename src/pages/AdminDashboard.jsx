@@ -131,8 +131,10 @@ export default function AdminDashboard() {
   const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
 
   useEffect(() => {
-    loadAdminData();
-  }, []);
+    if (user && perfil?.rol === 'admin') {
+      loadAdminData();
+    }
+  }, [user, perfil]);
 
   async function loadAdminData() {
     setLoading(true);
@@ -142,19 +144,30 @@ export default function AdminDashboard() {
         obtenerTodosProyectos(),
         obtenerModulos()
       ]);
-      setUsuarios(users);
-      setProyectos(proys);
-      setModulos(mods);
+      
+      if (!proys) {
+        console.warn("obtenerTodosProyectos returned null");
+        setProyectos([]);
+      } else {
+        setProyectos(proys);
+      }
+      
+      setUsuarios(users || []);
+      setModulos(mods || []);
 
       // Calculate basic stats
+      const validProys = proys || [];
+      const validUsers = users || [];
+      
       setStats({
-        totalUsers: users.length,
-        totalProjects: proys.length,
-        pendingProjects: proys.filter(p => !p.terminado).length,
-        totalFinalized: proys.filter(p => p.terminado).length
+        totalUsers: validUsers.length,
+        totalProjects: validProys.length,
+        pendingProjects: validProys.filter(p => !p.terminado).length,
+        totalFinalized: validProys.filter(p => p.terminado).length
       });
     } catch (error) {
       console.error("Error loading admin data:", error);
+      alert("Error al cargar datos del servidor: " + error.message);
     } finally {
       setLoading(false);
     }
