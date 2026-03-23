@@ -44,7 +44,7 @@ export default function Modulos() {
   const [selectedModule, setSelectedModule] = useState(null);
   const [contenidos, setContenidos] = useState({ guia: [], video: [], material: [], subpagina: [] });
   const [proyectosLinea, setProyectosLinea] = useState([]);
-  const [activeTab, setActiveTab] = useState('guia');
+  const [activeTab, setActiveTab] = useState('ovas');
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   
@@ -100,7 +100,7 @@ export default function Modulos() {
 
   const handleModuleClick = (module) => {
     setSelectedModule(module);
-    setActiveTab('guia');
+    setActiveTab('ovas');
     fetchContenidos(module.id, module.nombre);
   };
 
@@ -280,12 +280,7 @@ export default function Modulos() {
               
               <div className="flex bg-card p-1 rounded-2xl overflow-x-auto custom-scrollbar">
                 {[
-                  { id: 'guia', label: 'Guías', icon: FileText },
                   { id: 'ovas', label: 'OVAs', icon: Cpu },
-                  { id: 'video', label: 'Videos', icon: Video },
-                  { id: 'material', label: 'Material', icon: LinkIcon },
-                  { id: 'proyectos', label: 'Proyectos', icon: FolderOpen },
-                  { id: 'subpagina', label: 'Especialidad', icon: BookOpen },
                 ].map(tab => (
                   <button
                     key={tab.id}
