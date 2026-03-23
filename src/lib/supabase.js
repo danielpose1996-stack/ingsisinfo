@@ -321,6 +321,24 @@ export async function obtenerGaleria() {
     return data;
 }
 
+export async function crearGaleria(item) {
+    const { data, error } = await supabase
+        .from('galeria')
+        .insert(item)
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+export async function eliminarGaleria(id) {
+    const { error } = await supabase
+        .from('galeria')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+}
+
 // AULA VIRTUAL
 export async function obtenerModulos() {
     const { data, error } = await supabase

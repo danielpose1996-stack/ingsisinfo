@@ -24,22 +24,52 @@ export default function Home() {
 
   useEffect(() => {
     async function loadData() {
-      try {
-        const [news, evs, gal, proys] = await Promise.all([
-          obtenerNoticias(),
-          obtenerEventos('proximo'),
-          obtenerGaleria(),
-          obtenerProyectosFinalizados()
-        ]);
-        setNoticias(news.slice(0, 3));
-        setEventos(evs.slice(0, 4));
-        setGaleria(gal.slice(0, 6));
-        setProyectos(proys);
-      } catch (error) {
-        console.error("Error loading home data:", error);
-      } finally {
-        setLoading(false);
-      }
+      // Cargamos cada sección de forma independiente para que si una falla, las demás sigan funcionando
+      
+      const loadNews = async () => {
+        try {
+          const data = await obtenerNoticias();
+          setNoticias(data.slice(0, 3));
+        } catch (err) {
+          console.error("Error cargando noticias:", err);
+        }
+      };
+
+      const loadEvents = async () => {
+        try {
+          const data = await obtenerEventos('proximo');
+          setEventos(data.slice(0, 4));
+        } catch (err) {
+          console.error("Error cargando eventos:", err);
+        }
+      };
+
+      const loadGallery = async () => {
+        try {
+          const data = await obtenerGaleria();
+          setGaleria(data.slice(0, 6));
+        } catch (err) {
+          console.error("Error cargando galería:", err);
+        }
+      };
+
+      const loadProjects = async () => {
+        try {
+          const data = await obtenerProyectosFinalizados();
+          setProyectos(data);
+        } catch (err) {
+          console.error("Error cargando proyectos:", err);
+        }
+      };
+
+      await Promise.allSettled([
+        loadNews(),
+        loadEvents(),
+        loadGallery(),
+        loadProjects()
+      ]);
+      
+      setLoading(false);
     }
     loadData();
   }, []);

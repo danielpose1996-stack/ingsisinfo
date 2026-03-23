@@ -13,6 +13,11 @@ export default function NewsCard({ noticia }) {
             src={imagen_url} 
             alt={titulo} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = ''; 
+              e.target.parentElement.innerHTML = '<div class="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">🖼️</div>';
+            }}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">

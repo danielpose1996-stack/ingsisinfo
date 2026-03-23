@@ -6,9 +6,17 @@ import {
   obtenerTodosUsuarios, 
   obtenerTodosProyectos,
   obtenerModulos,
-  obtenerContenidosModulo,
+  obtenerNoticias,
+  crearNoticia,
   actualizarNoticia,
+  eliminarNoticia,
+  obtenerEventos,
+  crearEvento,
   actualizarEvento,
+  eliminarEvento,
+  obtenerGaleria,
+  crearGaleria,
+  eliminarGaleria,
   eliminarUsuario,
   registrarUsuario,
   actualizarPerfil,
@@ -70,6 +78,18 @@ export default function AdminDashboard() {
   const [modulos, setModulos] = useState([]);
   const [seguimientoOvas, setSeguimientoOvas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPublic, setLoadingPublic] = useState(false);
+
+  // Public Content State (Inicio)
+  const [noticiasAdmin, setNoticiasAdmin] = useState([]);
+  const [eventosAdmin, setEventosAdmin] = useState([]);
+  const [galeriaAdmin, setGaleriaAdmin] = useState([]);
+
+  // Public Selection/Modal States
+  const [isPublicModalOpen, setIsPublicModalOpen] = useState(false);
+  const [publicType, setPublicType] = useState('noticia'); // 'noticia', 'evento', 'galeria'
+  const [editingPublicItem, setEditingPublicItem] = useState(null);
+  const [publicForm, setPublicForm] = useState({});
 
   // Modal states
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -385,8 +405,86 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'seguimiento') {
       loadSeguimiento();
+    } else if (activeTab === 'publico') {
+      loadPublicData();
     }
   }, [activeTab]);
+
+  async function loadPublicData() {
+    setLoadingPublic(true);
+    try {
+      const [news, evts, gal] = await Promise.all([
+        obtenerNoticias(),
+        obtenerEventos(),
+        obtenerGaleria()
+      ]);
+      setNoticiasAdmin(news);
+      setEventosAdmin(evts);
+      setGaleriaAdmin(gal);
+    } catch (error) {
+      console.error("Error loading public data:", error);
+    } finally {
+      setLoadingPublic(false);
+    }
+  }
+
+  const handleOpenPublicModal = (type, item = null) => {
+    setPublicType(type);
+    setEditingPublicItem(item);
+    if (item) {
+      setPublicForm(item);
+    } else {
+      setPublicForm(
+        type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', fecha: new Date().toISOString().split('T')[0] } :
+        type === 'evento' ? { titulo: '', descripcion: '', fecha_evento: new Date().toISOString().split('T')[0], tipo: 'proximo', imagen_url: '' } :
+        { titulo: '', imagen_url: '', evento_id: null }
+      );
+    }
+    setIsPublicModalOpen(true);
+  };
+
+  const handleSavePublicItem = async (e) => {
+    e.preventDefault();
+    try {
+      if (publicType === 'noticia') {
+        if (editingPublicItem) await actualizarNoticia(editingPublicItem.id, publicForm);
+        else await crearNoticia(publicForm);
+      } else if (publicType === 'evento') {
+        if (editingPublicItem) await actualizarEvento(editingPublicItem.id, publicForm);
+        else await crearEvento(publicForm);
+      } else if (publicType === 'galeria') {
+        await crearGaleria(publicForm);
+      }
+      setIsPublicModalOpen(false);
+      await loadPublicData();
+      alert('Operación realizada con éxito');
+    } catch (error) {
+      alert('Error al guardar: ' + error.message);
+    }
+  };
+
+  const handleDeletePublicItem = async (type, id) => {
+    if (!confirm('¿Estás seguro de eliminar este elemento?')) return;
+    try {
+      if (type === 'noticia') await eliminarNoticia(id);
+      else if (type === 'evento') await eliminarEvento(id);
+      else if (type === 'galeria') await eliminarGaleria(id);
+      await loadPublicData();
+    } catch (error) {
+      alert('Error al eliminar: ' + error.message);
+    }
+  };
+
+  const handlePublicFileUpload = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const url = await subirArchivoOva(file, 'web-publica'); // Usamos el mismo bucket pero carpeta diferente
+      setPublicForm({ ...publicForm, [field]: url });
+    } catch (error) {
+      alert('Error al subir imagen');
+    }
+  };
 
   async function loadSeguimiento() {
     setLoading(true);
@@ -879,32 +977,137 @@ export default function AdminDashboard() {
             )}
 
             {activeTab === 'publico' && (
-              <div className="space-y-12">
-                <section>
-                  <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
-                    <h3 className="text-2xl font-bold flex items-center gap-3 italic">
-                      <span className="w-2 h-8 bg-emerald-500 rounded-full" />
-                      📰 Noticias y Novedades
-                    </h3>
-                    <Button size="sm">+ Redactar Noticia</Button>
+              <div className="space-y-12 pb-20">
+                {loadingPublic ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
                   </div>
-                  <p className="text-foreground/40 italic py-10 text-center bg-cardard rounded-2xl border border-dashed border-card-border">
-                    Carga de noticias globales... presione el botón "+" para crear la primera.
-                  </p>
-                </section>
+                ) : (
+                  <>
+                    <section>
+                      <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
+                        <h3 className="text-2xl font-bold flex items-center gap-3 italic">
+                          <span className="w-2 h-8 bg-emerald-500 rounded-full" />
+                          📰 Noticias y Novedades
+                        </h3>
+                        <Button size="sm" onClick={() => handleOpenPublicModal('noticia')}>+ Redactar Noticia</Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {noticiasAdmin.map(n => (
+                          <GlassCard key={n.id} className="p-4 border-card-border group hover:border-emerald-500/30 transition-all">
+                            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-cardard">
+                              {n.imagen_url ? (
+                                <img 
+                                  src={n.imagen_url} 
+                                  alt="" 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    e.target.onerror = null; 
+                                    e.target.src = ''; // Clear src to prevent broken image icon
+                                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-foreground/10"><ImageIcon className="w-12 h-12" /></div>';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-foreground/10">
+                                  <ImageIcon className="w-12 h-12" />
+                                </div>
+                              )}
+                              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleOpenPublicModal('noticia', n)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-emerald-500 transition-colors">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleDeletePublicItem('noticia', n.id)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-red-500 transition-colors">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                            <h4 className="font-bold text-foreground italic mb-1 line-clamp-1">{n.titulo}</h4>
+                            <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">{new Date(n.fecha).toLocaleDateString()}</p>
+                          </GlassCard>
+                        ))}
+                        {noticiasAdmin.length === 0 && (
+                          <div className="col-span-full py-10 text-center text-foreground/30 italic bg-cardard border border-dashed border-card-border rounded-2xl">
+                            No hay noticias publicadas.
+                          </div>
+                        )}
+                      </div>
+                    </section>
 
-                <section>
-                  <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
-                    <h3 className="text-2xl font-bold flex items-center gap-3 italic">
-                      <span className="w-2 h-8 bg-backgroundlue-500 rounded-full" />
-                      📅 Eventos Semilleristas
-                    </h3>
-                    <Button size="sm">+ Agendar Evento</Button>
-                  </div>
-                   <p className="text-foreground/40 italic py-10 text-center bg-cardard rounded-2xl border border-dashed border-card-border">
-                    Sincronizando calendario de eventos...
-                  </p>
-                </section>
+                    <section>
+                      <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
+                        <h3 className="text-2xl font-bold flex items-center gap-3 italic">
+                          <span className="w-2 h-8 bg-blue-500 rounded-full" />
+                          📅 Eventos Semilleristas
+                        </h3>
+                        <Button size="sm" onClick={() => handleOpenPublicModal('evento')}>+ Agendar Evento</Button>
+                      </div>
+                      <div className="space-y-4">
+                        {eventosAdmin.map(e => (
+                          <div key={e.id} className="flex items-center justify-between p-5 bg-cardard rounded-2xl border border-card-border group hover:border-blue-500/30 transition-all">
+                            <div className="flex items-center gap-6">
+                              <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
+                                <span className="text-xs font-black uppercase tracking-tighter italic">{new Date(e.fecha_evento).toLocaleString('es', { month: 'short' })}</span>
+                                <span className="text-xl font-black leading-none">{new Date(e.fecha_evento).getDate()}</span>
+                              </div>
+                              {e.imagen_url && (
+                                <div className="w-14 h-14 rounded-xl overflow-hidden border border-card-border">
+                                  <img src={e.imagen_url} alt="" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <div>
+                                <h4 className="font-bold text-foreground italic">{e.titulo}</h4>
+                                <p className="text-xs text-foreground/40 italic">{e.descripcion?.substring(0, 100)}...</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge variant="blue" size="sm" className="italic">{e.tipo?.toUpperCase()}</Badge>
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleOpenPublicModal('evento', e)} className="p-2 rounded-lg bg-card hover:bg-blue-500/10 text-foreground/40 hover:text-blue-500 transition-colors">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleDeletePublicItem('evento', e.id)} className="p-2 rounded-lg bg-card hover:bg-red-500/10 text-foreground/40 hover:text-red-500 transition-colors">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {eventosAdmin.length === 0 && (
+                          <p className="text-foreground/40 italic py-10 text-center bg-cardard rounded-2xl border border-dashed border-card-border">
+                            No hay eventos programados.
+                          </p>
+                        )}
+                      </div>
+                    </section>
+
+                    <section>
+                      <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
+                        <h3 className="text-2xl font-bold flex items-center gap-3 italic">
+                          <span className="w-2 h-8 bg-amber-500 rounded-full" />
+                          📸 Galería de Galería
+                        </h3>
+                        <Button size="sm" onClick={() => handleOpenPublicModal('galeria')}>+ Añadir a Galería</Button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {galeriaAdmin.map(g => (
+                          <div key={g.id} className="relative aspect-square rounded-xl overflow-hidden border border-card-border group">
+                            <img src={g.imagen_url} alt="" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                               <button onClick={() => handleDeletePublicItem('galeria', g.id)} className="p-2 rounded-xl bg-red-500 text-white shadow-lg">
+                                 <Trash2 className="w-4 h-4" />
+                               </button>
+                            </div>
+                          </div>
+                        ))}
+                        {galeriaAdmin.length === 0 && (
+                          <div className="col-span-full py-12 text-center text-foreground/30 italic bg-cardard border border-dashed border-card-border rounded-2xl">
+                            La galería está vacía.
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  </>
+                )}
               </div>
             )}
             {activeTab === 'seguimiento' && (
@@ -1230,6 +1433,164 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Admin Public Content Modal (News, Events, Gallery) */}
+      <Modal
+        isOpen={isPublicModalOpen}
+        onClose={() => {
+          setIsPublicModalOpen(false);
+          setEditingPublicItem(null);
+          setPublicForm({});
+        }}
+        title={`${editingPublicItem ? 'Editar' : 'Nueva'} ${publicType === 'noticia' ? 'Noticia' : publicType === 'evento' ? 'Evento' : 'Imagen de Galería'}`}
+      >
+        <form onSubmit={handleSavePublicItem} className="space-y-4">
+          {publicType === 'noticia' && (
+            <>
+              <input
+                type="text"
+                placeholder="Título de la noticia"
+                value={publicForm.titulo || ''}
+                onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+                required
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="date"
+                  value={publicForm.fecha || ''}
+                  onChange={(e) => setPublicForm({...publicForm, fecha: e.target.value})}
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+                  required
+                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <div className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 flex items-center justify-between">
+                    <span>{publicForm.imagen_url ? 'Imagen cargada' : 'Subir Imagen'}</span>
+                    <ImageIcon className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+              <textarea
+                placeholder="Contenido de la noticia..."
+                value={publicForm.contenido || ''}
+                onChange={(e) => setPublicForm({...publicForm, contenido: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none min-h-[150px]"
+                required
+              />
+            </>
+          )}
+
+          {publicType === 'evento' && (
+            <>
+              <input
+                type="text"
+                placeholder="Título del evento"
+                value={publicForm.titulo || ''}
+                onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+                required
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="datetime-local"
+                  value={publicForm.fecha_evento ? new Date(publicForm.fecha_evento).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setPublicForm({...publicForm, fecha_evento: e.target.value})}
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+                  required
+                />
+                <select
+                  value={publicForm.tipo || 'proximo'}
+                  onChange={(e) => setPublicForm({...publicForm, tipo: e.target.value})}
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+                >
+                  <option value="proximo">Próximo</option>
+                  <option value="pasado">Pasado / Archivo</option>
+                </select>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <div className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 flex items-center justify-between">
+                    <span>{publicForm.imagen_url ? 'Imagen cargada' : 'Subir Imagen'}</span>
+                    <ImageIcon className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+              <textarea
+                placeholder="Descripción corta..."
+                value={publicForm.descripcion || ''}
+                onChange={(e) => setPublicForm({...publicForm, descripcion: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none min-h-[100px]"
+                required
+              />
+            </>
+          )}
+
+          {publicType === 'galeria' && (
+            <>
+              <div className="relative w-full aspect-video rounded-2xl border-2 border-dashed border-card-border flex flex-col items-center justify-center overflow-hidden mb-4 group hover:border-emerald-500/50 transition-colors">
+                {publicForm.imagen_url ? (
+                  <>
+                    <img src={publicForm.imagen_url} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <p className="text-white text-xs font-bold">Cambiar Imagen</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="w-10 h-10 text-foreground/10 mb-2" />
+                    <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest italic">Seleccionar Fotografía</p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  required={!editingPublicItem}
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Pie de foto / Título (opcional)"
+                value={publicForm.titulo || ''}
+                onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+              />
+              <select
+                value={publicForm.evento_id || ''}
+                onChange={(e) => setPublicForm({...publicForm, evento_id: e.target.value || null})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-emerald-500 outline-none"
+              >
+                <option value="">Vincular a un evento (opcional)</option>
+                {eventosAdmin.map(ev => (
+                  <option key={ev.id} value={ev.id}>{ev.titulo}</option>
+                ))}
+              </select>
+            </>
+          )}
+
+          <div className="flex gap-4 pt-4">
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsPublicModalOpen(false)}>Cancelar</Button>
+            <Button
+              type="submit"
+              variant="secondary"
+              className="flex-1 font-bold italic"
+            >
+              {editingPublicItem ? 'ACTUALIZAR' : 'PUBLICAR AHORA'}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
