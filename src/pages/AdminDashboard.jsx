@@ -330,6 +330,7 @@ export default function AdminDashboard() {
       loadOvas(selectedModuloAula.id);
     } catch (error) {
       console.error("Error deleting OVA:", error);
+      alert("Error al eliminar OVA: " + error.message);
     }
   };
 
