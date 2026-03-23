@@ -81,7 +81,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-foreground/60 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-            Potenciando la innovación y el descubrimiento científico en el Instituto Universitario de la Paz - UNIPAZ.
+            Impulsando la innovación tecnológica y el desarrollo de soluciones informáticas en el Instituto Universitario de la Paz - UNIPAZ.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold transition-all transform hover:scale-105 shadow-lg shadow-emerald-500/20">

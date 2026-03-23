@@ -24,7 +24,7 @@ export default function Footer() {
               <span className="text-xl font-bold text-foreground tracking-tight italic">SISINFO</span>
             </div>
             <p className="text-foreground/40 text-sm leading-relaxed italic">
-              Semillero de Investigación en Sistemas de Información. Potenciando la excelencia académica en UNIPAZ.
+              Semillero de investigación de ingeniería informática - UNIPAZ
             </p>
           </div>
 
@@ -41,7 +41,7 @@ export default function Footer() {
             <h4 className="text-foreground font-bold uppercase tracking-widest text-xs mb-6 italic">Contacto</h4>
             <ul className="space-y-4 text-sm text-foreground/40 italic">
               <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-emerald-500/50" /> sisinfo@unipaz.edu.co</li>
-              <li className="flex items-center gap-3"><Phone className="w-4 h-4 text-emerald-500/50" /> +57 (607) 123 4567</li>
+              
               <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-emerald-500/50" /> UNIPAZ, Barrancabermeja</li>
             </ul>
           </div>
