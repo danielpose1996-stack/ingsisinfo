@@ -1,14 +1,18 @@
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import AdminLogin from './pages/AdminLogin';
-import StudentDashboard from './pages/StudentDashboard';
-import TeacherDashboard from './pages/TeacherDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import Modulos from './pages/Modulos';
-import Repositorio from './pages/Repositorio';
-import Informacion from './pages/Informacion';
+
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Modulos = lazy(() => import('./pages/Modulos'));
+const Repositorio = lazy(() => import('./pages/Repositorio'));
+const Informacion = lazy(() => import('./pages/Informacion'));
+
 import ProtectedRoute from './components/ProtectedRoute';
 
 import { useAuth } from './context/AuthContext';
@@ -29,49 +33,56 @@ function AdminGatekeeper({ children }) {
 function App() {
   return (
     <MainLayout>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/admin/login" 
-          element={
-            <AdminGatekeeper>
-              <AdminLogin />
-            </AdminGatekeeper>
-          } 
-        />
-        
-        {/* Protected Routes */}
-        <Route 
-          path="/dashboard/estudiante" 
-          element={
-            <ProtectedRoute>
-              <StudentDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/docente" 
-          element={
-            <ProtectedRoute>
-              <TeacherDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/dashboard/admin" 
-          element={
-            <ProtectedRoute adminOnly>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
+      <Suspense fallback={
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+          <p className="text-foreground/40 text-sm font-medium animate-pulse">Cargando...</p>
+        </div>
+      }>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/admin/login" 
+            element={
+              <AdminGatekeeper>
+                <AdminLogin />
+              </AdminGatekeeper>
+            } 
+          />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/dashboard/estudiante" 
+            element={
+              <ProtectedRoute>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/docente" 
+            element={
+              <ProtectedRoute>
+                <TeacherDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/admin" 
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
 
-        <Route path="/repositorio" element={<Repositorio />} />
-        
-        <Route path="/modulos" element={<Modulos />} />
-        <Route path="/informacion" element={<Informacion />} />
-      </Routes>
+          <Route path="/repositorio" element={<Repositorio />} />
+          
+          <Route path="/modulos" element={<Modulos />} />
+          <Route path="/informacion" element={<Informacion />} />
+        </Routes>
+      </Suspense>
     </MainLayout>
   );
 }
