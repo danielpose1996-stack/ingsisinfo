@@ -65,7 +65,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6">
              <div className="h-6 w-px bg-card" />
-             <p className="text-[10px] text-foreground/80 font-black italic tracking-widest underline decoration-emerald-500/20">MADE BY SISINFO_TEAM</p>
+             <p className="text-[10px] text-foreground/80 font-black italic tracking-widest underline decoration-emerald-500/20">MADE BY DANIEL POSSE</p>
           </div>
         </div>
       </div>
