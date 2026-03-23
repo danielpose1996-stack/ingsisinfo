@@ -47,6 +47,10 @@ export default function OvaEditor({
   onSave,
   onCancel,
   onFileUpload,
+  hasDraft,
+  draftData,
+  onRecoverDraft,
+  onDiscardDraft,
 }) {
   const [activeSection, setActiveSection] = useState(null);
   const sectionRefs = useRef({});
@@ -244,6 +248,49 @@ export default function OvaEditor({
       {/* MAIN EDITOR AREA */}
       {/* ═══════════════════════════════════════ */}
       <div className="flex-1 space-y-8 min-w-0">
+        <AnimatePresence>
+          {hasDraft && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-6"
+            >
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-emerald-500/5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <AlertCircle className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground italic">¡Borrador Detectado!</h4>
+                    <p className="text-xs text-foreground/50 italic">
+                      Se encontró una versión guardada de esta OVA ({new Date(draftData?.lastSaved).toLocaleTimeString()}).
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onDiscardDraft}
+                    className="text-[10px] font-bold italic border-red-500/20 text-red-400 hover:bg-red-500/10"
+                  >
+                    DESCARTAR
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={onRecoverDraft}
+                    className="text-[10px] font-bold italic px-6"
+                  >
+                    RECUPERAR AHORA
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between gap-4 pb-4 border-b border-card-border">
           <div className="flex items-center gap-3">

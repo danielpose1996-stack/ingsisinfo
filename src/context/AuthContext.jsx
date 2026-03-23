@@ -28,13 +28,13 @@ export const AuthProvider = ({ children }) => {
     // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            // Log de evento sin PII (seguridad)
-            console.log("Auth Event:", event);
-            
             if (session) {
                 setUser(session.user);
-                // Solo activamos loading si aún no tenemos el perfil
-                setLoading(prev => !perfil); 
+                // Solo activamos loading si es la carga inicial y no tenemos perfil
+                // Si ya hay un perfil, no interrumpimos la UI (evita recargas al cambiar de pestaña)
+                if (!perfil) {
+                    setLoading(true);
+                }
             } else {
                 setUser(null);
                 setPerfil(null);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => subscription.unsubscribe();
-    }, []); // Array VACÍO para estabilidad total
+    }, [perfil]); // Dependemos de perfil para saber si debemos mostrar loading inicial
 
     // 2. Efecto separado para cargar el perfil cuando cambia el usuario
     useEffect(() => {

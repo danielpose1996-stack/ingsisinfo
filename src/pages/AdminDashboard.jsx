@@ -144,11 +144,44 @@ export default function AdminDashboard() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
 
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftData, setDraftData] = useState(null);
+
   useEffect(() => {
     if (user && perfil?.rol === 'admin') {
       loadAdminData();
     }
   }, [user, perfil]);
+
+  // Autoguardado Effect
+  useEffect(() => {
+    if (isOvaFormOpen && ovaForm.titulo) {
+      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+      localStorage.setItem(draftKey, JSON.stringify({
+        ...ovaForm,
+        lastSaved: new Date().toISOString()
+      }));
+    }
+  }, [ovaForm, isOvaFormOpen, editingOva]);
+
+  // Check for Draft when modal opens
+  useEffect(() => {
+    if (isOvaFormOpen) {
+      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Only show if it's different from current form (or if current is empty)
+        if (parsed.titulo !== ovaForm.titulo || parsed.descripcion !== ovaForm.descripcion || parsed.contenido?.length !== ovaForm.contenido?.length) {
+          setDraftData(parsed);
+          setHasDraft(true);
+        }
+      }
+    } else {
+      setHasDraft(false);
+      setDraftData(null);
+    }
+  }, [isOvaFormOpen, editingOva]);
 
   async function loadAdminData() {
     setLoading(true);
@@ -364,15 +397,37 @@ export default function AdminDashboard() {
 
       if (editingOva) {
         await actualizarOva(editingOva.id, dataToSave);
+        localStorage.removeItem(`ova_draft_${editingOva.id}`);
       } else {
         await crearOva(dataToSave);
+        localStorage.removeItem('ova_draft_new');
       }
 
       setIsOvaFormOpen(false);
+      setHasDraft(false);
+      setDraftData(null);
       loadOvas(selectedModuloAula.id);
     } catch (error) {
       console.error("Error saving OVA:", error);
       alert("Error al guardar OVA");
+    }
+  };
+
+  const handleRecoverDraft = () => {
+    if (draftData) {
+      setOvaForm(draftData);
+      setHasDraft(false);
+      setDraftData(null);
+      alert("Borrador recuperado con éxito.");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    if (confirm("¿Estás seguro de descartar el borrador? Esta acción no se puede deshacer.")) {
+      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+      localStorage.removeItem(draftKey);
+      setHasDraft(false);
+      setDraftData(null);
     }
   };
 
@@ -988,6 +1043,10 @@ export default function AdminDashboard() {
                         onSave={handleSaveOva}
                         onCancel={() => setIsOvaFormOpen(false)}
                         onFileUpload={handleFileUpload}
+                        hasDraft={hasDraft}
+                        draftData={draftData}
+                        onRecoverDraft={handleRecoverDraft}
+                        onDiscardDraft={handleDiscardDraft}
                       />
                    ) : (
                      <div className="space-y-6">
