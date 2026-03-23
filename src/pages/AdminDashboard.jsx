@@ -16,6 +16,7 @@ import {
   obtenerOvasModulo,
   crearOva,
   actualizarOva,
+  eliminarOva,
   subirArchivoOva,
   obtenerSeguimientoOvas,
   eliminarResultadoOva,
