@@ -526,9 +526,9 @@ export default function AdminDashboard() {
   const [filterOva, setFilterOva] = useState('');
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-backgroundackground">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-background">
       {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-72 bg-cardard border-r border-card-border p-6 space-y-8">
+      <aside className="w-full lg:w-72 bg-card border-r border-card-border p-6 space-y-8">
         <div className="flex items-center gap-3 px-2 mb-10">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
@@ -544,7 +544,7 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.05)]' : 'text-foreground/40 hover:text-foreground hover:bg-backgroundackground/80'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.05)]' : 'text-foreground/40 hover:text-foreground hover:bg-background/80'}`}
             >
               <item.icon className="w-4 h-4" />
               {item.label}
@@ -553,7 +553,7 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="pt-10">
-          <GlassCard className="p-4 bg-backgroundlue-500/5">
+          <GlassCard className="p-4 bg-blue-500/5">
              <p className="text-[10px] text-foreground/40 font-bold uppercase mb-2 italic">Estado del Sistema</p>
              <div className="flex items-center gap-2">
                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -603,7 +603,7 @@ export default function AdminDashboard() {
 
                   <GlassCard className="p-8 border-card-border hover:border-blue-500/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-2xl bg-backgroundlue-500/10 border border-blue-500/20">
+                      <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20">
                         <FolderTree className="w-6 h-6 text-blue-500" />
                       </div>
                       <Badge variant="blue">+5 este mes</Badge>
@@ -614,7 +614,7 @@ export default function AdminDashboard() {
 
                   <GlassCard className="p-8 border-card-border hover:border-amber-500/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-2xl bg-cardmber-500/10 border border-amber-500/20">
+                      <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                         <TrendingUp className="w-6 h-6 text-amber-500" />
                       </div>
                       <Badge variant="amber">Crítico</Badge>
@@ -643,7 +643,7 @@ export default function AdminDashboard() {
                      </h3>
                      <div className="space-y-4">
                        {proyectos.slice(0, 5).map(p => (
-                         <div key={p.id} className="flex items-center justify-between p-4 bg-cardard rounded-xl border border-transparent hover:border-card-border transition-all group">
+                         <div key={p.id} className="flex items-center justify-between p-4 bg-card rounded-xl border border-transparent hover:border-card-border transition-all group">
                            <div>
                              <h4 className="text-sm font-bold text-foreground italic mb-1">{p.nombre}</h4>
                              <p className="text-[10px] text-foreground/40 font-medium">Estudiante: {p.estudiante?.nombre} · {new Date(p.created_at).toLocaleDateString()}</p>
@@ -660,8 +660,8 @@ export default function AdminDashboard() {
                      </h3>
                      <div className="space-y-4">
                        {usuarios.filter(u => u.rol === 'estudiante').slice(0, 5).map(u => (
-                         <div key={u.id} className="flex items-center gap-4 p-3 hover:bg-cardard rounded-xl transition-colors">
-                           <div className="w-10 h-10 rounded-full bg-backgroundlue-500/10 flex items-center justify-center text-blue-400 font-bold border border-blue-500/10 text-xs italic">
+                         <div key={u.id} className="flex items-center gap-4 p-3 hover:bg-card rounded-xl transition-colors">
+                           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold border border-blue-500/10 text-xs italic">
                              {u.nombre[0]}
                            </div>
                            <div className="flex-1">
@@ -679,14 +679,14 @@ export default function AdminDashboard() {
 
             {activeTab === 'users' && (
               <GlassCard className="p-0 overflow-hidden border-card-border">
-                <div className="p-6 border-b border-card-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-cardard/30">
+                <div className="p-6 border-b border-card-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card/30">
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
                       <input
                         type="text"
                         placeholder="Buscar por nombre o email..."
-                        className="bg-backgroundackground border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 min-w-[320px] shadow-inner transition-all"
+                        className="bg-background border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 min-w-[320px] shadow-inner transition-all"
                       />
                     </div>
                     <Button variant="outline" size="sm" className="gap-2 italic text-xs uppercase tracking-tight">
@@ -701,7 +701,7 @@ export default function AdminDashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="bg-backgroundackground/50 border-b border-card-border">
+                      <tr className="bg-background/50 border-b border-card-border">
                         <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">Usuario</th>
                         <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">Rol</th>
                         <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">Carrera / Línea</th>
@@ -711,10 +711,10 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-card-border">
                       {usuarios.map(u => (
-                        <tr key={u.id} className="hover:bg-backgroundackground/40 transition-colors group">
+                        <tr key={u.id} className="hover:bg-background/40 transition-colors group">
                           <td className="px-6 py-5">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-cardard flex items-center justify-center text-xs font-bold text-emerald-500 border border-card-border italic shadow-sm group-hover:scale-105 transition-transform">
+                              <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center text-xs font-bold text-emerald-500 border border-card-border italic shadow-sm group-hover:scale-105 transition-transform">
                                 {u.nombre[0]}
                               </div>
                               <div>
@@ -738,7 +738,7 @@ export default function AdminDashboard() {
                             <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={() => handleEditClick(u)}
-                                className="p-2 rounded-lg bg-cardard hover:bg-emerald-500/10 text-foreground/40 hover:text-emerald-500 border border-card-border"
+                                className="p-2 rounded-lg bg-card hover:bg-emerald-500/10 text-foreground/40 hover:text-emerald-500 border border-card-border"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -762,7 +762,7 @@ export default function AdminDashboard() {
               <div className="space-y-6">
                 <div className="flex grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <select
-                    className="bg-cardard border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
+                    className="bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
                     onChange={(e) => setFilterLinea(e.target.value)}
                   >
                     <option value="">Línea: Todas</option>
@@ -773,13 +773,13 @@ export default function AdminDashboard() {
                     <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
                   </select>
                    <select
-                    className="bg-cardard border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
+                    className="bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm"
                     onChange={(e) => setFilterFase(e.target.value)}
                   >
                     <option value="">Fase: Todas</option>
-                    <option value="Propuesta">Propuesta</option>
-                    <option value="Desarrollo">Desarrollo</option>
-                    <option value="Aplicación">Aplicación</option>
+                    <option value="propuesta">Propuesta</option>
+                    <option value="desarrollo">Desarrollo</option>
+                    <option value="aplicacion">Aplicación</option>
                   </select>
                 </div>
 
@@ -791,7 +791,7 @@ export default function AdminDashboard() {
 
                     if (filteredProyectos.length === 0) {
                       return (
-                        <div className="col-span-full py-12 text-center text-foreground/40 italic bg-cardard border border-dashed border-card-border rounded-2xl">
+                        <div className="col-span-full py-12 text-center text-foreground/40 italic bg-card border border-dashed border-card-border rounded-2xl">
                           No se encontraron proyectos para los filtros seleccionados.
                         </div>
                       );
@@ -864,7 +864,7 @@ export default function AdminDashboard() {
                      <button
                        key={m.id}
                        onClick={() => handleSelectModuloAula(m)}
-                       className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group ${selectedModuloAula?.id === m.id ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'hover:bg-backgroundackground/80 text-foreground/40 hover:text-emerald-500 border border-transparent'}`}
+                       className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group ${selectedModuloAula?.id === m.id ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'hover:bg-background/80 text-foreground/40 hover:text-emerald-500 border border-transparent'}`}
                      >
                        <span className="text-sm font-bold italic">{m.nombre}</span>
                        <ChevronRight className={`w-4 h-4 transition-transform ${selectedModuloAula?.id === m.id ? 'rotate-90 text-emerald-500' : 'opacity-0 group-hover:opacity-100'}`} />
@@ -875,7 +875,7 @@ export default function AdminDashboard() {
                  <div className="lg:col-span-3 space-y-6">
                    {!selectedModuloAula ? (
                      <GlassCard className="p-20 flex flex-col items-center justify-center text-center space-y-4">
-                       <div className="w-16 h-16 rounded-2xl bg-cardard flex items-center justify-center text-gray-600">
+                       <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center text-gray-600">
                          <BookOpen className="w-8 h-8" />
                        </div>
                        <h3 className="text-xl font-bold text-foreground italic">Gestión de Contenidos Aula Virtual</h3>
@@ -909,7 +909,7 @@ export default function AdminDashboard() {
 
                        {loadingOvas ? (
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {[1, 2].map(i => <div key={i} className="h-64 rounded-3xl bg-cardard animate-pulse" />)}
+                            {[1, 2].map(i => <div key={i} className="h-64 rounded-3xl bg-card animate-pulse" />)}
                          </div>
                        ) : ovas.length > 0 ? (
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -923,13 +923,13 @@ export default function AdminDashboard() {
                                    <button
                                      onClick={() => handleToggleOvaStatus(ova)}
                                      title={ova.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
-                                     className="p-2 rounded-lg bg-cardard hover:bg-white/10 text-foreground/60 hover:text-emerald-400"
+                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-emerald-400"
                                    >
                                      {ova.estado === 'publicado' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                    </button>
                                    <button
                                      onClick={() => handleEditOva(ova)}
-                                     className="p-2 rounded-lg bg-cardard hover:bg-white/10 text-foreground/60 hover:text-foreground"
+                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-foreground"
                                    >
                                      <Edit className="w-4 h-4" />
                                    </button>
@@ -995,7 +995,7 @@ export default function AdminDashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {noticiasAdmin.map(n => (
                           <GlassCard key={n.id} className="p-4 border-card-border group hover:border-emerald-500/30 transition-all">
-                            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-cardard">
+                            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-card">
                               {n.imagen_url ? (
                                 <img 
                                   src={n.imagen_url} 
@@ -1026,7 +1026,7 @@ export default function AdminDashboard() {
                           </GlassCard>
                         ))}
                         {noticiasAdmin.length === 0 && (
-                          <div className="col-span-full py-10 text-center text-foreground/30 italic bg-cardard border border-dashed border-card-border rounded-2xl">
+                          <div className="col-span-full py-10 text-center text-foreground/30 italic bg-card border border-dashed border-card-border rounded-2xl">
                             No hay noticias publicadas.
                           </div>
                         )}
@@ -1043,7 +1043,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="space-y-4">
                         {eventosAdmin.map(e => (
-                          <div key={e.id} className="flex items-center justify-between p-5 bg-cardard rounded-2xl border border-card-border group hover:border-blue-500/30 transition-all">
+                          <div key={e.id} className="flex items-center justify-between p-5 bg-card rounded-2xl border border-card-border group hover:border-blue-500/30 transition-all">
                             <div className="flex items-center gap-6">
                               <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
                                 <span className="text-xs font-black uppercase tracking-tighter italic">{new Date(e.fecha_evento).toLocaleString('es', { month: 'short' })}</span>
@@ -1073,7 +1073,7 @@ export default function AdminDashboard() {
                           </div>
                         ))}
                         {eventosAdmin.length === 0 && (
-                          <p className="text-foreground/40 italic py-10 text-center bg-cardard rounded-2xl border border-dashed border-card-border">
+                          <p className="text-foreground/40 italic py-10 text-center bg-card rounded-2xl border border-dashed border-card-border">
                             No hay eventos programados.
                           </p>
                         )}
@@ -1100,7 +1100,7 @@ export default function AdminDashboard() {
                           </div>
                         ))}
                         {galeriaAdmin.length === 0 && (
-                          <div className="col-span-full py-12 text-center text-foreground/30 italic bg-cardard border border-dashed border-card-border rounded-2xl">
+                          <div className="col-span-full py-12 text-center text-foreground/30 italic bg-card border border-dashed border-card-border rounded-2xl">
                             La galería está vacía.
                           </div>
                         )}
@@ -1249,7 +1249,7 @@ export default function AdminDashboard() {
         }}
         title={isEditMode ? "Editar Usuario SISINFO" : "Creación de Cuenta SISINFO"}
       >
-        <p className="text-amber-400 text-xs italic font-medium p-4 bg-cardmber-500/10 border border-amber-500/20 rounded-xl mb-6">
+        <p className="text-amber-400 text-xs italic font-medium p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-6">
           <AlertCircle className="w-4 h-4 inline mr-2" />
           Las cuentas creadas por el administrador tienen privilegios automáticos según el rol asignado. Se enviará una notificación al usuario.
         </p>
@@ -1364,7 +1364,7 @@ export default function AdminDashboard() {
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-cardard border border-card-border">
+              <div className="p-4 rounded-xl bg-card border border-card-border">
                 <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic mb-1">Fase Actual</p>
                 <div className="flex items-center gap-2">
                    <Badge variant={
@@ -1373,7 +1373,7 @@ export default function AdminDashboard() {
                    }>{selectedProyecto.fase || 'Propuesta'}</Badge>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-cardard border border-card-border">
+              <div className="p-4 rounded-xl bg-card border border-card-border">
                 <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic mb-1">Estado</p>
                 <div className="flex items-center gap-2">
                    <Badge variant={selectedProyecto.terminado ? 'emerald' : 'blue'}>
@@ -1385,7 +1385,7 @@ export default function AdminDashboard() {
 
             <div className="space-y-3">
               <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic">Participantes</p>
-              <div className="p-4 rounded-xl bg-cardard border border-card-border space-y-3">
+              <div className="p-4 rounded-xl bg-card border border-card-border space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground/60">Estudiante:</span>
                   <span className="text-foreground font-bold">{selectedProyecto.estudiante?.nombre || 'Desconocido'} {selectedProyecto.estudiante?.apellido || ''}</span>
@@ -1405,7 +1405,7 @@ export default function AdminDashboard() {
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {selectedProyecto.versiones_proyecto && selectedProyecto.versiones_proyecto.length > 0 ? (
                   selectedProyecto.versiones_proyecto.map((ver, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-cardard border border-card-border hover:border-emerald-500/20 transition-colors">
+                    <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-card border border-card-border hover:border-emerald-500/20 transition-colors">
                       <div className="flex items-center gap-3">
                          <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                            <span className="text-emerald-400 text-xs font-bold">V{idx + 1}</span>
