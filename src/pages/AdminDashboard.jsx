@@ -725,7 +725,7 @@ export default function AdminDashboard() {
                     <select
                       value={filterUserRol}
                       onChange={(e) => setFilterUserRol(e.target.value)}
-                      className="bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 outline-none italic shadow-sm transition-all"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 outline-none italic shadow-sm transition-all"
                     >
                       <option value="">TODOS LOS ROLES</option>
                       <option value="admin">ADMINISTRADORES</option>
@@ -830,7 +830,7 @@ export default function AdminDashboard() {
                       <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Línea</label>
                       <select
                         value={filterLinea}
-                        className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
+                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
                         onChange={(e) => setFilterLinea(e.target.value)}
                       >
                         <option value="">Todas las Líneas</option>
@@ -846,7 +846,7 @@ export default function AdminDashboard() {
                       <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Fase</label>
                       <select
                         value={filterFase}
-                        className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
+                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 italic shadow-sm transition-all"
                         onChange={(e) => setFilterFase(e.target.value)}
                       >
                         <option value="">Todas las Fases</option>
@@ -1221,7 +1221,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <select
-                      className="bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-emerald-500/50 outline-none italic"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-emerald-500/50 outline-none italic shadow-sm transition-all"
                       value={filterOva}
                       onChange={(e) => setFilterOva(e.target.value)}
                     >

@@ -471,7 +471,7 @@ export default function StudentDashboard() {
               <div>
                 <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Estado Inicial</label>
                 <select 
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50"
+                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
                   value={newProject.estado}
                   onChange={e => setNewProject({...newProject, estado: e.target.value})}
                 >
@@ -484,7 +484,7 @@ export default function StudentDashboard() {
                 <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Asesor Asignado</label>
                 <select 
                   required
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50"
+                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
                   value={newProject.docenteId}
                   onChange={e => setNewProject({...newProject, docenteId: e.target.value})}
                 >
@@ -500,7 +500,7 @@ export default function StudentDashboard() {
               <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Línea de Investigación</label>
               <select 
                 required
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50"
+                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
                 value={newProject.linea_investigacion}
                 onChange={e => setNewProject({...newProject, linea_investigacion: e.target.value})}
               >
@@ -716,7 +716,7 @@ export default function StudentDashboard() {
                 required
                 value={editProfileData.linea_investigacion}
                 onChange={e => setEditProfileData({...editProfileData, linea_investigacion: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic"
+                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic shadow-sm"
               >
                 <option value="Ingeniería de Software" className="bg-background">Ingeniería de Software</option>
                 <option value="Robótica" className="bg-background">Robótica</option>
