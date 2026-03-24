@@ -67,11 +67,49 @@ export default function TeacherDashboard() {
   const [editingOva, setEditingOva] = useState(null);
   const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
 
+  // Persistence State
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftData, setDraftData] = useState(null);
+
   useEffect(() => {
     if (user && perfil) {
       loadData();
     }
   }, [user, perfil]);
+
+  // 1. Detección de borradores al abrir el editor
+  useEffect(() => {
+    if (isOvaFormOpen && !editingOva) {
+      const draft = localStorage.getItem('ova_draft_new');
+      if (draft) {
+        setHasDraft(true);
+        setDraftData(JSON.parse(draft));
+      }
+    } else if (isOvaFormOpen && editingOva) {
+      const draft = localStorage.getItem(`ova_draft_${editingOva.id}`);
+      if (draft) {
+        setHasDraft(true);
+        setDraftData(JSON.parse(draft));
+      }
+    } else {
+      setHasDraft(false);
+      setDraftData(null);
+    }
+  }, [isOvaFormOpen, editingOva]);
+
+  // 2. Efecto de Autoguardado (sync con localStorage)
+  useEffect(() => {
+    if (isOvaFormOpen && ovaForm) {
+      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+      const draftContent = {
+        ...ovaForm,
+        lastSaved: new Date().toISOString()
+      };
+      
+      // Solo guardar si hay cambios significativos
+      localStorage.setItem(draftKey, JSON.stringify(draftContent));
+    }
+  }, [ovaForm, isOvaFormOpen, editingOva]);
 
   async function loadData() {
     setLoading(true);
@@ -103,6 +141,20 @@ export default function TeacherDashboard() {
     } finally {
       setLoadingOvas(false);
     }
+  };
+
+  const handleRecoverDraft = () => {
+    if (draftData) {
+      setOvaForm(draftData);
+      setHasDraft(false);
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+    localStorage.removeItem(draftKey);
+    setHasDraft(false);
+    setDraftData(null);
   };
 
   // ─── OVA Handlers ───
@@ -164,6 +216,10 @@ export default function TeacherDashboard() {
         await crearOva(dataToSave);
       }
       setIsOvaFormOpen(false);
+      // Limpiar borrador tras guardado exitoso
+      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
+      localStorage.removeItem(draftKey);
+      
       loadOvas(docenteModulo.id);
     } catch (error) {
       alert('Error al guardar OVA: ' + error.message);
@@ -301,14 +357,15 @@ export default function TeacherDashboard() {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {activeTab === 'revision' ? (
+        {activeTab !== 'aula' && (
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {activeTab === 'revision' ? (
             enRevision.length > 0 ? (
               enRevision.map(p => (
                 <GlassCard key={p.id} className="flex flex-col h-full border-card-border hover:border-blue-500/30 transition-all group">
@@ -412,7 +469,8 @@ export default function TeacherDashboard() {
               </div>
             )
           )}
-        </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* ═══════════════════════════════════════ */}
@@ -438,6 +496,10 @@ export default function TeacherDashboard() {
               onSave={handleSaveOva}
               onCancel={() => setIsOvaFormOpen(false)}
               onFileUpload={handleOvaFileUpload}
+              hasDraft={hasDraft}
+              draftData={draftData}
+              onRecoverDraft={handleRecoverDraft}
+              onDiscardDraft={handleDiscardDraft}
             />
           ) : (
             <div className="space-y-6">
