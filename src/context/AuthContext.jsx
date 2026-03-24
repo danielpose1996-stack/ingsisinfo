@@ -25,14 +25,16 @@ export const AuthProvider = ({ children }) => {
         if (p) setPerfil(p);
     };
 
+    const perfilRef = React.useRef(perfil);
+    useEffect(() => { perfilRef.current = perfil; }, [perfil]);
+
     // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (session) {
                 setUser(session.user);
-                // Solo activamos loading si es la carga inicial y no tenemos perfil
-                // Si ya hay un perfil, no interrumpimos la UI (evita recargas al cambiar de pestaña)
-                if (!perfil) {
+                // Usamos la ref para no depender de perfil en el useEffect
+                if (!perfilRef.current) {
                     setLoading(true);
                 }
             } else {
@@ -45,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => subscription.unsubscribe();
-    }, [perfil]); // Dependemos de perfil para saber si debemos mostrar loading inicial
+    }, []); // Array VACÍO = Estabilidad total
 
     // 2. Efecto separado para cargar el perfil cuando cambia el usuario
     useEffect(() => {

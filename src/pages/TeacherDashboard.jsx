@@ -70,12 +70,13 @@ export default function TeacherDashboard() {
   // Persistence State
   const [hasDraft, setHasDraft] = useState(false);
   const [draftData, setDraftData] = useState(null);
+  const [hasLoadedInitial, setHasLoadedInitial] = useState(false);
 
   useEffect(() => {
-    if (user && perfil) {
+    if (user && perfil && !hasLoadedInitial) {
       loadData();
     }
-  }, [user, perfil]);
+  }, [user, perfil, hasLoadedInitial]);
 
   // 1. Detección de borradores al abrir el editor
   useEffect(() => {
@@ -112,6 +113,8 @@ export default function TeacherDashboard() {
   }, [ovaForm, isOvaFormOpen, editingOva]);
 
   async function loadData() {
+    if (loading && hasLoadedInitial) return; // Evitar doble carga
+    
     setLoading(true);
     try {
       const data = await obtenerProyectosDocente(perfil.id);
@@ -122,8 +125,12 @@ export default function TeacherDashboard() {
       const match = modulos.find(m => m.nombre === perfil.linea_investigacion);
       if (match) {
         setDocenteModulo(match);
-        await loadOvas(match.id);
+        // Solo cargar ovas si no las tenemos o si es cambio de módulo
+        if (ovas.length === 0) {
+          await loadOvas(match.id);
+        }
       }
+      setHasLoadedInitial(true);
     } catch (error) {
       console.error("Error loading teacher data:", error);
     } finally {
@@ -132,6 +139,9 @@ export default function TeacherDashboard() {
   }
 
   const loadOvas = async (moduloId) => {
+    // Si ya estamos cargando, no repetir
+    if (loadingOvas) return;
+
     setLoadingOvas(true);
     try {
       const data = await obtenerOvasModulo(moduloId);
