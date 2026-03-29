@@ -12,9 +12,9 @@ export default function Button({
   ...props 
 }) {
   const variants = {
-    primary: 'bg-emerald-500 hover:bg-emerald-600 text-black',
-    secondary: 'bg-blue-500 hover:bg-blue-600 text-white',
-    emerald: 'bg-emerald-500 hover:bg-emerald-600 text-black shadow-lg shadow-emerald-500/20',
+    primary: 'bg-[#059669] hover:bg-[#047857] text-white',
+    secondary: 'bg-[#1E3A8A] hover:bg-[#1E40AF] text-white',
+    emerald: 'bg-[#059669] hover:bg-[#047857] text-white shadow-lg shadow-[#059669]/20',
     outline: 'border border-card-border hover:bg-card text-foreground',
     ghost: 'hover:bg-card text-foreground',
     danger: 'bg-red-500 hover:bg-red-600 text-white',

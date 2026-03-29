@@ -91,7 +91,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1E3A8A]/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -123,7 +123,7 @@ export default function Login() {
                     className={`w-full bg-card border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none transition-all ${
                       emailError 
                         ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20' 
-                        : 'border-card-border focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20'
+                        : 'border-card-border focus:border-[#059669]/50 focus:ring-1 focus:ring-[#059669]/20'
                     }`}
                     placeholder="tu@unipaz.edu.co"
                     required
@@ -146,7 +146,7 @@ export default function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
+                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 focus:ring-1 focus:ring-[#059669]/20 transition-all"
                     placeholder="••••••••"
                     required
                   />
@@ -164,7 +164,7 @@ export default function Login() {
                   <button 
                     type="button" 
                     onClick={() => window.location.reload()}
-                    className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 hover:text-emerald-400 mt-1 text-left px-6"
+                    className="text-[10px] font-bold uppercase tracking-widest text-[#059669] hover:text-[#047857] mt-1 text-left px-6"
                   >
                     ¿Sigue cargando? Haz clic aquí para reintentar
                   </button>
@@ -175,7 +175,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isSubmitting || !isEmailValid || !email}
-              className="w-full py-4 rounded-xl text-base shadow-xl shadow-emerald-500/10"
+              className="w-full py-4 rounded-xl text-base shadow-xl shadow-[#059669]/10"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -192,7 +192,7 @@ export default function Login() {
               <button 
                 type="button"
                 onClick={() => window.location.reload()}
-                className="text-xs font-bold text-emerald-500 hover:text-emerald-400 bg-emerald-500/5 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
+                className="text-xs font-bold text-[#059669] hover:text-[#047857] bg-[#059669]/5 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
               >
                 ¿Demora mucho? Click para recargar sesión
               </button>

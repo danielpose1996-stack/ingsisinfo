@@ -40,12 +40,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-card-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1E3A8A] backdrop-blur-md border-b border-blue-800 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-white">
               SISINFO
             </span>
           </Link>
@@ -60,8 +60,8 @@ export default function Navbar() {
                   className={cn(
                     "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                     location.pathname === link.path 
-                      ? "text-emerald-500 font-bold" 
-                      : "text-foreground/60 hover:text-foreground hover:bg-card"
+                      ? "text-green-400 font-bold bg-white/10" 
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >
                   {link.name}
@@ -76,7 +76,7 @@ export default function Navbar() {
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-sm transition-all transform hover:scale-105"
+                className="px-4 py-2 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-semibold text-sm transition-all transform hover:scale-105"
               >
                 Inicio de Sesión
               </Link>
@@ -84,12 +84,12 @@ export default function Navbar() {
               <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-card transition-colors"
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold shadow-lg shadow-emerald-500/20">
+                  <div className="w-8 h-8 rounded-full bg-[#059669] flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/20">
                     {getInitial()}
                   </div>
-                  <ChevronDown className={cn("w-4 h-4 text-foreground/40 transition-transform", isDropdownOpen && "rotate-180")} />
+                  <ChevronDown className={cn("w-4 h-4 text-white/60 transition-transform", isDropdownOpen && "rotate-180")} />
                 </button>
 
                 {isDropdownOpen && (
@@ -129,7 +129,7 @@ export default function Navbar() {
             <ThemeToggle className="p-1.5" />
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-foreground/40 hover:text-foreground hover:bg-card focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -139,7 +139,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-background/90 backdrop-blur-xl border-b border-card-border px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-[#1E3A8A]/95 backdrop-blur-xl border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -147,8 +147,8 @@ export default function Navbar() {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                 location.pathname === link.path 
-                  ? "text-emerald-500 bg-emerald-500/5" 
-                  : "text-foreground/60 hover:text-foreground hover:bg-card"
+                  ? "text-green-400 bg-white/10" 
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               )}
               onClick={() => setIsOpen(false)}
             >
@@ -159,7 +159,7 @@ export default function Navbar() {
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="w-full text-center block px-4 py-2 rounded-lg bg-emerald-500 text-black font-bold"
+                className="w-full text-center block px-4 py-2 rounded-lg bg-[#059669] text-white font-bold"
                 onClick={() => setIsOpen(false)}
               >
                 Inicio de Sesión
@@ -168,7 +168,7 @@ export default function Navbar() {
               <>
                 <Link
                   to={getPanelLink()}
-                  className="flex items-center gap-3 px-3 py-2 text-gray-300"
+                  className="flex items-center gap-3 px-3 py-2 text-white/80"
                   onClick={() => setIsOpen(false)}
                 >
                   <LayoutDashboard className="w-5 h-5" />

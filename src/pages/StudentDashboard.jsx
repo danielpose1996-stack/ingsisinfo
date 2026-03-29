@@ -225,7 +225,7 @@ export default function StudentDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Panel de Estudiante</h1>
           <p className="text-foreground/60 font-medium italic">
-            Hola, {perfil?.nombre} — <span className="text-emerald-500">{perfil?.carrera || 'Ingeniería Informática'}</span>
+            Hola, {perfil?.nombre} — <span className="text-[#059669]">{perfil?.carrera || 'Ingeniería Informática'}</span>
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -237,9 +237,9 @@ export default function StudentDashboard() {
               setIsNotificationsModalOpen(true);
               handleMarkNotificationsRead();
             }}
-            className="relative p-3 rounded-xl bg-card hover:bg-emerald-500/10 border border-card-border transition-colors group z-10"
+            className="relative p-3 rounded-xl bg-card hover:bg-[#059669]/10 border border-card-border transition-colors group z-10"
           >
-            <Bell className="w-5 h-5 text-foreground/40 group-hover:text-emerald-500 pointer-events-none" />
+            <Bell className="w-5 h-5 text-foreground/40 group-hover:text-[#059669] pointer-events-none" />
             {notificaciones.filter(n => !n.leida).length > 0 && (
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background pointer-events-none" />
             )}
@@ -254,19 +254,19 @@ export default function StudentDashboard() {
       <div className="flex gap-2 p-1 bg-card border border-card-border rounded-2xl w-fit">
         <button 
           onClick={() => setActiveTab('perfil')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'perfil' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'perfil' ? 'bg-[#059669] text-white shadow-lg shadow-[#059669]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
         >
           <User className="w-4 h-4" /> Mi Perfil
         </button>
         <button 
           onClick={() => setActiveTab('proyectos')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'proyectos' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'proyectos' ? 'bg-[#059669] text-white shadow-lg shadow-[#059669]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
         >
           <Folder className="w-4 h-4" /> En Desarrollo
         </button>
         <button 
           onClick={() => setActiveTab('completados')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'completados' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'completados' ? 'bg-[#059669] text-white shadow-lg shadow-[#059669]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
         >
           <CheckCircle className="w-4 h-4" /> Completados
         </button>
@@ -286,7 +286,7 @@ export default function StudentDashboard() {
               <GlassCard className="lg:col-span-2 p-8">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-xl font-bold flex items-center gap-2 italic">
-                    <User className="w-5 h-5 text-emerald-400" /> Información Personal
+                    <User className="w-5 h-5 text-[#059669]" /> Información Personal
                   </h3>
                   <Button variant="outline" size="sm" onClick={openEditProfile}>
                     Editar Perfil
@@ -317,9 +317,9 @@ export default function StudentDashboard() {
               </GlassCard>
 
               <div className="space-y-6">
-                <GlassCard className="p-6 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
+                <GlassCard className="p-6 bg-gradient-to-br from-[#059669]/10 to-transparent border-[#059669]/20">
                   <h4 className="text-foreground font-bold mb-4 flex items-center gap-2">
-                    <History className="w-4 h-4 text-emerald-500" /> Resumen de Actividad
+                    <History className="w-4 h-4 text-[#059669]" /> Resumen de Actividad
                   </h4>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-sm">
@@ -340,7 +340,7 @@ export default function StudentDashboard() {
                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                      {notificaciones.length > 0 ? (
                        notificaciones.map(n => (
-                         <div key={n.id} className={`p-3 rounded-lg text-xs leading-relaxed ${n.leida ? 'bg-card text-foreground/40 border border-card-border' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10'}`}>
+                         <div key={n.id} className={`p-3 rounded-lg text-xs leading-relaxed ${n.leida ? 'bg-card text-foreground/40 border border-card-border' : 'bg-[#059669]/10 text-[#059669] dark:text-[#059669] border border-[#059669]/10'}`}>
                            {n.mensaje}
                          </div>
                        ))
@@ -374,15 +374,15 @@ export default function StudentDashboard() {
                           <span className="text-[10px] text-foreground/40 font-mono">{new Date(p.created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <h4 className="text-lg font-bold text-foreground mb-3 group-hover:text-emerald-500 transition-colors line-clamp-2 italic uppercase tracking-tight">
+                      <h4 className="text-lg font-bold text-foreground mb-3 group-hover:text-[#059669] transition-colors line-clamp-2 italic uppercase tracking-tight">
                         {p.nombre}
                       </h4>
                       <div className="space-y-2 mb-6">
                         <div className="flex items-center gap-2 text-xs text-foreground/60">
-                          <User className="w-3 h-3 text-emerald-500" /> Asesor: {p.docente?.nombre} {p.docente?.apellido}
+                          <User className="w-3 h-3 text-[#059669]" /> Asesor: {p.docente?.nombre} {p.docente?.apellido}
                         </div>
                         {p.linea_investigacion && (
-                          <div className="flex items-center gap-2 text-xs text-emerald-400/80">
+                          <div className="flex items-center gap-2 text-xs text-[#059669]/80">
                             <BookOpen className="w-3 h-3" /> Línea: {p.linea_investigacion}
                           </div>
                         )}
@@ -393,7 +393,7 @@ export default function StudentDashboard() {
                     </div>
                     <div className="p-4 bg-card border-t border-card-border flex items-center justify-between">
                       <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-tighter italic">Ver detalles del seguimiento</span>
-                      <ChevronRight className="w-4 h-4 text-emerald-500" />
+                      <ChevronRight className="w-4 h-4 text-[#059669]" />
                     </div>
                   </GlassCard>
                 ))
@@ -413,14 +413,14 @@ export default function StudentDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {proyectos.filter(p => p.terminado).length > 0 ? (
                 proyectos.filter(p => p.terminado).map(p => (
-                  <GlassCard key={p.id} className="p-6 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
+                  <GlassCard key={p.id} className="p-6 border-[#059669]/20 bg-[#059669]/5 hover:bg-[#059669]/10 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
-                      <CheckCircle className="w-6 h-6 text-emerald-500" />
+                      <CheckCircle className="w-6 h-6 text-[#059669]" />
                       <h4 className="text-lg font-bold text-foreground italic uppercase tracking-tight">{p.nombre}</h4>
                     </div>
                     <div className="space-y-2 mb-4">
                       {p.linea_investigacion && (
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400/80 font-medium flex items-center gap-1.5 mb-1.5">
+                        <p className="text-xs text-[#059669] dark:text-[#059669]/80 font-medium flex items-center gap-1.5 mb-1.5">
                            <BookOpen className="w-3 h-3" /> Línea: {p.linea_investigacion}
                         </p>
                       )}
@@ -463,7 +463,7 @@ export default function StudentDashboard() {
                 value={newProject.nombre}
                 onChange={e => setNewProject({...newProject, nombre: e.target.value})}
                 placeholder="Ej: Desarrollo de un Sistema de IA..."
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic"
               />
             </div>
             
@@ -471,7 +471,7 @@ export default function StudentDashboard() {
               <div>
                 <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Estado Inicial</label>
                 <select 
-                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
+                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all shadow-sm"
                   value={newProject.estado}
                   onChange={e => setNewProject({...newProject, estado: e.target.value})}
                 >
@@ -484,7 +484,7 @@ export default function StudentDashboard() {
                 <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Asesor Asignado</label>
                 <select 
                   required
-                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
+                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all shadow-sm"
                   value={newProject.docenteId}
                   onChange={e => setNewProject({...newProject, docenteId: e.target.value})}
                 >
@@ -500,7 +500,7 @@ export default function StudentDashboard() {
               <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Línea de Investigación</label>
               <select 
                 required
-                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all shadow-sm"
+                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all shadow-sm"
                 value={newProject.linea_investigacion}
                 onChange={e => setNewProject({...newProject, linea_investigacion: e.target.value})}
               >
@@ -518,7 +518,7 @@ export default function StudentDashboard() {
               {!selectedFile ? (
                 <div 
                   onClick={() => document.getElementById('file-input').click()}
-                  className="mt-1 border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-emerald-500/30 hover:bg-emerald-500/5 cursor-pointer transition-all"
+                  className="mt-1 border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-[#059669]/30 hover:bg-[#059669]/5 cursor-pointer transition-all"
                 >
                   <Upload className="w-8 h-8 text-gray-600 mx-auto mb-3" />
                   <p className="text-sm text-gray-400 italic">Haz clic para subir o arrastra el archivo</p>
@@ -526,9 +526,9 @@ export default function StudentDashboard() {
                   <input id="file-input" type="file" className="hidden" accept=".doc,.docx" onChange={e => setSelectedFile(e.target.files[0])} />
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-[#059669]/10 border border-[#059669]/20 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-emerald-400" />
+                    <FileText className="w-5 h-5 text-[#059669]" />
                     <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{selectedFile.name}</span>
                   </div>
                   <button type="button" onClick={() => setSelectedFile(null)} className="p-1 hover:bg-red-500/20 rounded text-red-400 transition-colors">
@@ -565,7 +565,7 @@ export default function StudentDashboard() {
                 </div>
                 <div>
                   <p className="text-foreground/40 font-bold mb-1 italic">ESTADO</p>
-                  <p className="text-emerald-500 font-bold uppercase">{selectedProyecto.estado.toUpperCase()}</p>
+                  <p className="text-[#059669] font-bold uppercase">{selectedProyecto.estado.toUpperCase()}</p>
                 </div>
               </div>
             </div>
@@ -579,7 +579,7 @@ export default function StudentDashboard() {
                   [...selectedProyecto.versiones_proyecto].reverse().map((v, idx) => (
                     <div key={v.id} className="p-3 bg-card rounded-xl border border-card-border">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest italic">Versión {v.version || (selectedProyecto.versiones_proyecto.length - idx)}</span>
+                        <span className="text-[10px] font-bold text-[#059669] uppercase tracking-widest italic">Versión {v.version || (selectedProyecto.versiones_proyecto.length - idx)}</span>
                         <span className="text-[10px] text-foreground/40 font-medium">{new Date(v.created_at).toLocaleDateString()}</span>
                       </div>
                       <p className="text-xs text-foreground font-medium italic mb-2">{v.nombre_archivo}</p>
@@ -662,7 +662,7 @@ export default function StudentDashboard() {
                 required
                 value={editProfileData.nombre}
                 onChange={e => setEditProfileData({...editProfileData, nombre: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic"
               />
             </div>
             <div>
@@ -672,7 +672,7 @@ export default function StudentDashboard() {
                 required
                 value={editProfileData.apellido}
                 onChange={e => setEditProfileData({...editProfileData, apellido: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic"
               />
             </div>
           </div>
@@ -707,7 +707,7 @@ export default function StudentDashboard() {
                 required
                 value={editProfileData.semestre}
                 onChange={e => setEditProfileData({...editProfileData, semestre: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic"
               />
             </div>
             <div>
@@ -716,7 +716,7 @@ export default function StudentDashboard() {
                 required
                 value={editProfileData.linea_investigacion}
                 onChange={e => setEditProfileData({...editProfileData, linea_investigacion: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic shadow-sm"
+                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic shadow-sm"
               >
                 <option value="Ingeniería de Software" className="bg-background">Ingeniería de Software</option>
                 <option value="Robótica" className="bg-background">Robótica</option>
@@ -756,7 +756,7 @@ export default function StudentDashboard() {
               {!correctionFile ? (
                 <div 
                   onClick={() => document.getElementById('correction-file-input').click()}
-                  className="border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-emerald-500/30 hover:bg-emerald-500/5 cursor-pointer transition-all"
+                  className="border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-[#059669]/30 hover:bg-[#059669]/5 cursor-pointer transition-all"
                 >
                   <Upload className="w-8 h-8 text-foreground/20 mx-auto mb-3" />
                   <p className="text-sm text-foreground/40 italic">Adjuntar documento (.docx)</p>
@@ -769,9 +769,9 @@ export default function StudentDashboard() {
                   />
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-[#059669]/10 border border-[#059669]/20 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <CheckCircle className="w-5 h-5 text-[#059669]" />
                     <span className="text-sm text-foreground font-medium truncate max-w-[250px]">{correctionFile.name}</span>
                   </div>
                   <button type="button" onClick={() => setCorrectionFile(null)} className="text-red-500 hover:text-red-400">
@@ -788,7 +788,7 @@ export default function StudentDashboard() {
                 onChange={e => setCorrectionComment(e.target.value)}
                 rows={4}
                 placeholder="Ej: Ya apliqué los cambios en la sección de arquitectura..."
-                className="w-full bg-card border border-card-border rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition-all font-medium italic resize-none"
+                className="w-full bg-card border border-card-border rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 transition-all font-medium italic resize-none"
               />
             </div>
           </div>

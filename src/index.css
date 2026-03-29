@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #10b981;
-  --color-emerald-500: #10b981;
-  --color-blue-500: #3b82f6;
+  --color-primary: #059669;
+  --color-primary-dark: #047857;
+  --color-institutional: #1E3A8A;
+  --color-institutional-light: #1E40AF;
+  --color-emerald-500: #059669;
+  --color-blue-500: #1E3A8A;
   --color-amber-500: #f59e0b;
   
   /* Semantic variables for themes */
@@ -14,26 +17,26 @@
 }
 
 :root {
-  --background: hsl(210, 40%, 98%);      /* #f8fafc */
-  --text: hsl(222.2, 47.4%, 11.2%);      /* #0f172a */
-  --card-bg: hsla(222.2, 47.4%, 11.2%, 0.05);
-  --card-border: hsla(222.2, 47.4%, 11.2%, 0.15);
-  --scrollbar-track: hsl(210, 40%, 98%);
-  --scrollbar-thumb: hsl(214.7, 31.8%, 91.4%);
-  --selection-bg: hsla(160, 84%, 39%, 0.2);
-  --selection-text: hsl(161, 94%, 30%);
+  --background: #F9FAFB;
+  --text: #111827;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(209, 213, 219, 0.6);
+  --scrollbar-track: #F9FAFB;
+  --scrollbar-thumb: #d1d5db;
+  --selection-bg: rgba(5, 150, 105, 0.2);
+  --selection-text: #047857;
 }
 
 .dark {
   color-scheme: dark;
-  --background: hsl(220, 10%, 5%);       /* #0a0b0d */
-  --text: hsl(0, 0%, 100%);              /* #ffffff */
-  --card-bg: hsla(0, 0%, 100%, 0.03);
-  --card-border: hsla(0, 0%, 100%, 0.08);
-  --scrollbar-track: hsl(220, 10%, 5%);
-  --scrollbar-thumb: hsl(222.2, 13.3%, 11.8%);
-  --selection-bg: hsla(160, 84%, 39%, 0.3);
-  --selection-text: hsl(160, 84%, 39%);
+  --background: #0F172A;
+  --text: #E5E7EB;
+  --card-bg: rgba(30, 41, 59, 0.8);
+  --card-border: rgba(51, 65, 85, 0.6);
+  --scrollbar-track: #0F172A;
+  --scrollbar-thumb: #334155;
+  --selection-bg: rgba(5, 150, 105, 0.3);
+  --selection-text: #059669;
 }
 
 @layer base {
@@ -94,7 +97,7 @@
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(16, 185, 129, 0.2);
+    background: rgba(5, 150, 105, 0.2);
   }
 
   .glass-effect {
@@ -166,7 +169,7 @@
 }
 
 .tiptap blockquote {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid #059669;
   padding-left: 1rem;
   margin: 1rem 0;
   color: color-mix(in srgb, var(--text), transparent 40%);
@@ -190,7 +193,7 @@
   font-size: 0.85rem;
   overflow-x: auto;
   margin: 1rem 0;
-  color: #10b981;
+  color: #059669;
 }
 
 .tiptap pre code {
@@ -202,13 +205,13 @@
 }
 
 .tiptap a {
-  color: #10b981;
+  color: #059669;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .tiptap a:hover {
-  color: #34d399;
+  color: #047857;
 }
 
 .tiptap p {
@@ -221,7 +224,7 @@
 }
 
 .tiptap u {
-  text-decoration-color: #10b981;
+  text-decoration-color: #059669;
   text-underline-offset: 3px;
 }
 

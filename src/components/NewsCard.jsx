@@ -25,13 +25,13 @@ export default function NewsCard({ noticia }) {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent dark:from-black/80" />
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-emerald-400 font-medium">
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-[#059669] font-medium">
           <Calendar className="w-3 h-3" />
           {new Date(fecha).toLocaleDateString()}
         </div>
       </div>
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-emerald-400 transition-colors">
+        <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-[#059669] transition-colors">
           {titulo}
         </h3>
         <p className="text-foreground/60 text-sm line-clamp-3 leading-relaxed">

@@ -29,7 +29,7 @@ const ToolbarButton = ({ onClick, active, children, title }) => (
     title={title}
     className={`p-1.5 rounded-lg transition-all duration-200 ${
       active
-        ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.15)]'
+        ? 'bg-[#059669]/20 text-[#059669] shadow-[0_0_8px_rgba(5,150,105,0.15)]'
         : 'text-foreground/40 hover:text-foreground/70 hover:bg-white/5'
     }`}
   >
@@ -58,14 +58,14 @@ export default function RichTextEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-emerald-400 underline hover:text-emerald-300 transition-colors',
+          class: 'text-[#059669] underline hover:text-[#047857] transition-colors',
           target: '_blank',
           rel: 'noopener noreferrer',
         },
       }),
       CodeBlock.configure({
         HTMLAttributes: {
-          class: 'bg-black/40 border border-card-border rounded-xl p-4 font-mono text-sm text-emerald-300 my-4 overflow-x-auto',
+          class: 'bg-black/40 border border-card-border rounded-xl p-4 font-mono text-sm text-[#059669] my-4 overflow-x-auto',
         },
       }),
       Placeholder.configure({
@@ -98,7 +98,7 @@ export default function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className={`rounded-2xl border border-card-border bg-card/30 overflow-hidden transition-all focus-within:border-emerald-500/40 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.05)] ${className}`}>
+    <div className={`rounded-2xl border border-card-border bg-card/30 overflow-hidden transition-all focus-within:border-[#059669]/40 focus-within:shadow-[0_0_20px_rgba(5,150,105,0.05)] ${className}`}>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-card-border bg-card/50">
         <ToolbarButton

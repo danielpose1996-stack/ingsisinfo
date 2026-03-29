@@ -81,16 +81,16 @@ export default function Repositorio() {
           className="w-full max-w-2xl"
         >
           <GlassCard className="p-12 text-center relative overflow-hidden text-balance">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] -z-10" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#059669]/10 blur-[80px] -z-10" />
             
             <div className="mb-8 flex justify-center">
-              <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
-                <Lock className="w-12 h-12 text-emerald-400" />
+              <div className="p-6 bg-[#059669]/10 rounded-3xl border border-[#059669]/20">
+                <Lock className="w-12 h-12 text-[#059669]" />
               </div>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6 italic tracking-tight">
-              ACCESO <span className="text-emerald-400">RESTRINGIDO</span>
+              ACCESO <span className="text-[#059669]">RESTRINGIDO</span>
             </h2>
             
             <p className="text-foreground/60 text-lg mb-10 italic max-w-md mx-auto leading-relaxed">
@@ -99,7 +99,7 @@ export default function Repositorio() {
             </p>
 
             <Link to="/login">
-              <Button size="lg" className="gap-3 px-10 py-6 rounded-2xl shadow-2xl shadow-emerald-500/20">
+              <Button size="lg" className="gap-3 px-10 py-6 rounded-2xl shadow-2xl shadow-[#059669]/20">
                 <LogIn className="w-5 h-5" />
                 INICIAR SESIÓN AHORA
               </Button>
@@ -108,7 +108,7 @@ export default function Repositorio() {
             <div className="mt-12 grid grid-cols-3 gap-4 border-t border-white/5 pt-8">
               {['Estudiantes', 'Docentes', 'Admin'].map((role) => (
                 <div key={role} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                  <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">{role}</p>
+                  <p className="text-[10px] text-[#059669] font-bold uppercase tracking-widest">{role}</p>
                 </div>
               ))}
             </div>
@@ -125,11 +125,11 @@ export default function Repositorio() {
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="h-px w-8 bg-emerald-500" />
-              <span className="text-emerald-400 text-xs font-bold uppercase tracking-widest italic font-mono">Archivo Histórico</span>
+              <div className="h-px w-8 bg-[#059669]" />
+              <span className="text-[#059669] text-xs font-bold uppercase tracking-widest italic font-mono">Archivo Histórico</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-black text-foreground italic tracking-tighter">
-              REPOSITORIO DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">PROYECTOS</span>
+              REPOSITORIO DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E3A8A] to-[#059669]">PROYECTOS</span>
             </h1>
           </div>
         </div>
@@ -144,14 +144,14 @@ export default function Repositorio() {
                 placeholder="Buscar por estudiante o título..."
                 value={searchNombre}
                 onChange={(e) => setSearchNombre(e.target.value)}
-                className="w-full bg-black/20 border border-card-border rounded-xl py-3 pl-12 pr-4 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic"
+                className="w-full bg-black/20 border border-card-border rounded-xl py-3 pl-12 pr-4 text-sm text-foreground focus:border-[#059669] outline-none transition-all italic"
               />
             </div>
 
             <div className="relative">
               <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <select 
-                className="w-full bg-black/20 border border-card-border rounded-xl py-3 pl-12 pr-4 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic appearance-none"
+                className="w-full bg-black/20 border border-card-border rounded-xl py-3 pl-12 pr-4 text-sm text-foreground focus:border-[#059669] outline-none transition-all italic appearance-none"
                 value={filterLinea}
                 onChange={(e) => setFilterLinea(e.target.value)}
               >
@@ -184,7 +184,7 @@ export default function Repositorio() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2, delay: idx * 0.05 }}
               >
-                <GlassCard className="group h-full flex flex-col border-emerald-500/5 hover:border-emerald-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/5">
+                <GlassCard className="group h-full flex flex-col border-[#059669]/5 hover:border-[#059669]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#059669]/5">
                   <div className="p-8 flex-grow">
                     <div className="flex justify-between items-start mb-6">
                       <Badge variant="emerald" className="px-3 py-1 text-[10px] tracking-widest">PRODUCTO FINAL</Badge>
@@ -198,13 +198,13 @@ export default function Repositorio() {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                          <FileText className="w-5 h-5 text-emerald-400" />
+                        <div className="p-2 bg-[#059669]/10 rounded-lg">
+                          <FileText className="w-5 h-5 text-[#059669]" />
                         </div>
                       </div>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-foreground mb-6 italic group-hover:text-emerald-400 transition-colors leading-tight">
+                    <h3 className="text-xl font-bold text-foreground mb-6 italic group-hover:text-[#059669] transition-colors leading-tight">
                       {p.nombre}
                     </h3>
 
@@ -215,7 +215,7 @@ export default function Repositorio() {
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">Autor</p>
-                          <p className="text-sm text-gray-200 font-medium">{p.estudiante?.nombre} {p.estudiante?.apellido}</p>
+                          <p className="text-sm text-foreground/80 font-medium">{p.estudiante?.nombre} {p.estudiante?.apellido}</p>
                         </div>
                       </div>
 
@@ -225,7 +225,7 @@ export default function Repositorio() {
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">Línea</p>
-                          <p className="text-sm text-gray-200 font-medium italic">{p.linea_investigacion}</p>
+                          <p className="text-sm text-foreground/80 font-medium italic">{p.linea_investigacion}</p>
                         </div>
                       </div>
 
@@ -235,7 +235,7 @@ export default function Repositorio() {
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">Fecha de Publicación</p>
-                          <p className="text-sm text-gray-200 font-medium">{new Date(p.created_at).toLocaleDateString()}</p>
+                          <p className="text-sm text-foreground/80 font-medium">{new Date(p.created_at).toLocaleDateString()}</p>
                         </div>
                       </div>
                     </div>
@@ -244,7 +244,7 @@ export default function Repositorio() {
                   <div className="p-4 bg-card border-t border-card-border">
                     <Button 
                       variant="outline" 
-                      className="w-full gap-2 italic text-xs py-4 group-hover:bg-emerald-500 group-hover:text-black transition-all"
+                      className="w-full gap-2 italic text-xs py-4 group-hover:bg-[#059669] group-hover:text-white transition-all"
                       onClick={() => {
                         const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
                         if (lastVersion?.documento_url) {

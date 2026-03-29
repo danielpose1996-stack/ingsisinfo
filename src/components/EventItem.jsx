@@ -9,7 +9,7 @@ export default function EventItem({ evento }) {
 
   return (
     <div className="flex gap-4 p-4 rounded-xl hover:bg-card transition-colors border border-transparent hover:border-card-border group">
-      <div className="flex flex-col items-center justify-center min-w-[60px] h-[60px] rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+      <div className="flex flex-col items-center justify-center min-w-[60px] h-[60px] rounded-lg bg-[#059669]/10 text-[#059669] border border-[#059669]/20">
         <span className="text-xl font-bold leading-none">{day}</span>
         <span className="text-[10px] font-bold tracking-wider">{month}</span>
       </div>
@@ -21,7 +21,7 @@ export default function EventItem({ evento }) {
       )}
 
       <div className="flex flex-col justify-center">
-        <h4 className="text-foreground font-semibold group-hover:text-emerald-400 transition-colors">
+        <h4 className="text-foreground font-semibold group-hover:text-[#059669] transition-colors">
           {titulo}
         </h4>
         {descripcion && (

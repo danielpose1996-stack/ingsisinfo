@@ -40,8 +40,8 @@ export default function AdminLogin() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <GlassCard className="max-w-md w-full p-12 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/20 mb-6 border border-emerald-500/30">
-            <Lock className="w-10 h-10 text-emerald-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#059669]/20 mb-6 border border-[#059669]/30">
+            <Lock className="w-10 h-10 text-[#059669]" />
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4 italic">Acceso Concedido</h2>
           <p className="text-foreground/60">Cargando panel de gestión global...</p>
@@ -53,14 +53,14 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1E3A8A]/5 rounded-full blur-[150px]" />
       </div>
 
       <div className="w-full max-w-md">
-        <GlassCard className="p-10 border-blue-500/20">
+        <GlassCard className="p-10 border-[#1E3A8A]/20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-card mb-6 border border-card-border shadow-inner">
-              <ShieldAlert className="w-8 h-8 text-blue-400" />
+              <ShieldAlert className="w-8 h-8 text-blue-300" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2 italic tracking-tight">Acceso Administrativo</h2>
             <p className="text-foreground/40 text-sm italic">Área restringida para gestión del sistema</p>
@@ -78,7 +78,7 @@ export default function AdminLogin() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all font-mono"
+                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 focus:ring-1 focus:ring-[#1E3A8A]/20 transition-all font-mono"
                     placeholder="admin@unipaz.edu.co"
                     required
                   />
@@ -95,7 +95,7 @@ export default function AdminLogin() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 focus:ring-1 focus:ring-[#1E3A8A]/20 transition-all"
                     placeholder="••••••••"
                     required
                   />
@@ -114,7 +114,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={isSubmitting}
               variant="secondary"
-              className="w-full py-4 rounded-xl text-base shadow-xl shadow-blue-500/10 italic font-bold tracking-widest"
+              className="w-full py-4 rounded-xl text-base shadow-xl shadow-[#1E3A8A]/10 italic font-bold tracking-widest"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -129,7 +129,7 @@ export default function AdminLogin() {
           <div className="mt-10 pt-8 border-t border-card-border text-center">
              <button 
               onClick={() => navigate('/login')}
-              className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors uppercase tracking-widest font-bold italic"
+              className="text-xs text-[#1E3A8A]/60 hover:text-[#1E3A8A] dark:text-blue-400/60 dark:hover:text-blue-400 transition-colors uppercase tracking-widest font-bold italic"
              >
                Regresar al acceso público
              </button>

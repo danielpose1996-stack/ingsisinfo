@@ -190,7 +190,7 @@ export default function OvaEditor({
               onClick={() => setOvaForm({ ...ovaForm, estado: 'publicado' })}
               className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest italic border transition-all ${
                 ovaForm.estado === 'publicado'
-                  ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5'
+                  ? 'border-[#059669]/30 text-[#059669] bg-[#059669]/5'
                   : 'border-card-border text-foreground/30 hover:text-foreground/50'
               }`}
             >
@@ -211,7 +211,7 @@ export default function OvaEditor({
                   onClick={() => scrollToSection(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all group ${
                     activeSection === item.id
-                      ? 'bg-emerald-500/10 text-emerald-400'
+                      ? 'bg-[#059669]/10 text-[#059669]'
                       : 'text-foreground/40 hover:text-foreground/70 hover:bg-white/3'
                   }`}
                 >
@@ -226,7 +226,7 @@ export default function OvaEditor({
             <button
               type="button"
               onClick={handleAddSection}
-              className="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/5 transition-all text-[10px] font-bold uppercase tracking-widest italic"
+              className="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#059669]/20 text-[#059669] hover:bg-[#059669]/5 transition-all text-[10px] font-bold uppercase tracking-widest italic"
             >
               <PlusCircle className="w-3.5 h-3.5" /> Añadir Sección
             </button>
@@ -256,9 +256,9 @@ export default function OvaEditor({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mb-6"
             >
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-emerald-500/5">
+              <div className="bg-[#059669]/10 border border-[#059669]/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-[#059669]/5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <div className="w-12 h-12 rounded-xl bg-[#059669]/20 flex items-center justify-center text-[#059669]">
                     <AlertCircle className="w-6 h-6 animate-pulse" />
                   </div>
                   <div>
@@ -311,7 +311,7 @@ export default function OvaEditor({
               onClick={() => setOvaForm({ ...ovaForm, estado: ovaForm.estado === 'publicado' ? 'borrador' : 'publicado' })}
               className={`p-2 rounded-xl transition-all ${
                 ovaForm.estado === 'publicado'
-                  ? 'bg-emerald-500/10 text-emerald-400'
+                  ? 'bg-[#059669]/10 text-[#059669]'
                   : 'bg-amber-500/10 text-amber-400'
               }`}
             >
@@ -327,8 +327,8 @@ export default function OvaEditor({
         {/* ─── DATOS GENERALES ─── */}
         <section id="datos-generales" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-6">
-            <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Datos Generales
+            <h4 className="flex items-center gap-2 text-[#059669] text-xs font-black uppercase tracking-[0.2em] italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Datos Generales
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Title */}
@@ -339,7 +339,7 @@ export default function OvaEditor({
                   placeholder="Ingrese un título impactante..."
                   value={ovaForm.titulo}
                   onChange={(e) => setOvaForm({ ...ovaForm, titulo: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-xl text-foreground focus:border-emerald-500 outline-none transition-all italic font-bold tracking-tight"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-xl text-foreground focus:border-[#059669] outline-none transition-all italic font-bold tracking-tight"
                 />
               </div>
 
@@ -350,7 +350,7 @@ export default function OvaEditor({
                   placeholder="¿Qué aprenderá el estudiante?"
                   value={ovaForm.objetivo}
                   onChange={(e) => setOvaForm({ ...ovaForm, objetivo: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic h-32 resize-none"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#059669] outline-none transition-all italic h-32 resize-none"
                 />
               </div>
 
@@ -371,8 +371,8 @@ export default function OvaEditor({
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-2xl border-2 border-dashed border-card-border hover:border-emerald-500/30 bg-card/20 cursor-pointer transition-all group">
-                    <ImageIcon className="w-6 h-6 text-foreground/30 group-hover:text-emerald-400 transition-colors" />
+                  <label className="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-2xl border-2 border-dashed border-card-border hover:border-[#059669]/30 bg-card/20 cursor-pointer transition-all group">
+                    <ImageIcon className="w-6 h-6 text-foreground/30 group-hover:text-[#059669] transition-colors" />
                     <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">
                       Subir Imagen .JPG / .PNG
                     </span>
@@ -389,7 +389,7 @@ export default function OvaEditor({
                   placeholder="Resumen del contenido del OVA..."
                   value={ovaForm.descripcion}
                   onChange={(e) => setOvaForm({ ...ovaForm, descripcion: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-emerald-500 outline-none transition-all italic"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#059669] outline-none transition-all italic"
                 />
               </div>
             </div>
@@ -399,8 +399,8 @@ export default function OvaEditor({
         {/* ─── INTRODUCCIÓN ─── */}
         <section id="introduccion" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-4">
-            <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Introducción
+            <h4 className="flex items-center gap-2 text-[#059669] text-xs font-black uppercase tracking-[0.2em] italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Introducción
             </h4>
             <RichTextEditor
               content={ovaForm.introduccion || ''}
@@ -414,13 +414,13 @@ export default function OvaEditor({
         {/* ─── CONTENIDO DINÁMICO ─── */}
         <section className="space-y-4">
           <div className="flex justify-between items-center px-1">
-            <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Estructura de Contenido
+            <h4 className="flex items-center gap-2 text-[#059669] text-xs font-black uppercase tracking-[0.2em] italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Estructura de Contenido
             </h4>
             <button
               type="button"
               onClick={handleAddSection}
-              className="flex items-center gap-2 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-widest italic"
+              className="flex items-center gap-2 text-[10px] font-bold text-[#059669] hover:text-[#047857] transition-colors uppercase tracking-widest italic"
             >
               <PlusCircle className="w-4 h-4" /> Añadir Sección
             </button>
@@ -466,7 +466,7 @@ export default function OvaEditor({
           <button
             type="button"
             onClick={handleAddSection}
-            className="w-full py-6 rounded-3xl border-2 border-dashed border-card-border hover:border-emerald-500/30 text-foreground/20 hover:text-emerald-400 transition-all flex items-center justify-center gap-3 group"
+            className="w-full py-6 rounded-3xl border-2 border-dashed border-card-border hover:border-[#059669]/30 text-foreground/20 hover:text-[#059669] transition-all flex items-center justify-center gap-3 group"
           >
             <PlusCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
             <span className="text-xs font-bold uppercase tracking-widest italic">Añadir nueva sección</span>
@@ -477,8 +477,8 @@ export default function OvaEditor({
         <div id="recursos" className="scroll-mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Material Complementario */}
           <GlassCard className="p-8 border-card-border space-y-6">
-            <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Material Complementario
+            <h4 className="flex items-center gap-2 text-[#059669] text-xs font-black uppercase tracking-[0.2em] italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Material Complementario
             </h4>
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-3">
@@ -486,14 +486,14 @@ export default function OvaEditor({
                   <FileDown className="w-3 h-3" /> Guía PDF
                 </label>
                 {ovaForm.recursos.pdf_url ? (
-                  <div className="flex items-center justify-between text-xs text-foreground bg-emerald-500/10 p-3 rounded-xl italic">
-                    <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-emerald-400" /> Archivo cargado</span>
+                  <div className="flex items-center justify-between text-xs text-foreground bg-[#059669]/10 p-3 rounded-xl italic">
+                    <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-[#059669]" /> Archivo cargado</span>
                     <button type="button" onClick={() => setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: '' } })} className="text-red-400 hover:text-red-300 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-card-border text-foreground/40 hover:text-foreground/60 hover:border-emerald-500/20 cursor-pointer transition-all text-[10px] font-bold uppercase tracking-widest italic">
+                  <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-card-border text-foreground/40 hover:text-foreground/60 hover:border-[#059669]/20 cursor-pointer transition-all text-[10px] font-bold uppercase tracking-widest italic">
                     <PlusCircle className="w-3.5 h-3.5" /> Subir documento PDF
                     <input type="file" accept=".pdf" onChange={(e) => onFileUpload(e, 'pdf')} className="hidden" />
                   </label>
@@ -534,8 +534,8 @@ export default function OvaEditor({
         <section id="evaluacion" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-6">
             <div className="flex items-center justify-between">
-              <h4 className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-[0.2em] italic">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Evaluación Final — Quiz Interactivo
+              <h4 className="flex items-center gap-2 text-[#059669] text-xs font-black uppercase tracking-[0.2em] italic">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" /> Evaluación Final — Quiz Interactivo
               </h4>
               <div className="flex items-center gap-2 text-[9px] text-foreground/20 italic">
                 <Award className="w-3 h-3" /> Sistema de evaluación tipo quiz

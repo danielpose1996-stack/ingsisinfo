@@ -91,7 +91,7 @@ export default function Home() {
     <div className="space-y-24 pb-24">
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-radial-gradient from-emerald-500/10 via-transparent to-transparent opacity-50" />
+        <div className="absolute inset-0 bg-radial-gradient from-[#059669]/10 via-transparent to-transparent opacity-50" />
         
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -100,13 +100,13 @@ export default function Home() {
           className="relative z-10 text-center px-4 max-w-4xl"
         >
           <div className="flex justify-center mb-6">
-            <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+            <span className="px-4 py-1.5 rounded-full bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 text-[#1E3A8A] dark:text-blue-300 text-xs font-bold tracking-widest uppercase flex items-center gap-2">
               <Sparkles className="w-3 h-3" /> Programa de Ingeniería Informática
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-foreground">
             Semillero de Investigación <br />
-            <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#1E3A8A] via-[#059669] to-[#047857] bg-clip-text text-transparent">
               SISINFO
             </span>
           </h1>
@@ -114,7 +114,7 @@ export default function Home() {
             Impulsando la innovación tecnológica y el desarrollo de soluciones informáticas en el Instituto Universitario de la Paz - UNIPAZ.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold transition-all transform hover:scale-105 shadow-lg shadow-emerald-500/20">
+            <button className="px-8 py-4 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold transition-all transform hover:scale-105 shadow-lg shadow-[#059669]/20">
               Explorar Módulos
             </button>
             <button 
@@ -127,8 +127,8 @@ export default function Home() {
         </motion.div>
 
         {/* Decorative elements */}
-        <div className="absolute top-1/4 -left-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 -left-20 w-64 h-64 bg-[#1E3A8A]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-[#059669]/10 rounded-full blur-3xl" />
       </section>
 
       {/* Main Content Grid */}
@@ -143,10 +143,10 @@ export default function Home() {
         >
           <div className="flex items-center justify-between border-b border-card-border pb-4">
             <h2 className="text-2xl font-bold flex items-center gap-3 text-foreground">
-              <span className="w-2 h-8 bg-emerald-500 rounded-full" />
+              <span className="w-2 h-8 bg-[#059669] rounded-full" />
               📢 Noticias Recientes
             </h2>
-            <button className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+            <button className="text-[#059669] dark:text-green-400 text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
               Ver todas <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -176,7 +176,7 @@ export default function Home() {
         >
           <div className="flex items-center border-b border-card-border pb-4">
             <h2 className="text-2xl font-bold flex items-center gap-3 text-foreground">
-              <span className="w-2 h-8 bg-blue-500 rounded-full" />
+              <span className="w-2 h-8 bg-[#1E3A8A] rounded-full" />
               📅 Eventos
             </h2>
           </div>

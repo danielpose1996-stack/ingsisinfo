@@ -35,7 +35,7 @@ function App() {
     <MainLayout>
       <Suspense fallback={
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-[#059669]/20 border-t-[#059669] rounded-full animate-spin"></div>
           <p className="text-foreground/40 text-sm font-medium animate-pulse">Cargando...</p>
         </div>
       }>

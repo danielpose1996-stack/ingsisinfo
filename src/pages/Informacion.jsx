@@ -36,9 +36,9 @@ export default function Informacion() {
         >
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground uppercase italic leading-tight">
             Semillero de Investigación <br /> 
-            <span className="text-emerald-500">y Soluciones Informáticas</span>
+            <span className="text-[#059669]">y Soluciones Informáticas</span>
           </h1>
-          <div className="w-24 h-1.5 bg-emerald-500 mx-auto rounded-full" />
+          <div className="w-24 h-1.5 bg-[#059669] mx-auto rounded-full" />
         </motion.div>
 
         <motion.div 
@@ -48,11 +48,11 @@ export default function Informacion() {
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           <motion.div variants={itemVariants}>
-            <GlassCard className="p-8 h-full border-t-4 border-t-emerald-500 relative overflow-hidden group">
+            <GlassCard className="p-8 h-full border-t-4 border-t-[#059669] relative overflow-hidden group">
               <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                 <Info className="w-32 h-32" />
               </div>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-emerald-500 italic">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-[#059669] italic">
                 <Info className="w-5 h-5 font-bold" /> ¿QUÉ ES?
               </h3>
               <p className="text-foreground/70 leading-relaxed text-sm">
@@ -62,11 +62,11 @@ export default function Informacion() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <GlassCard className="p-8 h-full border-t-4 border-t-blue-500 relative overflow-hidden group">
+            <GlassCard className="p-8 h-full border-t-4 border-t-[#1E3A8A] relative overflow-hidden group">
               <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                 <Target className="w-32 h-32" />
               </div>
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-500 italic">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-[#1E3A8A] dark:text-blue-300 italic">
                 <Target className="w-5 h-5 font-bold" /> MISIÓN
               </h3>
               <p className="text-foreground/70 leading-relaxed text-sm">
@@ -98,7 +98,7 @@ export default function Informacion() {
             className="flex items-center gap-4"
           >
             <h2 className="text-2xl font-bold uppercase tracking-widest italic flex items-center gap-3">
-              <span className="w-2 h-8 bg-gradient-to-b from-emerald-400 to-blue-500 rounded-full" />
+              <span className="w-2 h-8 bg-gradient-to-b from-[#059669] to-[#1E3A8A] rounded-full" />
               Líneas de Investigación
             </h2>
           </motion.div>
@@ -109,8 +109,8 @@ export default function Informacion() {
                 title: 'INGENIERÍA DE SOFTWARE',
                 desc: 'Se enfoca en el desarrollo de aplicaciones y sistemas informáticos mediante el uso de lenguajes de programación, frameworks y metodologías de desarrollo. En Ingeniería Informática, esta línea permite diseñar soluciones web, móviles y de escritorio, aplicando buenas prácticas como control de versiones, pruebas de software y arquitectura de sistemas.',
                 icon: Code,
-                color: 'text-emerald-500',
-                bg: 'bg-emerald-500/5'
+                color: 'text-[#059669]',
+                bg: 'bg-[#059669]/5'
               },
               {
                 title: 'GESTIÓN DE LA SEGURIDAD INFORMÁTICA',
@@ -123,8 +123,8 @@ export default function Informacion() {
                 title: 'REDES Y TELEMÁTICA',
                 desc: 'Se centra en la comunicación entre sistemas informáticos a través de redes. En este campo, el ingeniero informático diseña e implementa soluciones que permiten la conectividad entre aplicaciones, servidores y dispositivos, incluyendo el uso de APIs, servicios web, arquitecturas cliente-servidor y despliegue en la nube.',
                 icon: Network,
-                color: 'text-blue-500',
-                bg: 'bg-blue-500/5'
+                color: 'text-[#1E3A8A] dark:text-blue-300',
+                bg: 'bg-[#1E3A8A]/5'
               },
               {
                 title: 'INGENIERÍA DEL CONOCIMIENTO',
@@ -148,7 +148,7 @@ export default function Informacion() {
                 transition={{ delay: idx * 0.1 }}
                 viewport={{ once: true }}
               >
-                <GlassCard className="p-6 h-full hover:border-emerald-500/30 transition-all group">
+                <GlassCard className="p-6 h-full hover:border-[#059669]/30 transition-all group">
                   <div className={`w-12 h-12 rounded-xl ${line.bg} ${line.color} flex items-center justify-center mb-6 border border-current/10 group-hover:scale-110 transition-transform`}>
                     <line.icon className="w-6 h-6" />
                   </div>
