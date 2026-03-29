@@ -76,7 +76,7 @@ export default function Navbar() {
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="px-4 py-2 rounded-full border border-[#22d3ee] hover:bg-[#22d3ee]/10 text-[#22d3ee] font-semibold text-sm transition-all transform hover:scale-105"
+                className="px-4 py-2 rounded-full bg-[#22d3ee] hover:bg-[#06b6d4] text-white font-semibold text-sm transition-all transform hover:scale-105"
               >
                 Inicio de Sesión
               </Link>
