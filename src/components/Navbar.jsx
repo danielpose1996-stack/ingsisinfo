@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { LogOut, LayoutDashboard, User, Menu, X, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import ThemeToggle from './ThemeToggle';
+
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
           {/* Auth Button / Avatar */}
           <div className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
+
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
@@ -126,7 +126,7 @@ export default function Navbar() {
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle className="p-1.5" />
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"

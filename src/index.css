@@ -17,17 +17,6 @@
 }
 
 :root {
-  --background: #F9FAFB;
-  --text: #111827;
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --card-border: rgba(209, 213, 219, 0.6);
-  --scrollbar-track: #F9FAFB;
-  --scrollbar-thumb: #d1d5db;
-  --selection-bg: rgba(5, 150, 105, 0.2);
-  --selection-text: #047857;
-}
-
-.dark {
   color-scheme: dark;
   --background: #0F172A;
   --text: #E5E7EB;
