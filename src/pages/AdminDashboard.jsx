@@ -522,7 +522,7 @@ export default function AdminDashboard() {
       setPublicForm(item);
     } else {
       setPublicForm(
-        type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', fecha: new Date().toISOString().split('T')[0] } :
+        type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', enlace_url: '', fecha: new Date().toISOString().split('T')[0] } :
         type === 'evento' ? { titulo: '', descripcion: '', fecha_evento: new Date().toISOString().split('T')[0], tipo: 'proximo', imagen_url: '' } :
         { titulo: '', imagen_url: '', evento_id: null }
       );
@@ -1677,6 +1677,16 @@ export default function AdminDashboard() {
                 className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none min-h-[150px]"
                 required
               />
+              <div className="relative">
+                <ExternalLink className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+                <input
+                  type="url"
+                  placeholder="Enlace al artículo (opcional)"
+                  value={publicForm.enlace_url || ''}
+                  onChange={(e) => setPublicForm({...publicForm, enlace_url: e.target.value})}
+                  className="w-full bg-card border border-card-border rounded-xl py-3 pl-11 pr-4 text-sm text-foreground focus:border-[#059669] outline-none placeholder:text-foreground/30"
+                />
+              </div>
             </>
           )}
 
