@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados } from '../lib/supabase';
+import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados, supabase } from '../lib/supabase';
 import NewsCard from '../components/NewsCard';
 import EventItem from '../components/EventItem';
 import GlassCard from '../components/GlassCard';
@@ -21,15 +21,22 @@ export default function Home() {
   const [galeria, setGaleria] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
-    async function loadData() {
-      // Cargamos cada sección de forma independiente para que si una falla, las demás sigan funcionando
-      
+    // Wait for Supabase auth to settle before fetching data.
+    // On page refresh, the Supabase client restores the session from localStorage
+    // which briefly puts the client in a transitional state where queries can fail.
+    let cancelled = false;
+
+    async function fetchAllData() {
+      if (hasLoaded.current) return;
+      hasLoaded.current = true;
+
       const loadNews = async () => {
         try {
           const data = await obtenerNoticias();
-          setNoticias(data.slice(0, 3));
+          if (!cancelled) setNoticias(data.slice(0, 3));
         } catch (err) {
           console.error("Error cargando noticias:", err);
         }
@@ -38,7 +45,7 @@ export default function Home() {
       const loadEvents = async () => {
         try {
           const data = await obtenerEventos('proximo');
-          setEventos(data.slice(0, 4));
+          if (!cancelled) setEventos(data.slice(0, 4));
         } catch (err) {
           console.error("Error cargando eventos:", err);
         }
@@ -47,7 +54,7 @@ export default function Home() {
       const loadGallery = async () => {
         try {
           const data = await obtenerGaleria();
-          setGaleria(data.slice(0, 6));
+          if (!cancelled) setGaleria(data.slice(0, 6));
         } catch (err) {
           console.error("Error cargando galería:", err);
         }
@@ -56,7 +63,7 @@ export default function Home() {
       const loadProjects = async () => {
         try {
           const data = await obtenerProyectosFinalizados();
-          setProyectos(data);
+          if (!cancelled) setProyectos(data);
         } catch (err) {
           console.error("Error cargando proyectos:", err);
         }
@@ -69,9 +76,30 @@ export default function Home() {
         loadProjects()
       ]);
       
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     }
-    loadData();
+
+    // Wait for the auth state to settle before querying.
+    // This prevents the race condition where queries fire while
+    // Supabase is still restoring the session from localStorage.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      // INITIAL_SESSION fires once when Supabase finishes restoring the session.
+      // This is the safe moment to start querying.
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        fetchAllData();
+      }
+    });
+
+    // Fallback: if INITIAL_SESSION doesn't fire within 1.5s, load anyway
+    const fallbackTimer = setTimeout(() => {
+      fetchAllData();
+    }, 1500);
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const containerVariants = {
