@@ -339,7 +339,9 @@ export default function AdminDashboard() {
       recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
       actividad_final: '',
       evaluacion: { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 },
-      estado: 'borrador'
+      estado: 'borrador',
+      tipo: 'manual',
+      archivo_html_url: ''
     });
     setIsOvaFormOpen(true);
   };
@@ -367,6 +369,8 @@ export default function AdminDashboard() {
         tipo: s.tipo || 'texto',
       })),
       recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
+      tipo: ova.tipo || 'manual',
+      archivo_html_url: ova.archivo_html_url || '',
       evaluacion,
     });
     setIsOvaFormOpen(true);
@@ -374,8 +378,16 @@ export default function AdminDashboard() {
 
   const handleSaveOva = async (e) => {
     if (e) e.preventDefault();
-    if (!ovaForm.titulo || !ovaForm.objetivo || ovaForm.contenido.length === 0) {
-      toast.error("Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección)");
+    if (!ovaForm.titulo) {
+      toast.error("Por favor completa el título");
+      return;
+    }
+    if (ovaForm.tipo !== 'html' && (!ovaForm.objetivo || ovaForm.contenido.length === 0)) {
+       toast.error("Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección)");
+       return;
+    }
+    if (ovaForm.tipo === 'html' && !ovaForm.archivo_html_url) {
+      toast.error('Debe subir un archivo HTML obligatorio.');
       return;
     }
 
@@ -407,7 +419,9 @@ export default function AdminDashboard() {
         contenido: cleanedContenido,
         recursos: ovaForm.recursos || {},
         estado: ovaForm.estado || 'borrador',
-        modulo_id: selectedModuloAula.id
+        modulo_id: selectedModuloAula.id,
+        tipo: ovaForm.tipo || 'manual',
+        archivo_html_url: ovaForm.archivo_html_url || ''
       };
 
       if (editingOva) {
@@ -504,6 +518,8 @@ export default function AdminDashboard() {
         setOvaForm({ ...ovaForm, imagen_portada: url });
       } else if (type === 'pdf') {
         setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: url } });
+      } else if (type === 'html') {
+        setOvaForm({ ...ovaForm, archivo_html_url: url });
       } else if (type === 'seccion' && sectionIndex >= 0) {
         const newContenido = [...ovaForm.contenido];
         newContenido[sectionIndex].recurso_url = url;

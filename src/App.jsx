@@ -12,6 +12,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Modulos = lazy(() => import('./pages/Modulos'));
 const Repositorio = lazy(() => import('./pages/Repositorio'));
 const Informacion = lazy(() => import('./pages/Informacion'));
+const OvaHtmlPlayer = lazy(() => import('./pages/OvaHtmlPlayer'));
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -98,6 +99,15 @@ function App() {
           <Route path="/repositorio" element={<Repositorio />} />
           
           <Route path="/modulos" element={<Modulos />} />
+
+          <Route 
+            path="/ova-html/:id" 
+            element={
+              <ProtectedRoute>
+                <OvaHtmlPlayer />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/informacion" element={<Informacion />} />
         </Routes>
       </Suspense>

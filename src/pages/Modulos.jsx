@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo, registrarResultadoOva } from '../lib/supabase';
 import { sanitizeHTML } from '../lib/security';
@@ -40,6 +41,7 @@ function formatYoutubeUrl(url) {
 }
 
 export default function Modulos() {
+  const navigate = useNavigate();
   const [modulos, setModulos] = useState([]);
   const [selectedModule, setSelectedModule] = useState(null);
   const [contenidos, setContenidos] = useState({ guia: [], video: [], material: [], subpagina: [] });
@@ -352,8 +354,12 @@ export default function Modulos() {
                         hover
                         className="flex flex-col h-full border-card-border group relative overflow-hidden"
                         onClick={() => {
-                          setSelectedOva(ova);
-                          setActiveOvaStep(0);
+                          if (ova.tipo === 'html') {
+                            navigate(`/ova-html/${ova.id}`);
+                          } else {
+                            setSelectedOva(ova);
+                            setActiveOvaStep(0);
+                          }
                         }}
                       >
                          <div className="aspect-video relative overflow-hidden">

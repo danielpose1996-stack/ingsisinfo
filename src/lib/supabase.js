@@ -210,7 +210,7 @@ export async function actualizarEstadoProyecto(proyectoId, estado) {
 
 // HELPERS DE SEGURIDAD
 const FILE_LIMIT_MB = 10;
-const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'svg', 'gif', 'webp'];
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'html'];
 
 function validarArchivo(file) {
     if (!file) throw new Error("No se ha proporcionado ningún archivo");
@@ -585,6 +585,16 @@ export async function descargarArchivo(fullUrl, fileName) {
 // OVA MANAGEMENT (Aula Virtual)
 // ==========================================
 
+export async function obtenerOvaPorId(id) {
+    const { data, error } = await supabase
+        .from('ovas')
+        .select('*')
+        .eq('id', id)
+        .single();
+    if (error) throw error;
+    return data;
+}
+
 export async function obtenerOvasModulo(moduloId) {
     const { data, error } = await supabase
         .from('ovas')
@@ -629,11 +639,16 @@ export async function subirArchivoOva(file, pathPrefix = 'ovas') {
     const fileExt = file.name.split('.').pop();
     const fileName = `${pathPrefix}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
+    let contentType = file.type;
+    if (fileExt.toLowerCase() === 'html' || fileExt.toLowerCase() === 'htm') {
+        contentType = 'text/html; charset=utf-8';
+    }
+
     const { error: uploadError } = await supabase.storage
         .from('documentos-proyectos')
         .upload(fileName, file, { 
             upsert: false,
-            contentType: file.type 
+            contentType: contentType 
         });
     if (uploadError) throw uploadError;
 

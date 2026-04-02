@@ -182,7 +182,9 @@ export default function TeacherDashboard() {
       recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
       actividad_final: '',
       evaluacion: { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 },
-      estado: 'borrador'
+      estado: 'borrador',
+      tipo: 'manual',
+      archivo_html_url: ''
     });
     setIsOvaFormOpen(true);
   };
@@ -198,6 +200,8 @@ export default function TeacherDashboard() {
     }
     setOvaForm({
       ...ova,
+      tipo: ova.tipo || 'manual',
+      archivo_html_url: ova.archivo_html_url || '',
       contenido: (ova.contenido || []).map((s, i) => ({ ...s, _id: s._id || `section-${Date.now()}-${i}`, tipo: s.tipo || 'texto' })),
       recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
       evaluacion,
@@ -208,6 +212,10 @@ export default function TeacherDashboard() {
   const handleSaveOva = async () => {
     if (!ovaForm.titulo.trim()) {
       toast.error('El título es obligatorio.');
+      return;
+    }
+    if (ovaForm.tipo === 'html' && !ovaForm.archivo_html_url) {
+      toast.error('Debe subir un archivo HTML para este tipo de OVA.');
       return;
     }
     try {
@@ -223,7 +231,9 @@ export default function TeacherDashboard() {
         contenido: cleanedContenido,
         recursos: ovaForm.recursos || {},
         estado: ovaForm.estado || 'borrador',
-        modulo_id: docenteModulo.id
+        modulo_id: docenteModulo.id,
+        tipo: ovaForm.tipo || 'manual',
+        archivo_html_url: ovaForm.archivo_html_url || ''
       };
       if (editingOva) {
         await actualizarOva(editingOva.id, dataToSave);
@@ -280,6 +290,8 @@ export default function TeacherDashboard() {
         setOvaForm({ ...ovaForm, imagen_portada: url });
       } else if (type === 'pdf') {
         setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: url } });
+      } else if (type === 'html') {
+        setOvaForm({ ...ovaForm, archivo_html_url: url });
       } else if (type === 'seccion_imagen' && sectionIndex >= 0) {
         const newContenido = [...ovaForm.contenido];
         newContenido[sectionIndex] = { ...newContenido[sectionIndex], imagen_url: url };
