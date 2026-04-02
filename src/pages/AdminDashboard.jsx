@@ -986,6 +986,7 @@ export default function AdminDashboard() {
                         <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
                         <option value="Redes y Telemática">Redes y Telemática</option>
                         <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+                        <option value="Ingeniería Informática">Ingeniería Informática</option>
                       </select>
                     </div>
 
@@ -1613,6 +1614,7 @@ export default function AdminDashboard() {
                 <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
                 <option value="Redes y Telemática">Redes y Telemática</option>
                 <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+                <option value="Ingeniería Informática">Ingeniería Informática</option>
               </select>
             </div>
           )}
