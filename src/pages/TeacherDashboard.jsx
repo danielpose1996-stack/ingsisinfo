@@ -15,6 +15,8 @@ import {
   subirArchivoOva
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -204,7 +206,10 @@ export default function TeacherDashboard() {
   };
 
   const handleSaveOva = async () => {
-    if (!ovaForm.titulo.trim()) return alert('El título es obligatorio.');
+    if (!ovaForm.titulo.trim()) {
+      toast.error('El título es obligatorio.');
+      return;
+    }
     try {
       const cleanedContenido = ovaForm.contenido.map(({ _id, ...c }) => ({ ...c, titulo: sanitizeText(c.titulo) }));
       const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
@@ -231,17 +236,32 @@ export default function TeacherDashboard() {
       localStorage.removeItem(draftKey);
       
       loadOvas(docenteModulo.id);
+      toast.success('OVA guardado con éxito.');
     } catch (error) {
-      alert('Error al guardar OVA: ' + error.message);
+      toast.error('Error al guardar OVA: ' + error.message);
     }
   };
 
   const handleDeleteOva = async (id) => {
-    if (!confirm('¿Estás seguro de eliminar este OVA?')) return;
+    const res = await Swal.fire({
+      title: '¿Eliminar OVA?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
+    
     try {
       await eliminarOva(id);
       loadOvas(docenteModulo.id);
-    } catch (error) { console.error('Error deleting OVA:', error); }
+      toast.success('OVA eliminado con éxito.');
+    } catch (error) { console.error('Error deleting OVA:', error); toast.error('Error al eliminar OVA.'); }
   };
 
   const handleToggleOvaStatus = async (ova) => {
@@ -265,7 +285,7 @@ export default function TeacherDashboard() {
         newContenido[sectionIndex] = { ...newContenido[sectionIndex], imagen_url: url };
         setOvaForm({ ...ovaForm, contenido: newContenido });
       }
-    } catch (error) { alert('Error al subir archivo: ' + error.message); }
+    } catch (error) { toast.error('Error al subir archivo: ' + error.message); }
   };
 
   const handleSendObservation = async (e) => {
@@ -281,9 +301,10 @@ export default function TeacherDashboard() {
       if (perfil?.id) {
         await loadData();
       }
+      toast.success('Observación enviada con éxito.');
     } catch (error) {
       console.error("Error al enviar observación:", error);
-      alert('Error al enviar observación: ' + error.message);
+      toast.error('Error al enviar observación: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -291,7 +312,10 @@ export default function TeacherDashboard() {
 
   const handleFinalize = async (e) => {
     e.preventDefault();
-    if (!finalFile) return alert('Debes adjuntar el documento final');
+    if (!finalFile) {
+      toast.error('Debes adjuntar el documento final');
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -302,30 +326,43 @@ export default function TeacherDashboard() {
       setFinalFile(null);
       setConfirmPass('');
       await loadData();
-      alert('Proyecto finalizado y aprobado con éxito.');
+      toast.success('Proyecto finalizado y aprobado con éxito.');
     } catch (error) {
-      alert('Error al finalizar proyecto: ' + error.message);
+      toast.error('Error al finalizar proyecto: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handlePhaseChange = async (proyectoId, nuevoEstado) => {
-    const confirmacion = window.confirm(`¿Estás seguro de que deseas cambiar la fase del proyecto a ${nuevoEstado.toUpperCase()}?`);
-    if (!confirmacion) return;
+    const res = await Swal.fire({
+      title: `¿Cambiar a ${nuevoEstado.toUpperCase()}?`,
+      text: "Se notificará al estudiante.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, cambiar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
 
     try {
       await actualizarEstadoProyecto(proyectoId, nuevoEstado);
       await loadData();
+      toast.success('Fase del proyecto actualizada.');
     } catch (error) {
-      alert('Error al cambiar fase: ' + error.message);
+      toast.error('Error al cambiar fase: ' + error.message);
     }
   };
 
   const handleDownload = (proyecto) => {
     const version = proyecto.versiones_proyecto?.[proyecto.versiones_proyecto.length - 1];
     if (!version || !version.documento_url) {
-      return alert('Este proyecto aún no tiene un documento registrado o la subida falló anteriormente.');
+      toast.error('Este proyecto aún no tiene un documento registrado o la subida falló anteriormente.');
+      return;
     }
     
     descargarArchivo(version.documento_url, version.nombre_archivo);
@@ -441,7 +478,8 @@ export default function TeacherDashboard() {
                     <button 
                       onClick={() => {
                         if (p.estado !== 'aplicacion') {
-                          return alert('El proyecto debe estar en fase de APLICACIÓN para ser aprobado.');
+                          toast.error('El proyecto debe estar en fase de APLICACIÓN para ser aprobado.');
+                          return;
                         }
                         setSelectedProyecto(p); 
                         setIsFinalizeModalOpen(true); 

@@ -18,6 +18,7 @@ import RichTextEditor from '../components/RichTextEditor';
 import QuizBuilder from '../components/QuizBuilder';
 import Button from '../components/Button';
 import GlassCard from '../components/GlassCard';
+import { toast } from 'react-hot-toast';
 import {
   ArrowLeft,
   Save,
@@ -112,7 +113,7 @@ export default function OvaEditor({
 
   const handleRemoveSection = (index) => {
     if (ovaForm.contenido.length <= 1) {
-      alert('El OVA debe tener al menos una sección de contenido.');
+      toast.error('El OVA debe tener al menos una sección de contenido.');
       return;
     }
     const newContenido = [...ovaForm.contenido];

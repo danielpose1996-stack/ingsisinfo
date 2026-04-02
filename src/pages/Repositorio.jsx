@@ -6,6 +6,8 @@ import { obtenerProyectosFinalizados, eliminarProyecto } from '../lib/supabase';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { 
   Download, FileText, Search, Filter, BookOpen, 
   User as UserIcon, Calendar, Lock, LogIn, Trash2
@@ -39,15 +41,27 @@ export default function Repositorio() {
   }, [user, authLoading]);
 
   const handleDelete = async (id, nombre) => {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar el proyecto "${nombre}" permanentemente?`)) return;
+    const res = await Swal.fire({
+      title: '¿Eliminar proyecto?',
+      text: `¿Estás seguro de que deseas eliminar el proyecto "${nombre}" permanentemente?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
     
     try {
       await eliminarProyecto(id);
       setProyectos(prev => prev.filter(p => p.id !== id));
-      alert('Proyecto eliminado exitosamente');
+      toast.success('Proyecto eliminado exitosamente');
     } catch (error) {
       console.error("Error al eliminar proyecto:", error);
-      alert('Error al eliminar el proyecto');
+      toast.error('Error al eliminar el proyecto');
     }
   };
 

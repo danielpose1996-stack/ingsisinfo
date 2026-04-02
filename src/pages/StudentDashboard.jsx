@@ -12,6 +12,7 @@ import {
   descargarArchivo
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
+import { toast } from 'react-hot-toast';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -95,7 +96,10 @@ export default function StudentDashboard() {
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
-    if (!selectedFile) return alert('Debes adjuntar el documento del proyecto');
+    if (!selectedFile) {
+      toast.error('Debes adjuntar el documento del proyecto');
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -113,8 +117,9 @@ export default function StudentDashboard() {
       setNewProject({ nombre: '', estado: 'propuesta', docenteId: '', linea_investigacion: '' });
       setSelectedFile(null);
       await loadInitialData();
+      toast.success('Proyecto creado con éxito.');
     } catch (error) {
-      alert('Error al crear el proyecto: ' + error.message);
+      toast.error('Error al crear el proyecto: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -128,8 +133,9 @@ export default function StudentDashboard() {
       setIsDeleteModalOpen(false);
       setProjectToDelete(null);
       await loadInitialData();
+      toast.success('Proyecto eliminado con éxito.');
     } catch (error) {
-      alert('Error al eliminar el proyecto: ' + error.message);
+      toast.error('Error al eliminar el proyecto: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -157,9 +163,9 @@ export default function StudentDashboard() {
       });
       await refreshPerfil();
       setIsEditProfileOpen(false);
-      alert('Perfil actualizado con éxito');
+      toast.success('Perfil actualizado con éxito');
     } catch (error) {
-      alert('Error al actualizar perfil: ' + error.message);
+      toast.error('Error al actualizar perfil: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +174,8 @@ export default function StudentDashboard() {
   const handleDownload = (proyecto) => {
     const version = proyecto.versiones_proyecto?.[proyecto.versiones_proyecto.length - 1];
     if (!version || !version.documento_url) {
-      return alert('Este proyecto aún no tiene un documento registrado o la subida falló anteriormente.');
+      toast.error('Este proyecto aún no tiene un documento registrado o la subida falló anteriormente.');
+      return;
     }
     descargarArchivo(version.documento_url, version.nombre_archivo);
   };
@@ -189,9 +196,9 @@ export default function StudentDashboard() {
       setIsCorrectionModalOpen(false);
       setCorrectionComment('');
       setCorrectionFile(null);
-      alert('Corrección subida con éxito');
+      toast.success('Corrección subida con éxito');
     } catch (error) {
-      alert('Error al subir corrección: ' + error.message);
+      toast.error('Error al subir corrección: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }

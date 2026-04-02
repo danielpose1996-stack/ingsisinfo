@@ -32,6 +32,8 @@ import {
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
 import { useEmailValidation } from '../hooks/useEmailValidation';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -214,20 +216,33 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       console.error("Error loading admin data:", error);
-      alert("Error al cargar datos del servidor: " + error.message);
+      toast.error("Error al cargar datos del servidor: " + error.message);
     } finally {
       setLoading(false);
     }
   }
 
   const handleDeleteUser = async (id) => {
-    if (confirm('¿Estás seguro de eliminar este usuario? Esta acción es irreversible.')) {
+    const res = await Swal.fire({
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción es irreversible.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    
+    if (res.isConfirmed) {
       try {
         await eliminarUsuario(id);
         await loadAdminData();
-        alert('Usuario eliminado con éxito');
+        toast.success('Usuario eliminado con éxito');
       } catch (error) {
-        alert('Error al eliminar usuario: ' + error.message);
+        toast.error('Error al eliminar usuario: ' + error.message);
       }
     }
   };
@@ -269,7 +284,7 @@ export default function AdminDashboard() {
         }
 
         await actualizarPerfil(editingProfileId, updates, true);
-        alert('Usuario actualizado con éxito (Perfil y Credenciales).');
+        toast.success('Usuario actualizado con éxito (Perfil y Credenciales).');
       } else {
         // Lógica de creación (existente)
         await registrarUsuario({ 
@@ -279,7 +294,7 @@ export default function AdminDashboard() {
           email: normalizedEmail 
         });
 
-        alert('Usuario creado con éxito. Se ha enviado un correo de confirmación.');
+        toast.success('Usuario creado con éxito. Se ha enviado un correo de confirmación.');
       }
 
       setIsUserModalOpen(false);
@@ -289,7 +304,7 @@ export default function AdminDashboard() {
       setEditingProfileId(null);
       await loadAdminData();
     } catch (error) {
-      alert('Error en la operación: ' + error.message);
+      toast.error('Error en la operación: ' + error.message);
     } finally {
       setIsCreating(false);
     }
@@ -360,7 +375,7 @@ export default function AdminDashboard() {
   const handleSaveOva = async (e) => {
     if (e) e.preventDefault();
     if (!ovaForm.titulo || !ovaForm.objetivo || ovaForm.contenido.length === 0) {
-      alert("Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección)");
+      toast.error("Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección)");
       return;
     }
 
@@ -409,7 +424,7 @@ export default function AdminDashboard() {
       loadOvas(selectedModuloAula.id);
     } catch (error) {
       console.error("Error saving OVA:", error);
-      alert("Error al guardar OVA");
+      toast.error("Error al guardar OVA");
     }
   };
 
@@ -418,12 +433,24 @@ export default function AdminDashboard() {
       setOvaForm(draftData);
       setHasDraft(false);
       setDraftData(null);
-      alert("Borrador recuperado con éxito.");
+      toast.success("Borrador recuperado con éxito.");
     }
   };
 
-  const handleDiscardDraft = () => {
-    if (confirm("¿Estás seguro de descartar el borrador? Esta acción no se puede deshacer.")) {
+  const handleDiscardDraft = async () => {
+    const res = await Swal.fire({
+      title: '¿Descartar borrador?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, descartar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (res.isConfirmed) {
       const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
       localStorage.removeItem(draftKey);
       setHasDraft(false);
@@ -432,13 +459,26 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteOva = async (id) => {
-    if (!confirm("¿Estás seguro de eliminar este OVA?")) return;
+    const res = await Swal.fire({
+      title: '¿Eliminar OVA?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
+    
     try {
       await eliminarOva(id);
       loadOvas(selectedModuloAula.id);
     } catch (error) {
       console.error("Error deleting OVA:", error);
-      alert("Error al eliminar OVA: " + error.message);
+      toast.error("Error al eliminar OVA: " + error.message);
     }
   };
 
@@ -475,7 +515,7 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Error al subir archivo");
+      toast.error("Error al subir archivo");
     }
   };
 
@@ -544,21 +584,34 @@ export default function AdminDashboard() {
       }
       setIsPublicModalOpen(false);
       await loadPublicData();
-      alert('Operación realizada con éxito');
+      toast.success('Operación realizada con éxito');
     } catch (error) {
-      alert('Error al guardar: ' + error.message);
+      toast.error('Error al guardar: ' + error.message);
     }
   };
 
   const handleDeletePublicItem = async (type, id) => {
-    if (!confirm('¿Estás seguro de eliminar este elemento?')) return;
+    const res = await Swal.fire({
+      title: '¿Eliminar elemento?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
+    
     try {
       if (type === 'noticia') await eliminarNoticia(id);
       else if (type === 'evento') await eliminarEvento(id);
       else if (type === 'galeria') await eliminarGaleria(id);
       await loadPublicData();
     } catch (error) {
-      alert('Error al eliminar: ' + error.message);
+      toast.error('Error al eliminar: ' + error.message);
     }
   };
 
@@ -569,7 +622,7 @@ export default function AdminDashboard() {
       const url = await subirArchivoOva(file, 'web-publica'); // Usamos el mismo bucket pero carpeta diferente
       setPublicForm({ ...publicForm, [field]: url });
     } catch (error) {
-      alert('Error al subir imagen');
+      toast.error('Error al subir imagen');
     }
   };
 
@@ -586,25 +639,63 @@ export default function AdminDashboard() {
   }
 
   const handleDeleteSeguimiento = async (id) => {
-    if (!confirm('¿Estás seguro de eliminar este registro de seguimiento?')) return;
+    const res = await Swal.fire({
+      title: '¿Eliminar registro?',
+      text: "No podrás deshacer esto.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res.isConfirmed) return;
+    
     try {
       await eliminarResultadoOva(id);
       await loadSeguimiento();
     } catch (error) {
-      alert('Error al eliminar registro: ' + error.message);
+      toast.error('Error al eliminar registro: ' + error.message);
     }
   };
 
   const handleDeleteAllSeguimiento = async () => {
-    if (!confirm('🚨 ADVERTENCIA CRÍTICA: ¿Estás seguro de eliminar TODO el historial de seguimiento? Esta acción es irreversible y borrará el progreso de todos los estudiantes.')) return;
-    if (!confirm('Por favor confirma una vez más que deseas realizar esta acción destructiva.')) return;
+    const res1 = await Swal.fire({
+      title: '🚨 ADVERTENCIA CRÍTICA',
+      text: '¿Estás seguro de eliminar TODO el historial de seguimiento? Esta acción es irreversible y borrará el progreso de todos los estudiantes.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Sí, borrar todo',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res1.isConfirmed) return;
+    
+    const res2 = await Swal.fire({
+      title: '¿Estás absolutamente seguro?',
+      text: 'Por favor confirma una vez más que deseas realizar esta acción destructiva.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#334155',
+      confirmButtonText: 'Confirmar eliminación total',
+      cancelButtonText: 'Cancelar',
+      background: '#1e293b',
+      color: '#fff'
+    });
+    if (!res2.isConfirmed) return;
     
     try {
       await eliminarTodoSeguimiento();
       await loadSeguimiento();
-      alert('Se ha limpiado todo el historial de seguimiento correctamente.');
+      toast.success('Se ha limpiado todo el historial de seguimiento correctamente.');
     } catch (error) {
-      alert('Error al limpiar seguimiento: ' + error.message);
+      toast.error('Error al limpiar seguimiento: ' + error.message);
     }
   };
 

@@ -17,6 +17,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import { useAuth } from './context/AuthContext';
 
+import { Toaster } from 'react-hot-toast';
+
 function AdminGatekeeper({ children }) {
   const { isAdmin } = useAuth();
   const hasGateKey = sessionStorage.getItem('admin_access_gate') === 'true';
@@ -33,6 +35,22 @@ function AdminGatekeeper({ children }) {
 function App() {
   return (
     <MainLayout>
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{ 
+          style: { 
+            background: '#1e293b', 
+            color: '#fff', 
+            border: '1px solid #334155' 
+          },
+          success: {
+            iconTheme: {
+              primary: '#059669',
+              secondary: '#fff',
+            },
+          },
+        }} 
+      />
       <Suspense fallback={
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
           <div className="w-12 h-12 border-4 border-[#059669]/20 border-t-[#059669] rounded-full animate-spin"></div>
