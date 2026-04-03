@@ -70,7 +70,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6">
              <div className="h-6 w-px bg-white/10" />
-             <p className="text-[10px] text-white/70 font-black italic tracking-widest underline decoration-[#059669]/30">MADE BY DANIEL POSSE Y MATEO MONT</p>
+             <p className="text-[10px] text-white/70 font-black italic tracking-widest underline decoration-[#059669]/30">Desarrollado por Daniel Posse y Mateo Mont</p>
           </div>
         </div>
       </div>
