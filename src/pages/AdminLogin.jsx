@@ -22,15 +22,21 @@ export default function AdminLogin() {
 
     // Pequeño delay artificial para seguridad y feedback visual
     setTimeout(async () => {
-      const success = await loginAdmin(email, password);
-      
-      if (success) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          navigate('/dashboard/admin');
-        }, 1500);
-      } else {
-        setError('Credenciales de administrador inválidas');
+      try {
+        const success = await loginAdmin(email, password);
+        
+        if (success) {
+          setIsSuccess(true);
+          setTimeout(() => {
+            navigate('/dashboard/admin');
+          }, 1500);
+        } else {
+          setError('Credenciales de administrador inválidas');
+          setIsSubmitting(false);
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        setError('Correo o contraseña incorrectos.');
         setIsSubmitting(false);
       }
     }, 1000);
