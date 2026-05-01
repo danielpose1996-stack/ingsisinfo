@@ -10,6 +10,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 export const supabase = createClient(SUPABASE_URL || 'https://placeholder.supabase.co', SUPABASE_ANON_KEY || 'placeholder');
 
 // AUTH
+// SECURITY WARNING: La asignación de 'rol' desde este payload será IGNORADA por la base de datos
+// si se intenta enviar desde un cliente no autorizado. La asignación real de rol debe manejarse 
+// a través de la Edge Function (usando service_role) o se forzará a 'estudiante' mediante Triggers SQL.
 export async function registrarUsuario(data) {
     const { data: responseData, error } = await supabase.functions.invoke('create-user', {
         body: data

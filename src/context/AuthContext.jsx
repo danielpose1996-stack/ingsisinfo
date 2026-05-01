@@ -67,13 +67,17 @@ export const AuthProvider = ({ children }) => {
                     setUser(null);
                     setPerfil(null);
                     setIsAdmin(false);
-                } else {
-                    setPerfil(p || null);
-                    setIsAdmin(p?.rol === 'admin');
+                } else if (p) {
+                    setPerfil(p);
                     
-                    // Persistence admin
-                    if (p?.rol === 'admin' || sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+                    // SECURITY FIX: Nunca confiar en sessionStorage sobre la respuesta de la DB.
+                    // Si la BD indica que NO es administrador, forzamos la remoción de sus permisos.
+                    if (p.rol === 'admin') {
                         setIsAdmin(true);
+                        sessionStorage.setItem('isAdminLoggedIn', 'true');
+                    } else {
+                        setIsAdmin(false);
+                        sessionStorage.removeItem('isAdminLoggedIn');
                     }
                 }
             } catch (err) {
