@@ -6,13 +6,17 @@ import EventItem from '../components/EventItem';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
+import Modal from '../components/Modal';
 import { 
   ArrowRight, 
   Image as ImageIcon, 
   Sparkles, 
   Download, 
   FileText, 
-  ChevronRight
+  ChevronRight,
+  Calendar,
+  ExternalLink,
+  FileDown
 } from 'lucide-react';
 
 export default function Home() {
@@ -21,6 +25,9 @@ export default function Home() {
   const [galeria, setGaleria] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
   const hasLoaded = useRef(false);
 
   useEffect(() => {
@@ -203,7 +210,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
                 >
-                  <NewsCard noticia={n} />
+                  <NewsCard noticia={n} onClick={() => setSelectedNews(n)} />
                 </motion.div>
               ))}
             </div>
@@ -252,7 +259,8 @@ export default function Home() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: idx * 0.1 }}
-                      className="group relative flex gap-4 p-4 rounded-2xl border border-card-border bg-card/50 hover:bg-card hover:border-[#1E3A8A]/30 dark:hover:border-blue-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#1E3A8A]/5"
+                      className="group relative flex gap-4 p-4 rounded-2xl border border-card-border bg-card/50 hover:bg-card hover:border-[#1E3A8A]/30 dark:hover:border-blue-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#1E3A8A]/5 cursor-pointer"
+                      onClick={() => setSelectedEvent(e)}
                     >
                       {/* Date Badge */}
                       <div className="flex flex-col items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] text-white flex-shrink-0 shadow-lg shadow-[#1E3A8A]/20">
@@ -329,6 +337,7 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.06 }}
                     className="group relative aspect-square rounded-2xl overflow-hidden border border-card-border shadow-lg shadow-black/5 dark:shadow-black/20 cursor-pointer"
+                    onClick={() => setSelectedPhoto(g)}
                   >
                     <img
                       src={g.imagen_url}
@@ -364,6 +373,182 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* ═══ MODAL DETALLE DE NOTICIA ═══ */}
+      <Modal
+        isOpen={!!selectedNews}
+        onClose={() => setSelectedNews(null)}
+        title="Detalles de la Noticia"
+        maxWidth="max-w-2xl"
+      >
+        {selectedNews && (
+          <div className="space-y-6 animate-in fade-in">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-card border border-white/10 shadow-2xl">
+              {selectedNews.imagen_url ? (
+                <img
+                  src={selectedNews.imagen_url}
+                  alt={selectedNews.titulo}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                  <span className="text-6xl">📢</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-[#059669] bg-[#059669]/15 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#059669]/30 font-bold">
+                <Calendar className="w-3.5 h-3.5" />
+                {new Date(selectedNews.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight italic">
+                {selectedNews.titulo}
+              </h3>
+              
+              <div className="w-12 h-1 bg-[#059669] rounded-full" />
+              
+              <p className="text-gray-300 text-base leading-relaxed whitespace-pre-wrap font-medium">
+                {selectedNews.contenido}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-white/5">
+              {selectedNews.pdf_url && (
+                <a
+                  href={selectedNews.pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all transform hover:scale-[1.02] shadow-lg shadow-red-600/20 text-sm cursor-pointer"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Descargar PDF Adjunto
+                </a>
+              )}
+              {selectedNews.enlace_url && (
+                <a
+                  href={selectedNews.enlace_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold border border-white/10 transition-all text-sm backdrop-blur-sm"
+                >
+                  Leer Artículo Completo
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="px-6 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold transition-all text-sm border border-white/5 cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ═══ MODAL DETALLE DE EVENTO ═══ */}
+      <Modal
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        title="Detalles del Evento"
+        maxWidth="max-w-2xl"
+      >
+        {selectedEvent && (
+          <div className="space-y-6 animate-in fade-in">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-card border border-white/10 shadow-2xl">
+              {selectedEvent.imagen_url ? (
+                <img
+                  src={selectedEvent.imagen_url}
+                  alt={selectedEvent.titulo}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-900 to-indigo-950 flex items-center justify-center">
+                  <span className="text-6xl">📅</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-blue-400 bg-blue-500/15 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-500/30 font-bold">
+                <Calendar className="w-3.5 h-3.5" />
+                {new Date(selectedEvent.fecha_evento).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-wider italic">
+                  {selectedEvent.tipo === 'proximo' ? 'Próximo Evento' : 'Evento Pasado'}
+                </span>
+              </div>
+
+              <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight italic">
+                {selectedEvent.titulo}
+              </h3>
+              
+              <div className="w-12 h-1 bg-blue-500 rounded-full" />
+              
+              <p className="text-gray-300 text-base leading-relaxed whitespace-pre-wrap font-medium">
+                {selectedEvent.descripcion || 'Sin descripción detallada.'}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-4 border-t border-white/5">
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="px-6 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold transition-all text-sm border border-white/5 cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ═══ MODAL DETALLE DE GALERÍA (LIGHTBOX) ═══ */}
+      <Modal
+        isOpen={!!selectedPhoto}
+        onClose={() => setSelectedPhoto(null)}
+        title="Galería de Momentos"
+        maxWidth="max-w-3xl"
+      >
+        {selectedPhoto && (
+          <div className="space-y-6 animate-in fade-in">
+            <div className="relative max-h-[60vh] w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10 shadow-2xl">
+              <img
+                src={selectedPhoto.imagen_url}
+                alt={selectedPhoto.titulo || ''}
+                className="max-h-[60vh] w-auto object-contain mx-auto"
+              />
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
+              <h4 className="text-lg font-bold text-white italic">
+                {selectedPhoto.titulo || 'Fotografía de SISINFO'}
+              </h4>
+              {selectedPhoto.eventos?.titulo && (
+                <div className="flex items-center gap-2 text-xs text-[#059669] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" />
+                  <span>Evento vinculado: {selectedPhoto.eventos.titulo}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setSelectedPhoto(null)}
+                className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold transition-all text-sm border border-white/5 cursor-pointer"
+              >
+                Volver
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

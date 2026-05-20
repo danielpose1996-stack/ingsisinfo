@@ -63,6 +63,7 @@ import {
   List,
   PlusCircle,
   FileDown,
+  FileText,
   Youtube,
   Globe,
   X,
@@ -578,7 +579,7 @@ export default function AdminDashboard() {
       setPublicForm(item);
     } else {
       setPublicForm(
-        type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', enlace_url: '', fecha: new Date().toISOString().split('T')[0] } :
+        type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', enlace_url: '', pdf_url: '', fecha: new Date().toISOString().split('T')[0] } :
         type === 'evento' ? { titulo: '', descripcion: '', fecha_evento: new Date().toISOString().split('T')[0], tipo: 'proximo', imagen_url: '' } :
         { titulo: '', imagen_url: '', evento_id: null }
       );
@@ -637,8 +638,10 @@ export default function AdminDashboard() {
     try {
       const url = await subirArchivoOva(file, 'web-publica'); // Usamos el mismo bucket pero carpeta diferente
       setPublicForm({ ...publicForm, [field]: url });
+      toast.success(field === 'pdf_url' ? 'Documento PDF subido con éxito' : 'Imagen subida con éxito');
     } catch (error) {
-      toast.error('Error al subir imagen');
+      console.error(error);
+      toast.error(field === 'pdf_url' ? 'Error al subir el documento PDF' : 'Error al subir la imagen');
     }
   };
 
@@ -1796,6 +1799,32 @@ export default function AdminDashboard() {
                   className="w-full bg-card border border-card-border rounded-xl py-3 pl-11 pr-4 text-sm text-foreground focus:border-[#059669] outline-none placeholder:text-foreground/30"
                 />
               </div>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => handlePublicFileUpload(e, 'pdf_url')}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <div className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 flex items-center justify-between animate-in fade-in">
+                  <span>{publicForm.pdf_url ? '📄 PDF cargado' : 'Subir Documento PDF (opcional)'}</span>
+                  <FileText className="w-4 h-4 text-red-400" />
+                </div>
+              </div>
+              {publicForm.pdf_url && (
+                <div className="flex items-center justify-between px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+                  <span className="text-xs text-red-400 font-bold truncate max-w-[280px]">
+                    PDF Adjunto Activo
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPublicForm({...publicForm, pdf_url: null})}
+                    className="text-xs text-red-400 hover:text-red-300 font-bold"
+                  >
+                    Eliminar PDF
+                  </button>
+                </div>
+              )}
             </>
           )}
 

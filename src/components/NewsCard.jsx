@@ -2,11 +2,11 @@ import React from 'react';
 import GlassCard from './GlassCard';
 import { Calendar, ExternalLink } from 'lucide-react';
 
-export default function NewsCard({ noticia }) {
+export default function NewsCard({ noticia, onClick }) {
   const { titulo, contenido, fecha, imagen_url, enlace_url } = noticia;
   
   return (
-    <GlassCard hover className="flex flex-col h-full overflow-hidden p-0 group">
+    <GlassCard hover onClick={onClick} className="flex flex-col h-full overflow-hidden p-0 group cursor-pointer hover:shadow-lg hover:shadow-[#059669]/5 transition-all duration-300 border border-transparent hover:border-[#059669]/20">
       <div className="relative h-48 overflow-hidden">
         {imagen_url ? (
           <img 
@@ -42,6 +42,7 @@ export default function NewsCard({ noticia }) {
             href={enlace_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#059669] hover:text-[#047857] transition-colors group/link"
           >
             <span>Leer artículo</span>
