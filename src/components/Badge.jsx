@@ -6,11 +6,11 @@ const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function Badge({ children, variant = 'gray', className }) {
   const variants = {
-    emerald: 'bg-[#059669]/10 text-[#059669] border-[#059669]/20',
-    blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    red: 'bg-red-500/10 text-red-400 border-red-500/20',
-    gray: 'bg-card text-foreground border-card-border',
+    emerald: 'bg-blue-50 text-[#1E3A8A] border-blue-200/60',
+    blue: 'bg-blue-50 text-blue-800 border-blue-200/60',
+    amber: 'bg-amber-50 text-amber-800 border-amber-200/60',
+    red: 'bg-red-50 text-red-800 border-red-200/60',
+    gray: 'bg-slate-50 text-slate-700 border-slate-200',
   };
 
   return (

@@ -8,8 +8,8 @@ export default function GlassCard({ children, className, hover = false, ...props
   return (
     <div
       className={cn(
-        'glass-effect rounded-2xl p-6 transition-all duration-300 shadow-lg shadow-black/5 dark:shadow-black/20',
-        hover && 'hover:bg-primary/5 hover:border-primary/30 hover:shadow-2xl hover:-translate-y-1',
+        'bg-card rounded-xl border border-card-border p-6 transition-all duration-300 shadow-sm',
+        hover && 'hover:shadow-md hover:border-primary/30 hover:bg-primary/[0.01]',
         className
       )}
       {...props}

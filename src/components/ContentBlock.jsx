@@ -57,7 +57,7 @@ export default function ContentBlock({
   const TypeIcon = typeConfig.icon;
 
   const colorClasses = {
-    emerald: 'bg-[#059669]/10 text-[#059669] border-[#059669]/20',
+    emerald: 'bg-[#1E3A8A]/10 text-[#1E3A8A] border-[#1E3A8A]/20',
     red: 'bg-red-500/10 text-red-400 border-red-500/20',
     blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -278,7 +278,7 @@ export default function ContentBlock({
       style={style}
       className={`relative rounded-3xl border transition-all duration-300 ${
         isDragging
-          ? 'border-[#059669]/40 shadow-[0_0_40px_rgba(5,150,105,0.1)] bg-card/80 scale-[1.01]'
+          ? 'border-[#1E3A8A]/40 shadow-[0_0_40px_rgba(5,150,105,0.1)] bg-card/80 scale-[1.01]'
           : 'border-card-border bg-card/20 hover:border-card-border/80'
       }`}
     >
@@ -332,7 +332,7 @@ export default function ContentBlock({
                     onClick={() => handleTypeChange(type.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                       blockType === type.id
-                        ? 'bg-[#059669]/10 text-[#059669]'
+                        ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]'
                         : 'text-foreground/60 hover:bg-white/5 hover:text-foreground'
                     }`}
                   >
@@ -365,7 +365,7 @@ export default function ContentBlock({
 
       {/* Attached File Indicator */}
       {section.recurso_url && blockType === 'texto' && (
-        <div className="mx-6 mb-6 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#059669]/5 border border-[#059669]/15 text-[#059669]">
+        <div className="mx-6 mb-6 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#1E3A8A]/5 border border-[#1E3A8A]/15 text-[#1E3A8A]">
           <FileText className="w-4 h-4" />
           <span className="text-xs font-bold italic">Archivo adjunto</span>
           <button

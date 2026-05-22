@@ -64,7 +64,7 @@ export default function OvaHtmlPlayer() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-12 h-12 text-[#059669] animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-[#1E3A8A] animate-spin mb-4" />
         <p className="text-foreground/40 italic font-bold">Cargando visualizador e interpretando HTML...</p>
       </div>
     );
@@ -116,7 +116,7 @@ export default function OvaHtmlPlayer() {
                <Button 
                  variant="primary" 
                  size="sm" 
-                 className="gap-2 italic text-[10px] bg-[#059669] hover:bg-[#047857] text-white border-none"
+                 className="gap-2 italic text-[10px] bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none"
                  onClick={() => setShowQuizModal(true)}
                >
                  EVALUACIÓN FINAL <Award className="w-3.5 h-3.5" />
@@ -140,7 +140,7 @@ export default function OvaHtmlPlayer() {
            <div className="max-w-4xl w-full mx-auto pb-20">
              <div className="flex justify-between items-center mb-10">
                <h2 className="text-2xl font-black italic text-foreground uppercase tracking-widest">
-                 Evaluación <span className="text-[#059669]">Final</span>
+                 Evaluación <span className="text-[#1E3A8A]">Final</span>
                </h2>
                <button onClick={() => setShowQuizModal(false)} className="p-3 bg-card rounded-full hover:bg-white/10 text-foreground/60 hover:text-white transition-colors">
                  <X className="w-6 h-6" />

@@ -230,11 +230,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     
     if (res.isConfirmed) {
@@ -459,11 +459,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, descartar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (res.isConfirmed) {
       const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
@@ -480,11 +480,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res.isConfirmed) return;
     
@@ -614,11 +614,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res.isConfirmed) return;
     
@@ -664,11 +664,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res.isConfirmed) return;
     
@@ -687,11 +687,11 @@ export default function AdminDashboard() {
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, borrar todo',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res1.isConfirmed) return;
     
@@ -701,11 +701,11 @@ export default function AdminDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Confirmar eliminación total',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res2.isConfirmed) return;
     
@@ -727,8 +727,8 @@ export default function AdminDashboard() {
       {/* Sidebar Navigation */}
       <aside className="w-full lg:w-72 bg-card border-r border-card-border p-6 space-y-8">
         <div className="flex items-center gap-3 px-2 mb-10">
-          <div className="w-10 h-10 rounded-xl bg-[#059669]/10 flex items-center justify-center border border-[#059669]/20">
-            <ShieldCheck className="w-6 h-6 text-[#059669]" />
+          <div className="w-10 h-10 rounded-xl bg-[#1E3A8A]/10 flex items-center justify-center border border-[#1E3A8A]/20">
+            <ShieldCheck className="w-6 h-6 text-[#1E3A8A]" />
           </div>
           <div>
             <h2 className="text-foreground font-bold tracking-tight italic">SISINFO</h2>
@@ -741,7 +741,7 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id ? 'bg-[#059669]/10 text-[#059669] border border-[#059669]/10 shadow-[0_0_20px_rgba(5,150,105,0.05)]' : 'text-foreground/40 hover:text-foreground hover:bg-background/80'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id ? 'bg-[#1E3A8A]/10 text-[#1E3A8A] border border-[#1E3A8A]/10 shadow-[0_0_20px_rgba(5,150,105,0.05)]' : 'text-foreground/40 hover:text-foreground hover:bg-background/80'}`}
             >
               <item.icon className="w-4 h-4" />
               {item.label}
@@ -753,7 +753,7 @@ export default function AdminDashboard() {
           <GlassCard className="p-4 bg-blue-500/5">
              <p className="text-[10px] text-foreground/40 font-bold uppercase mb-2 italic">Estado del Sistema</p>
              <div className="flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+               <span className="w-2 h-2 rounded-full bg-[#1E3A8A] animate-pulse" />
                <span className="text-xs text-foreground font-medium italic">Base de Datos Conectada</span>
              </div>
           </GlassCard>
@@ -787,10 +787,10 @@ export default function AdminDashboard() {
               <div className="space-y-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <GlassCard className="p-8 border-card-border hover:border-[#059669]/30 transition-all group">
+                  <GlassCard className="p-8 border-card-border hover:border-[#1E3A8A]/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-2xl bg-[#059669]/10 border border-[#059669]/20">
-                        <Users className="w-6 h-6 text-[#059669]" />
+                      <div className="p-3 rounded-2xl bg-[#1E3A8A]/10 border border-[#1E3A8A]/20">
+                        <Users className="w-6 h-6 text-[#1E3A8A]" />
                       </div>
                       <Badge variant="emerald">+12%</Badge>
                     </div>
@@ -836,7 +836,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                    <GlassCard className="p-6">
                      <h3 className="text-xl font-bold text-foreground mb-6 italic flex items-center gap-2">
-                       <FileCheck className="w-5 h-5 text-[#059669]" /> Últimos Proyectos
+                       <FileCheck className="w-5 h-5 text-[#1E3A8A]" /> Últimos Proyectos
                      </h3>
                      <div className="space-y-4">
                        {proyectos.slice(0, 5).map(p => (
@@ -845,7 +845,7 @@ export default function AdminDashboard() {
                              <h4 className="text-sm font-bold text-foreground italic mb-1">{p.nombre}</h4>
                              <p className="text-[10px] text-foreground/40 font-medium">Estudiante: {p.estudiante?.nombre} · {new Date(p.created_at).toLocaleDateString()}</p>
                            </div>
-                           <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#059669] transition-colors" />
+                           <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#1E3A8A] transition-colors" />
                          </div>
                        ))}
                      </div>
@@ -885,13 +885,13 @@ export default function AdminDashboard() {
                         placeholder="Buscar por nombre o email..."
                         value={searchUserTerm}
                         onChange={(e) => setSearchUserTerm(e.target.value)}
-                        className="bg-background border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 min-w-[320px] shadow-inner transition-all"
+                        className="bg-background border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 min-w-[320px] shadow-inner transition-all"
                       />
                     </div>
                     <select
                       value={filterUserRol}
                       onChange={(e) => setFilterUserRol(e.target.value)}
-                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 outline-none italic shadow-sm transition-all"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 outline-none italic shadow-sm transition-all"
                     >
                       <option value="">TODOS LOS ROLES</option>
                       <option value="admin">ADMINISTRADORES</option>
@@ -943,7 +943,7 @@ export default function AdminDashboard() {
                         <tr key={u.id} className="hover:bg-background/40 transition-colors group">
                           <td className="px-6 py-5">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center text-xs font-bold text-[#059669] border border-card-border italic shadow-sm group-hover:scale-105 transition-transform">
+                              <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center text-xs font-bold text-[#1E3A8A] border border-card-border italic shadow-sm group-hover:scale-105 transition-transform">
                                 {u.nombre[0]}
                               </div>
                               <div>
@@ -967,7 +967,7 @@ export default function AdminDashboard() {
                             <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={() => handleEditClick(u)}
-                                className="p-2 rounded-lg bg-card hover:bg-[#059669]/10 text-foreground/40 hover:text-[#059669] border border-card-border"
+                                className="p-2 rounded-lg bg-card hover:bg-[#1E3A8A]/10 text-foreground/40 hover:text-[#1E3A8A] border border-card-border"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -996,7 +996,7 @@ export default function AdminDashboard() {
                       <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Línea</label>
                       <select
                         value={filterLinea}
-                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 italic shadow-sm transition-all"
+                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 italic shadow-sm transition-all"
                         onChange={(e) => setFilterLinea(e.target.value)}
                       >
                         <option value="">Todas las Líneas</option>
@@ -1013,7 +1013,7 @@ export default function AdminDashboard() {
                       <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Fase</label>
                       <select
                         value={filterFase}
-                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 italic shadow-sm transition-all"
+                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 italic shadow-sm transition-all"
                         onChange={(e) => setFilterFase(e.target.value)}
                       >
                         <option value="">Todas las Fases</option>
@@ -1027,7 +1027,7 @@ export default function AdminDashboard() {
                   <Button 
                     variant="outline" 
                     onClick={() => loadAdminData()} 
-                    className="gap-2 italic py-3 px-6 h-[46px] border-[#059669]/10 hover:bg-[#059669]/5"
+                    className="gap-2 italic py-3 px-6 h-[46px] border-[#1E3A8A]/10 hover:bg-[#1E3A8A]/5"
                     disabled={loading}
                   >
                     <TrendingUp className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -1127,10 +1127,10 @@ export default function AdminDashboard() {
                      <button
                        key={m.id}
                        onClick={() => handleSelectModuloAula(m)}
-                       className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group ${selectedModuloAula?.id === m.id ? 'bg-[#059669]/10 text-[#059669] border border-[#059669]/20' : 'hover:bg-background/80 text-foreground/40 hover:text-[#059669] border border-transparent'}`}
+                       className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left group ${selectedModuloAula?.id === m.id ? 'bg-[#1E3A8A]/10 text-[#1E3A8A] border border-[#1E3A8A]/20' : 'hover:bg-background/80 text-foreground/40 hover:text-[#1E3A8A] border border-transparent'}`}
                      >
                        <span className="text-sm font-bold italic">{m.nombre}</span>
-                       <ChevronRight className={`w-4 h-4 transition-transform ${selectedModuloAula?.id === m.id ? 'rotate-90 text-[#059669]' : 'opacity-0 group-hover:opacity-100'}`} />
+                       <ChevronRight className={`w-4 h-4 transition-transform ${selectedModuloAula?.id === m.id ? 'rotate-90 text-[#1E3A8A]' : 'opacity-0 group-hover:opacity-100'}`} />
                      </button>
                    ))}
                  </GlassCard>
@@ -1181,7 +1181,7 @@ export default function AdminDashboard() {
                        ) : ovas.length > 0 ? (
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                            {ovas.map(ova => (
-                             <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-[#059669]/30 transition-all duration-500">
+                             <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-[#1E3A8A]/30 transition-all duration-500">
                                <div className="flex justify-between items-start mb-6">
                                  <Badge variant={ova.estado === 'publicado' ? 'emerald' : 'amber'}>
                                    {ova.estado?.toUpperCase()}
@@ -1190,7 +1190,7 @@ export default function AdminDashboard() {
                                    <button
                                      onClick={() => handleToggleOvaStatus(ova)}
                                      title={ova.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
-                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-[#059669]"
+                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-[#1E3A8A]"
                                    >
                                      {ova.estado === 'publicado' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                    </button>
@@ -1209,7 +1209,7 @@ export default function AdminDashboard() {
                                  </div>
                                </div>
 
-                               <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-[#059669] transition-colors tracking-tight leading-tight">
+                               <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-[#1E3A8A] transition-colors tracking-tight leading-tight">
                                  {ova.titulo}
                                </h4>
 
@@ -1247,21 +1247,21 @@ export default function AdminDashboard() {
               <div className="space-y-12 pb-20">
                 {loadingPublic ? (
                   <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#059669]"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A8A]"></div>
                   </div>
                 ) : (
                   <>
                     <section>
                       <div className="flex items-center justify-between mb-8 border-b border-card-border pb-4">
                         <h3 className="text-2xl font-bold flex items-center gap-3 italic">
-                          <span className="w-2 h-8 bg-[#059669] rounded-full" />
+                          <span className="w-2 h-8 bg-[#1E3A8A] rounded-full" />
                           📰 Noticias y Novedades
                         </h3>
                         <Button size="sm" onClick={() => handleOpenPublicModal('noticia')}>+ Redactar Noticia</Button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {noticiasAdmin.map(n => (
-                          <GlassCard key={n.id} className="p-4 border-card-border group hover:border-[#059669]/30 transition-all">
+                          <GlassCard key={n.id} className="p-4 border-card-border group hover:border-[#1E3A8A]/30 transition-all">
                             <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-card">
                               {n.imagen_url ? (
                                 <img 
@@ -1280,7 +1280,7 @@ export default function AdminDashboard() {
                                 </div>
                               )}
                               <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => handleOpenPublicModal('noticia', n)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-[#059669] transition-colors">
+                                <button onClick={() => handleOpenPublicModal('noticia', n)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-[#1E3A8A] transition-colors">
                                   <Edit className="w-4 h-4" />
                                 </button>
                                 <button onClick={() => handleDeletePublicItem('noticia', n.id)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-red-500 transition-colors">
@@ -1388,11 +1388,11 @@ export default function AdminDashboard() {
                         placeholder="Buscar estudiante..."
                         value={searchEstudiante}
                         onChange={(e) => setSearchEstudiante(e.target.value)}
-                        className="bg-card border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-[#059669]/50 min-w-[280px] outline-none italic transition-all"
+                        className="bg-card border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-[#1E3A8A]/50 min-w-[280px] outline-none italic transition-all"
                       />
                     </div>
                     <select
-                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#059669]/50 outline-none italic shadow-sm transition-all"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none italic shadow-sm transition-all"
                       value={filterOva}
                       onChange={(e) => setFilterOva(e.target.value)}
                     >
@@ -1402,7 +1402,7 @@ export default function AdminDashboard() {
                       ))}
                     </select>
                     <select
-                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#059669]/50 outline-none italic shadow-sm transition-all"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none italic shadow-sm transition-all"
                       value={filterLineaSeguimiento}
                       onChange={(e) => setFilterLineaSeguimiento(e.target.value)}
                     >
@@ -1429,10 +1429,10 @@ export default function AdminDashboard() {
 
                 {/* Metrics Highlight */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <GlassCard className="p-6 border-[#059669]/20 bg-[#059669]/5">
+                  <GlassCard className="p-6 border-[#1E3A8A]/20 bg-[#1E3A8A]/5">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-[#059669]/10 border border-[#059669]/20">
-                        <FileCheck className="w-6 h-6 text-[#059669]" />
+                      <div className="p-3 rounded-xl bg-[#1E3A8A]/10 border border-[#1E3A8A]/20">
+                        <FileCheck className="w-6 h-6 text-[#1E3A8A]" />
                       </div>
                       <div>
                         <p className="text-2xl font-black text-foreground italic leading-none">
@@ -1481,7 +1481,7 @@ export default function AdminDashboard() {
                             <tr key={s.id} className="hover:bg-white/[0.01] transition-colors group">
                               <td className="px-6 py-5">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-[#059669]/10 flex items-center justify-center text-[10px] font-black text-[#059669] border border-[#059669]/20 italic">
+                                  <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[10px] font-black text-[#1E3A8A] border border-[#1E3A8A]/20 italic">
                                     {s.perfil?.nombre?.[0]}
                                   </div>
                                   <div>
@@ -1492,13 +1492,13 @@ export default function AdminDashboard() {
                               </td>
                               <td className="px-6 py-5">
                                 <p className="text-sm font-bold text-foreground italic leading-tight">{s.ova?.titulo}</p>
-                                <p className="text-[10px] text-[#059669]/50 font-black uppercase tracking-widest italic">{s.ova?.modulos?.nombre}</p>
+                                <p className="text-[10px] text-[#1E3A8A]/50 font-black uppercase tracking-widest italic">{s.ova?.modulos?.nombre}</p>
                               </td>
                               <td className="px-6 py-5 text-center">
                                 <span className="text-sm font-black text-foreground/60 italic font-mono">{s.intentos}</span>
                               </td>
                               <td className="px-6 py-5 text-center">
-                                <span className={`text-base font-black italic ${s.mejor_puntaje >= 60 ? 'text-[#059669]' : 'text-red-400'}`}>
+                                <span className={`text-base font-black italic ${s.mejor_puntaje >= 60 ? 'text-[#1E3A8A]' : 'text-red-400'}`}>
                                   {s.mejor_puntaje}%
                                 </span>
                               </td>
@@ -1565,7 +1565,7 @@ export default function AdminDashboard() {
               placeholder="Primer Nombre"
               value={newUser.nombre}
               onChange={(e) => setNewUser({...newUser, nombre: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
               required
             />
             <input
@@ -1573,7 +1573,7 @@ export default function AdminDashboard() {
               placeholder="Apellidos"
               value={newUser.apellido}
               onChange={(e) => setNewUser({...newUser, apellido: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
               required
             />
           </div>
@@ -1589,7 +1589,7 @@ export default function AdminDashboard() {
               className={`w-full bg-card border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none transition-all ${
                 emailError
                   ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20'
-                  : 'border-card-border focus:border-[#059669]'
+                  : 'border-card-border focus:border-[#1E3A8A]'
               }`}
               required
             />
@@ -1603,7 +1603,7 @@ export default function AdminDashboard() {
             <select
               value={newUser.rol}
               onChange={(e) => setNewUser({...newUser, rol: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]"
             >
               <option value="estudiante">Estudiante</option>
               <option value="docente">Docente</option>
@@ -1613,7 +1613,7 @@ export default function AdminDashboard() {
               placeholder={isEditMode ? "Nueva Contraseña (opcional)" : "Contraseña"}
               value={newUser.password}
               onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
               required={!isEditMode}
             />
           </div>
@@ -1624,7 +1624,7 @@ export default function AdminDashboard() {
               <select
                 value={newUser.linea_investigacion}
                 onChange={(e) => setNewUser({...newUser, linea_investigacion: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#059669]"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]"
                 required
               >
                 <option value="">Seleccione una línea...</option>
@@ -1704,16 +1704,16 @@ export default function AdminDashboard() {
 
             <div className="space-y-3">
               <h4 className="text-sm font-bold text-foreground italic flex items-center gap-2">
-                <FolderTree className="w-4 h-4 text-[#059669]" />
+                <FolderTree className="w-4 h-4 text-[#1E3A8A]" />
                 Historial de Versiones
               </h4>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {selectedProyecto.versiones_proyecto && selectedProyecto.versiones_proyecto.length > 0 ? (
                   selectedProyecto.versiones_proyecto.map((ver, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-card border border-card-border hover:border-[#059669]/20 transition-colors">
+                    <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-card border border-card-border hover:border-[#1E3A8A]/20 transition-colors">
                       <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-[#059669]/10 flex items-center justify-center border border-[#059669]/20">
-                           <span className="text-[#059669] text-xs font-bold">V{idx + 1}</span>
+                         <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center border border-[#1E3A8A]/20">
+                           <span className="text-[#1E3A8A] text-xs font-bold">V{idx + 1}</span>
                          </div>
                          <div>
                            <p className="text-sm text-foreground font-medium">Entrega #{idx + 1}</p>
@@ -1758,7 +1758,7 @@ export default function AdminDashboard() {
                 placeholder="Título de la noticia"
                 value={publicForm.titulo || ''}
                 onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                 required
               />
               <div className="grid grid-cols-2 gap-4">
@@ -1766,7 +1766,7 @@ export default function AdminDashboard() {
                   type="date"
                   value={publicForm.fecha || ''}
                   onChange={(e) => setPublicForm({...publicForm, fecha: e.target.value})}
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                   required
                 />
                 <div className="relative">
@@ -1786,7 +1786,7 @@ export default function AdminDashboard() {
                 placeholder="Contenido de la noticia..."
                 value={publicForm.contenido || ''}
                 onChange={(e) => setPublicForm({...publicForm, contenido: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none min-h-[150px]"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none min-h-[150px]"
                 required
               />
               <div className="relative">
@@ -1796,7 +1796,7 @@ export default function AdminDashboard() {
                   placeholder="Enlace al artículo (opcional)"
                   value={publicForm.enlace_url || ''}
                   onChange={(e) => setPublicForm({...publicForm, enlace_url: e.target.value})}
-                  className="w-full bg-card border border-card-border rounded-xl py-3 pl-11 pr-4 text-sm text-foreground focus:border-[#059669] outline-none placeholder:text-foreground/30"
+                  className="w-full bg-card border border-card-border rounded-xl py-3 pl-11 pr-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none placeholder:text-foreground/30"
                 />
               </div>
               <div className="relative">
@@ -1835,7 +1835,7 @@ export default function AdminDashboard() {
                 placeholder="Título del evento"
                 value={publicForm.titulo || ''}
                 onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                 required
               />
               <div className="grid grid-cols-2 gap-4">
@@ -1843,13 +1843,13 @@ export default function AdminDashboard() {
                   type="datetime-local"
                   value={publicForm.fecha_evento ? new Date(publicForm.fecha_evento).toISOString().slice(0, 16) : ''}
                   onChange={(e) => setPublicForm({...publicForm, fecha_evento: e.target.value})}
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                   required
                 />
                 <select
                   value={publicForm.tipo || 'proximo'}
                   onChange={(e) => setPublicForm({...publicForm, tipo: e.target.value})}
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                 >
                   <option value="proximo">Próximo</option>
                   <option value="pasado">Pasado / Archivo</option>
@@ -1871,7 +1871,7 @@ export default function AdminDashboard() {
                 placeholder="Descripción corta..."
                 value={publicForm.descripcion || ''}
                 onChange={(e) => setPublicForm({...publicForm, descripcion: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none min-h-[100px]"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none min-h-[100px]"
                 required
               />
             </>
@@ -1879,7 +1879,7 @@ export default function AdminDashboard() {
 
           {publicType === 'galeria' && (
             <>
-              <div className="relative w-full aspect-video rounded-2xl border-2 border-dashed border-card-border flex flex-col items-center justify-center overflow-hidden mb-4 group hover:border-[#059669]/50 transition-colors">
+              <div className="relative w-full aspect-video rounded-2xl border-2 border-dashed border-card-border flex flex-col items-center justify-center overflow-hidden mb-4 group hover:border-[#1E3A8A]/50 transition-colors">
                 {publicForm.imagen_url ? (
                   <>
                     <img src={publicForm.imagen_url} alt="" className="w-full h-full object-cover" />
@@ -1906,12 +1906,12 @@ export default function AdminDashboard() {
                 placeholder="Pie de foto / Título (opcional)"
                 value={publicForm.titulo || ''}
                 onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
               />
               <select
                 value={publicForm.evento_id || ''}
                 onChange={(e) => setPublicForm({...publicForm, evento_id: e.target.value || null})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669] outline-none"
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
               >
                 <option value="">Vincular a un evento (opcional)</option>
                 {eventosAdmin.map(ev => (

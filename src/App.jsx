@@ -40,13 +40,13 @@ function App() {
         position="bottom-right" 
         toastOptions={{ 
           style: { 
-            background: '#1e293b', 
-            color: '#fff', 
-            border: '1px solid #334155' 
+            background: '#ffffff', 
+            color: '#1e293b', 
+            border: '1px solid #e2e8f0' 
           },
           success: {
             iconTheme: {
-              primary: '#059669',
+              primary: '#1E3A8A',
               secondary: '#fff',
             },
           },
@@ -54,7 +54,7 @@ function App() {
       />
       <Suspense fallback={
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <div className="w-12 h-12 border-4 border-[#059669]/20 border-t-[#059669] rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin"></div>
           <p className="text-foreground/40 text-sm font-medium animate-pulse">Cargando...</p>
         </div>
       }>

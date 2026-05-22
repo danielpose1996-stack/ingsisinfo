@@ -259,11 +259,11 @@ export default function TeacherDashboard() {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res.isConfirmed) return;
     
@@ -353,11 +353,11 @@ export default function TeacherDashboard() {
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3b82f6',
-      cancelButtonColor: '#334155',
+      cancelButtonColor: '#64748b',
       confirmButtonText: 'Sí, cambiar',
       cancelButtonText: 'Cancelar',
-      background: '#1e293b',
-      color: '#fff'
+      background: '#ffffff',
+      color: '#1e293b'
     });
     if (!res.isConfirmed) return;
 
@@ -408,7 +408,7 @@ export default function TeacherDashboard() {
           </button>
           <button 
             onClick={() => { setActiveTab('aula'); setIsOvaFormOpen(false); }}
-            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'aula' ? 'bg-[#059669] text-foreground shadow-lg shadow-[#059669]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'aula' ? 'bg-[#1E3A8A] text-foreground shadow-lg shadow-[#1E3A8A]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
           >
             <GraduationCap className="w-4 h-4" /> Aula Virtual
           </button>
@@ -512,9 +512,9 @@ export default function TeacherDashboard() {
           ) : (
             terminados.length > 0 ? (
               terminados.map(p => (
-                <GlassCard key={p.id} className="border-[#059669]/20 bg-[#059669]/5">
+                <GlassCard key={p.id} className="border-[#1E3A8A]/20 bg-[#1E3A8A]/5">
                   <div className="flex items-center gap-3 mb-4">
-                    <CheckCircle className="w-6 h-6 text-[#059669]" />
+                    <CheckCircle className="w-6 h-6 text-[#1E3A8A]" />
                     <h4 className="text-lg font-bold text-foreground italic">{p.nombre}</h4>
                   </div>
                   <div className="space-y-2 text-xs">
@@ -584,7 +584,7 @@ export default function TeacherDashboard() {
               ) : ovas.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {ovas.map(ova => (
-                    <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-[#059669]/30 transition-all duration-500">
+                    <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-[#1E3A8A]/30 transition-all duration-500">
                       <div className="flex justify-between items-start mb-6">
                         <Badge variant={ova.estado === 'publicado' ? 'emerald' : 'amber'}>
                           {ova.estado?.toUpperCase()}
@@ -593,7 +593,7 @@ export default function TeacherDashboard() {
                           <button
                             onClick={() => handleToggleOvaStatus(ova)}
                             title={ova.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
-                            className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-[#059669]"
+                            className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-[#1E3A8A]"
                           >
                             {ova.estado === 'publicado' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
@@ -612,7 +612,7 @@ export default function TeacherDashboard() {
                         </div>
                       </div>
 
-                      <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-[#059669] transition-colors tracking-tight leading-tight">
+                      <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-[#1E3A8A] transition-colors tracking-tight leading-tight">
                         {ova.titulo}
                       </h4>
 

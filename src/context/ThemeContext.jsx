@@ -4,14 +4,15 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   useEffect(() => {
-    // Always dark mode
+    // Always light mode for academic design
     const root = window.document.documentElement;
-    root.classList.add('dark');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0a0b0d');
+    root.classList.remove('dark');
+    root.classList.add('light');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#1E3A8A');
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme: 'dark' }}>
+    <ThemeContext.Provider value={{ theme: 'light' }}>
       {children}
     </ThemeContext.Provider>
   );

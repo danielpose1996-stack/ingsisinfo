@@ -46,7 +46,7 @@ const QUESTION_TYPES = [
 ];
 
 const colorClasses = {
-  emerald: 'bg-[#059669]/10 text-[#059669] border-[#059669]/20',
+  emerald: 'bg-[#1E3A8A]/10 text-[#1E3A8A] border-[#1E3A8A]/20',
   blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -101,7 +101,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
         return (
           <div className="space-y-3">
             <label className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest italic">
-              Opciones <span className="text-[#059669]">(clic en el círculo = respuesta correcta)</span>
+              Opciones <span className="text-[#1E3A8A]">(clic en el círculo = respuesta correcta)</span>
             </label>
             {(question.opciones || []).map((opt, optIdx) => (
               <div key={optIdx} className="flex items-center gap-3 group">
@@ -110,7 +110,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
                   onClick={() => onUpdate({ ...question, respuesta_correcta: optIdx })}
                   className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                     question.respuesta_correcta === optIdx
-                      ? 'border-[#059669] bg-[#059669]/20 text-[#059669] shadow-[0_0_12px_rgba(5,150,105,0.2)]'
+                      ? 'border-[#1E3A8A] bg-[#1E3A8A]/20 text-[#1E3A8A] shadow-[0_0_12px_rgba(5,150,105,0.2)]'
                       : 'border-card-border text-transparent hover:border-foreground/30'
                   }`}
                   title="Marcar como correcta"
@@ -122,7 +122,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
                   value={opt}
                   onChange={(e) => handleUpdateOption(optIdx, e.target.value)}
                   placeholder={`Opción ${String.fromCharCode(65 + optIdx)}...`}
-                  className="flex-1 bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#059669]/50 outline-none transition-all italic"
+                  className="flex-1 bg-card border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none transition-all italic"
                 />
                 {(question.opciones || []).length > 2 && (
                   <button
@@ -139,7 +139,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
               <button
                 type="button"
                 onClick={handleAddOption}
-                className="flex items-center gap-2 text-[10px] font-bold text-foreground/30 hover:text-[#059669] transition-colors uppercase tracking-widest italic ml-10"
+                className="flex items-center gap-2 text-[10px] font-bold text-foreground/30 hover:text-[#1E3A8A] transition-colors uppercase tracking-widest italic ml-10"
               >
                 <Plus className="w-3.5 h-3.5" /> Añadir Opción
               </button>
@@ -162,7 +162,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
                   className={`flex-1 py-4 rounded-2xl border-2 font-bold italic text-sm transition-all ${
                     question.respuesta_correcta === (idx === 0)
                       ? idx === 0
-                        ? 'border-[#059669] bg-[#059669]/10 text-[#059669] shadow-[0_0_20px_rgba(5,150,105,0.08)]'
+                        ? 'border-[#1E3A8A] bg-[#1E3A8A]/10 text-[#1E3A8A] shadow-[0_0_20px_rgba(5,150,105,0.08)]'
                         : 'border-red-500 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.08)]'
                       : 'border-card-border text-foreground/30 hover:text-foreground/50 hover:border-card-border/80'
                   }`}
@@ -258,7 +258,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
       style={style}
       className={`rounded-2xl border transition-all duration-300 ${
         isDragging
-          ? 'border-[#059669]/40 shadow-[0_0_40px_rgba(5,150,105,0.1)] bg-card/80 scale-[1.01]'
+          ? 'border-[#1E3A8A]/40 shadow-[0_0_40px_rgba(5,150,105,0.1)] bg-card/80 scale-[1.01]'
           : 'border-card-border bg-card/20 hover:border-card-border/80'
       }`}
     >
@@ -324,7 +324,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
               value={question.enunciado || ''}
               onChange={(e) => onUpdate({ ...question, enunciado: e.target.value })}
               placeholder="Escribe la pregunta aquí..."
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#059669]/50 outline-none transition-all italic min-h-[70px] resize-none"
+              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none transition-all italic min-h-[70px] resize-none"
             />
           </div>
 
@@ -341,7 +341,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
               value={question.explicacion || ''}
               onChange={(e) => onUpdate({ ...question, explicacion: e.target.value })}
               placeholder="¿Por qué esta es la respuesta correcta?"
-              className="w-full bg-card/50 border border-card-border/50 rounded-xl py-2.5 px-4 text-xs text-foreground/60 focus:border-[#059669]/30 outline-none transition-all italic"
+              className="w-full bg-card/50 border border-card-border/50 rounded-xl py-2.5 px-4 text-xs text-foreground/60 focus:border-[#1E3A8A]/30 outline-none transition-all italic"
             />
           </div>
         </div>
@@ -435,7 +435,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
               max="120"
               value={evaluacion.tiempo_limite || 0}
               onChange={(e) => onChange({ ...evaluacion, tiempo_limite: parseInt(e.target.value) || 0 })}
-              className="w-20 bg-card border border-card-border rounded-lg py-2 px-3 text-sm text-foreground text-center outline-none focus:border-[#059669]/50 transition-all font-bold italic"
+              className="w-20 bg-card border border-card-border rounded-lg py-2 px-3 text-sm text-foreground text-center outline-none focus:border-[#1E3A8A]/50 transition-all font-bold italic"
             />
             <span className="text-xs text-foreground/30 italic">minutos</span>
             <span className="text-[9px] text-foreground/15 italic ml-1">(0 = sin límite)</span>
@@ -453,7 +453,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
               max="100"
               value={evaluacion.nota_minima || 60}
               onChange={(e) => onChange({ ...evaluacion, nota_minima: parseInt(e.target.value) || 60 })}
-              className="w-20 bg-card border border-card-border rounded-lg py-2 px-3 text-sm text-foreground text-center outline-none focus:border-[#059669]/50 transition-all font-bold italic"
+              className="w-20 bg-card border border-card-border rounded-lg py-2 px-3 text-sm text-foreground text-center outline-none focus:border-[#1E3A8A]/50 transition-all font-bold italic"
             />
             <span className="text-xs text-foreground/30 italic">% para aprobar</span>
           </div>
@@ -467,7 +467,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
             <span className="text-foreground font-bold italic">{(evaluacion.preguntas || []).length}</span>
             <span className="text-foreground/20 text-xs italic">preguntas</span>
             <span className="text-foreground/10">•</span>
-            <span className="text-[#059669] font-bold italic">{totalPuntos}</span>
+            <span className="text-[#1E3A8A] font-bold italic">{totalPuntos}</span>
             <span className="text-foreground/20 text-xs italic">pts total</span>
           </div>
         </div>
@@ -535,7 +535,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
         <button
           type="button"
           onClick={() => setShowAddMenu(!showAddMenu)}
-          className="w-full py-4 rounded-2xl border-2 border-dashed border-[#059669]/15 hover:border-[#059669]/30 text-[#059669]/60 hover:text-[#059669] transition-all flex items-center justify-center gap-3 group"
+          className="w-full py-4 rounded-2xl border-2 border-dashed border-[#1E3A8A]/15 hover:border-[#1E3A8A]/30 text-[#1E3A8A]/60 hover:text-[#1E3A8A] transition-all flex items-center justify-center gap-3 group"
         >
           <PlusCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="text-xs font-bold uppercase tracking-widest italic">Añadir Pregunta</span>

@@ -40,27 +40,27 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1E3A8A] backdrop-blur-md border-b border-blue-800 shadow-md">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1E3A8A] border-b border-blue-800 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-            <span className="text-xl font-bold text-white">
+            <span className="text-xl font-bold text-white tracking-wide">
               SISINFO
             </span>
           </Link>
  
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-baseline space-x-2">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     location.pathname === link.path 
-                      ? "text-[#22d3ee] font-bold bg-white/10" 
+                      ? "text-white font-bold bg-white/15" 
                       : "text-white/80 hover:text-white hover:bg-white/10"
                   )}
                 >
@@ -76,7 +76,7 @@ export default function Navbar() {
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="px-4 py-2 rounded-full bg-[#22d3ee] hover:bg-[#06b6d4] text-white font-semibold text-sm transition-all transform hover:scale-105"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-blue-900 font-semibold text-sm transition-all shadow-sm"
               >
                 Inicio de Sesión
               </Link>
@@ -86,35 +86,35 @@ export default function Navbar() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#059669] flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/20">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-[#1E3A8A] flex items-center justify-center font-bold">
                     {getInitial()}
                   </div>
-                  <ChevronDown className={cn("w-4 h-4 text-white/60 transition-transform", isDropdownOpen && "rotate-180")} />
+                  <ChevronDown className={cn("w-4 h-4 text-white/70 transition-transform", isDropdownOpen && "rotate-180")} />
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 rounded-xl bg-card border border-card-border shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="px-4 py-3 border-b border-card-border">
+                    <div className="px-4 py-3 border-b border-card-border bg-slate-50">
                       <p className="text-sm font-semibold text-foreground truncate">
                         {isAdmin ? 'Administrador' : (perfil?.nombre ? `${perfil.nombre} ${perfil.apellido || ''}`.trim() : 'Usuario')}
                       </p>
-                      <p className="text-xs text-gray-400 capitalize">
+                      <p className="text-xs text-slate-500 capitalize">
                         {isAdmin ? 'Sistema' : perfil?.rol || 'Usuario'}
                       </p>
                     </div>
                     
                     <Link
                       to={getPanelLink()}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-foreground/60 hover:text-foreground hover:bg-card transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-foreground/80 hover:text-foreground hover:bg-slate-50 transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      <LayoutDashboard className="w-4 h-4" />
+                      <LayoutDashboard className="w-4 h-4 text-slate-500" />
                       Ir a mi Panel
                     </Link>
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-400/5 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       Cerrar Sesión
@@ -139,7 +139,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-[#1E3A8A]/95 backdrop-blur-xl border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-[#1E3A8A] border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -147,7 +147,7 @@ export default function Navbar() {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                 location.pathname === link.path 
-                  ? "text-[#22d3ee] bg-white/10" 
+                  ? "text-white bg-white/15" 
                   : "text-white/70 hover:text-white hover:bg-white/10"
               )}
               onClick={() => setIsOpen(false)}
@@ -155,11 +155,11 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
-          <div className="pt-4 pb-1 border-t border-card-border">
+          <div className="pt-4 pb-1 border-t border-blue-800">
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="w-full text-center block px-4 py-2 rounded-lg bg-[#059669] text-white font-bold"
+                className="w-full text-center block px-4 py-2 rounded-lg bg-white text-blue-900 font-bold"
                 onClick={() => setIsOpen(false)}
               >
                 Inicio de Sesión
@@ -176,7 +176,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-red-400"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-red-300"
                 >
                   <LogOut className="w-5 h-5" />
                   Cerrar Sesión

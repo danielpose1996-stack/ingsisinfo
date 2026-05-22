@@ -27,10 +27,10 @@ const ToolbarButton = ({ onClick, active, children, title }) => (
     type="button"
     onClick={onClick}
     title={title}
-    className={`p-1.5 rounded-lg transition-all duration-200 ${
+    className={`p-1.5 rounded-lg transition-all duration-200 border border-transparent ${
       active
-        ? 'bg-[#059669]/20 text-[#059669] shadow-[0_0_8px_rgba(5,150,105,0.15)]'
-        : 'text-foreground/40 hover:text-foreground/70 hover:bg-white/5'
+        ? 'bg-blue-50 text-[#1E3A8A] border-blue-200/50'
+        : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
     }`}
   >
     {children}
@@ -58,14 +58,14 @@ export default function RichTextEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-[#059669] underline hover:text-[#047857] transition-colors',
+          class: 'text-[#1E3A8A] underline hover:text-[#1D4ED8] transition-colors',
           target: '_blank',
           rel: 'noopener noreferrer',
         },
       }),
       CodeBlock.configure({
         HTMLAttributes: {
-          class: 'bg-black/40 border border-card-border rounded-xl p-4 font-mono text-sm text-[#059669] my-4 overflow-x-auto',
+          class: 'bg-slate-50 border border-card-border rounded-lg p-4 font-mono text-sm text-[#1E3A8A] my-4 overflow-x-auto',
         },
       }),
       Placeholder.configure({
@@ -78,7 +78,7 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert prose-sm max-w-none focus:outline-none min-h-full',
+        class: 'prose prose-slate prose-sm max-w-none focus:outline-none min-h-full',
       },
     },
   });
@@ -98,9 +98,9 @@ export default function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className={`rounded-2xl border border-card-border bg-card/30 overflow-hidden transition-all focus-within:border-[#059669]/40 focus-within:shadow-[0_0_20px_rgba(5,150,105,0.05)] ${className}`}>
+    <div className={`rounded-xl border border-card-border bg-card overflow-hidden transition-all focus-within:border-[#1E3A8A]/50 focus-within:shadow-sm ${className}`}>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-card-border bg-card/50">
+      <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-card-border bg-slate-50">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive('bold')}
@@ -211,7 +211,7 @@ export default function RichTextEditor({
       </div>
 
       {/* Editor Content */}
-      <div className="px-5 py-4" style={{ minHeight }}>
+      <div className="px-5 py-4 bg-card" style={{ minHeight }}>
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -222,7 +222,7 @@ export default function Modulos() {
           >
             <div className="text-center max-w-3xl mx-auto space-y-4">
               <h1 className="text-4xl md:text-5xl font-black text-foreground italic tracking-tight">
-                Líneas de <span className="text-[#059669]">Aprendizaje</span>
+                Líneas de <span className="text-[#1E3A8A]">Aprendizaje</span>
               </h1>
               <p className="text-foreground/60 text-lg italic">
                 Explora nuestras especialidades académicas e investigativas a través de recursos diseñados para tu crecimiento profesional.
@@ -237,19 +237,19 @@ export default function Modulos() {
                   <GlassCard 
                     key={mod.id} 
                     hover 
-                    className="p-8 flex flex-col items-center justify-center text-center group cursor-pointer border-card-border hover:border-[#059669]/30"
+                    className="p-8 flex flex-col items-center justify-center text-center group cursor-pointer border-card-border hover:border-[#1E3A8A]/30"
                     onClick={() => handleModuleClick(mod)}
                   >
-                    <div className="mb-6 p-5 rounded-2xl bg-card group-hover:bg-[#059669]/10 text-foreground/40 group-hover:text-[#059669] border border-card-border group-hover:border-[#059669]/20 transition-all duration-500 rotate-3 group-hover:rotate-0">
+                    <div className="mb-6 p-5 rounded-2xl bg-card group-hover:bg-[#1E3A8A]/10 text-foreground/40 group-hover:text-[#1E3A8A] border border-card-border group-hover:border-[#1E3A8A]/20 transition-all duration-500 rotate-3 group-hover:rotate-0">
                       {getModuleIcon(mod.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-'))}
                     </div>
-                    <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight italic group-hover:text-[#059669] transition-colors uppercase">
+                    <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight italic group-hover:text-[#1E3A8A] transition-colors uppercase">
                       {mod.nombre}
                     </h3>
                     <p className="text-foreground/60 text-sm italic leading-relaxed line-clamp-2">
                       {mod.descripcion || ''}
                     </p>
-                    <div className="mt-8 flex items-center gap-2 text-[10px] font-bold text-[#059669] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <div className="mt-8 flex items-center gap-2 text-[10px] font-bold text-[#1E3A8A] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
                       Entrar al Aula <ChevronRight className="w-3 h-3" />
                     </div>
                   </GlassCard>
@@ -287,7 +287,7 @@ export default function Modulos() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-[#059669] text-white' : 'text-foreground/40 hover:text-foreground hover:bg-card'}`}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-[#1E3A8A] text-white' : 'text-foreground/40 hover:text-foreground hover:bg-card'}`}
                   >
                     <tab.icon className="w-3.5 h-3.5" /> {tab.label.toUpperCase()}
                   </button>
@@ -300,7 +300,7 @@ export default function Modulos() {
               {contentLoading ? (
                 <div className="flex items-center justify-center h-full py-20">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-[#059669]/20 border-t-[#059669] rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
                     <p className="text-foreground/40 text-sm italic font-medium">Accediendo al repositorio...</p>
                   </div>
                 </div>
@@ -308,13 +308,13 @@ export default function Modulos() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {proyectosLinea.length > 0 ? (
                     proyectosLinea.map(p => (
-                      <GlassCard key={p.id} className="p-6 border-card-border hover:border-[#059669]/30 transition-all flex flex-col group">
+                      <GlassCard key={p.id} className="p-6 border-card-border hover:border-[#1E3A8A]/30 transition-all flex flex-col group">
                         <div className="flex-grow mb-6">
                           <div className="flex justify-between items-start mb-4">
                             <Badge variant="emerald">FINALIZADO</Badge>
                             <span className="text-[10px] text-foreground/40">{new Date(p.updated_at).toLocaleDateString()}</span>
                           </div>
-                          <h4 className="text-xl font-bold text-foreground italic group-hover:text-[#059669] transition-colors mb-4 line-clamp-2 uppercase tracking-tight">{p.nombre}</h4>
+                          <h4 className="text-xl font-bold text-foreground italic group-hover:text-[#1E3A8A] transition-colors mb-4 line-clamp-2 uppercase tracking-tight">{p.nombre}</h4>
                           <div className="space-y-2 pt-4 border-t border-card-border">
                             <p className="text-xs text-foreground/60"><span className="text-foreground/40 font-bold mr-2 uppercase tracking-widest text-[8px]">Autor</span> {p.estudiante?.nombre} {p.estudiante?.apellido}</p>
                             <p className="text-xs text-foreground/60"><span className="text-foreground/40 font-bold mr-2 uppercase tracking-widest text-[8px]">Asesor</span> {p.docente?.nombre} {p.docente?.apellido}</p>
@@ -377,7 +377,7 @@ export default function Modulos() {
                            <p className="text-foreground/40 text-xs italic line-clamp-2 mb-6">{ova.descripcion || 'Objeto virtual de aprendizaje diseñado para la profundización técnica.'}</p>
                            <div className="flex items-center justify-between pt-4 border-t border-card-border">
                              <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest italic font-mono">Ver Contenido</span>
-                             <div className="p-2 bg-[#059669]/10 rounded-lg text-[#059669]">
+                             <div className="p-2 bg-[#1E3A8A]/10 rounded-lg text-[#1E3A8A]">
                                <Play className="w-4 h-4 fill-current" />
                              </div>
                            </div>
@@ -401,7 +401,7 @@ export default function Modulos() {
                         animate={{ opacity: 1, scale: 1 }}
                       >
                         {activeTab === 'video' ? (
-                          <div className="group bg-card rounded-2xl overflow-hidden border border-card-border hover:border-[#059669]/30 transition-all">
+                          <div className="group bg-card rounded-2xl overflow-hidden border border-card-border hover:border-[#1E3A8A]/30 transition-all">
                             <div className="aspect-video relative bg-black/40">
                               <iframe 
                                 src={formatYoutubeUrl(item.url_recurso)} 
@@ -411,7 +411,7 @@ export default function Modulos() {
                               />
                             </div>
                             <div className="p-5">
-                              <h4 className="text-foreground font-bold italic mb-2 group-hover:text-[#059669] transition-colors uppercase tracking-tight">{item.titulo}</h4>
+                              <h4 className="text-foreground font-bold italic mb-2 group-hover:text-[#1E3A8A] transition-colors uppercase tracking-tight">{item.titulo}</h4>
                               <p className="text-foreground/60 text-xs italic line-clamp-2 leading-relaxed">
                                 {item.descripcion || 'Clase técnica y demostración aplicada de la línea de investigación.'}
                               </p>
@@ -423,19 +423,19 @@ export default function Modulos() {
                             className="p-8 flex flex-col items-center justify-center text-center cursor-pointer border-card-border"
                             onClick={() => setSelectedSubpage(item)}
                           >
-                             <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center text-foreground/40 mb-6 group-hover:text-[#059669] transition-colors border border-card-border group-hover:rotate-12 duration-500">
+                             <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center text-foreground/40 mb-6 group-hover:text-[#1E3A8A] transition-colors border border-card-border group-hover:rotate-12 duration-500">
                                <BookOpen className="w-7 h-7" />
                              </div>
-                             <h4 className="text-lg font-bold text-foreground italic mb-2 tracking-tight group-hover:text-[#059669] transition-colors">{item.titulo}</h4>
+                             <h4 className="text-lg font-bold text-foreground italic mb-2 tracking-tight group-hover:text-[#1E3A8A] transition-colors">{item.titulo}</h4>
                              <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest italic">Ver Contenido Especializado</p>
                           </GlassCard>
                         ) : (
-                          <GlassCard hover className="p-6 flex items-start gap-4 border-card-border hover:border-[#059669]/20 group">
-                             <div className="p-3 rounded-xl bg-card text-foreground/40 group-hover:text-[#059669] border border-card-border group-hover:border-[#059669]/30 transition-all">
+                          <GlassCard hover className="p-6 flex items-start gap-4 border-card-border hover:border-[#1E3A8A]/20 group">
+                             <div className="p-3 rounded-xl bg-card text-foreground/40 group-hover:text-[#1E3A8A] border border-card-border group-hover:border-[#1E3A8A]/30 transition-all">
                                {activeTab === 'guia' ? <FileText className="w-5 h-5" /> : <LinkIcon className="w-5 h-5" />}
                              </div>
                              <div className="flex-1">
-                               <h4 className="text-foreground font-bold italic mb-1 group-hover:text-[#059669] transition-colors uppercase tracking-tight">{item.titulo}</h4>
+                               <h4 className="text-foreground font-bold italic mb-1 group-hover:text-[#1E3A8A] transition-colors uppercase tracking-tight">{item.titulo}</h4>
                                <p className="text-foreground/60 text-[10px] italic leading-relaxed line-clamp-2 mb-4">
                                  {item.descripcion || 'Documentación oficial y recursos técnicos para la investigación.'}
                                </p>
@@ -443,7 +443,7 @@ export default function Modulos() {
                                  href={item.url_recurso} 
                                  target="_blank" 
                                  rel="noopener noreferrer"
-                                 className="inline-flex items-center gap-2 text-[10px] font-black text-[#059669] hover:text-[#059669] uppercase tracking-widest italic"
+                                 className="inline-flex items-center gap-2 text-[10px] font-black text-[#1E3A8A] hover:text-[#1E3A8A] uppercase tracking-widest italic"
                                >
                                  {activeTab === 'guia' ? 'DESCARGAR GUÍA' : 'ACCEDER AL RECURSO'} <ExternalLink className="w-3 h-3" />
                                </a>
@@ -497,14 +497,14 @@ export default function Modulos() {
           <div className="w-full lg:w-72 bg-white/[0.02] border-r border-card-border flex flex-col h-full shrink-0">
             <div className="p-6 border-b border-card-border">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black text-[#059669] uppercase tracking-[0.2em] italic">Progreso</span>
+                <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-[0.2em] italic">Progreso</span>
                 <span className="text-[10px] font-bold text-foreground/40 italic font-mono">
                   {Math.round(((activeOvaStep + 1) / ovaSteps.length) * 100)}%
                 </span>
               </div>
               <div className="h-1 bg-card rounded-full overflow-hidden">
                 <motion.div 
-                  className="h-full bg-[#059669]"
+                  className="h-full bg-[#1E3A8A]"
                   initial={{ width: 0 }}
                   animate={{ width: `${((activeOvaStep + 1) / ovaSteps.length) * 100}%` }}
                 />
@@ -516,16 +516,16 @@ export default function Modulos() {
                 <button
                   key={step.id}
                   onClick={() => setActiveOvaStep(idx)}
-                  className={`w-full text-left p-4 rounded-xl transition-all flex items-center gap-4 group ${activeOvaStep === idx ? 'bg-[#059669]/10 border border-[#059669]/20' : 'hover:bg-card border border-transparent'}`}
+                  className={`w-full text-left p-4 rounded-xl transition-all flex items-center gap-4 group ${activeOvaStep === idx ? 'bg-[#1E3A8A]/10 border border-[#1E3A8A]/20' : 'hover:bg-card border border-transparent'}`}
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black italic transition-all ${activeOvaStep === idx ? 'bg-[#059669] text-white' : 'bg-card text-foreground/40 group-hover:text-foreground'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black italic transition-all ${activeOvaStep === idx ? 'bg-[#1E3A8A] text-white' : 'bg-card text-foreground/40 group-hover:text-foreground'}`}>
                     0{idx + 1}
                   </div>
                   <div className="flex-grow min-w-0">
-                    <p className={`text-[8px] font-black uppercase tracking-widest italic mb-0.5 ${activeOvaStep === idx ? 'text-[#059669]' : 'text-gray-600'}`}>{step.label}</p>
+                    <p className={`text-[8px] font-black uppercase tracking-widest italic mb-0.5 ${activeOvaStep === idx ? 'text-[#1E3A8A]' : 'text-gray-600'}`}>{step.label}</p>
                     <p className={`text-xs font-bold italic truncate ${activeOvaStep === idx ? 'text-foreground' : 'text-foreground/40'}`}>{step.titulo}</p>
                   </div>
-                  {activeOvaStep > idx && <div className="w-1.5 h-1.5 rounded-full bg-[#059669] shadow-[0_0_8px_rgba(5,150,105,0.5)]" />}
+                  {activeOvaStep > idx && <div className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A] shadow-[0_0_8px_rgba(5,150,105,0.5)]" />}
                 </button>
               ))}
             </div>
@@ -566,8 +566,8 @@ export default function Modulos() {
                       
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                          <div className="space-y-4">
-                           <h4 className="text-xs font-black text-[#059669] dark:text-[#059669] uppercase tracking-widest italic flex items-center gap-3">
-                             <div className="w-8 h-px bg-[#059669]/50" /> Objetivo Central
+                           <h4 className="text-xs font-black text-[#1E3A8A] dark:text-[#1E3A8A] uppercase tracking-widest italic flex items-center gap-3">
+                             <div className="w-8 h-px bg-[#1E3A8A]/50" /> Objetivo Central
                            </h4>
                            <p className="text-xl text-foreground font-bold italic leading-relaxed">{currentStep.content.objetivo}</p>
                          </div>
@@ -585,7 +585,7 @@ export default function Modulos() {
                     <div className="space-y-8 pb-10">
                        <div className="flex items-end justify-between gap-4 border-b border-card-border pb-8">
                          <div className="space-y-2">
-                           <h4 className="text-[10px] font-black text-[#059669] dark:text-[#059669] uppercase tracking-[0.3em] font-mono italic">{currentStep.label}</h4>
+                           <h4 className="text-[10px] font-black text-[#1E3A8A] dark:text-[#1E3A8A] uppercase tracking-[0.3em] font-mono italic">{currentStep.label}</h4>
                            <h2 className="text-4xl font-black text-foreground italic uppercase tracking-tighter">{currentStep.titulo}</h2>
                          </div>
                          <div className="text-5xl font-black text-foreground/5 italic select-none">0{activeOvaStep + 1}</div>
@@ -688,9 +688,9 @@ export default function Modulos() {
 
                        {/* Legacy recurso_url support */}
                        {currentStep.content.recurso_url && currentStep.content.tipo !== 'recurso' && (
-                         <div className="p-8 rounded-3xl bg-[#059669]/5 border border-[#059669]/10 flex items-center justify-between gap-6">
+                         <div className="p-8 rounded-3xl bg-[#1E3A8A]/5 border border-[#1E3A8A]/10 flex items-center justify-between gap-6">
                            <div className="flex items-center gap-5">
-                             <div className="p-4 rounded-2xl bg-[#059669]/20 text-[#059669]">
+                             <div className="p-4 rounded-2xl bg-[#1E3A8A]/20 text-[#1E3A8A]">
                                <LinkIcon className="w-6 h-6" />
                              </div>
                              <div>
@@ -723,9 +723,9 @@ export default function Modulos() {
                         /* Legacy text-based evaluation */
                         <div className="max-w-3xl mx-auto text-center space-y-12">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-[#059669]/20 blur-[100px] rounded-full scale-150" />
+                            <div className="absolute inset-0 bg-[#1E3A8A]/20 blur-[100px] rounded-full scale-150" />
                             <div className="relative">
-                              <Terminal className="w-20 h-20 text-[#059669] mx-auto mb-8 drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
+                              <Terminal className="w-20 h-20 text-[#1E3A8A] mx-auto mb-8 drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
                               <h2 className="text-5xl font-black text-foreground italic uppercase tracking-tighter mb-4">Evaluación de Conocimiento</h2>
                               <p className="text-foreground/60 italic text-lg max-w-2xl mx-auto leading-relaxed">{currentStep.content.actividad}</p>
                             </div>
@@ -754,7 +754,7 @@ export default function Modulos() {
                                   onClick={() => window.open(currentStep.content.recursos.youtube_url, '_blank')}
                                 >
                                    <div className="flex items-center gap-4">
-                                     <div className="p-3 rounded-xl bg-[#059669]/10 text-[#059669] border border-[#059669]/20"><Video className="w-5 h-5" /></div>
+                                     <div className="p-3 rounded-xl bg-[#1E3A8A]/10 text-[#1E3A8A] border border-[#1E3A8A]/20"><Video className="w-5 h-5" /></div>
                                      <div>
                                        <h5 className="text-foreground font-bold italic text-sm">Material Audiovisual</h5>
                                        <p className="text-[10px] text-gray-600 font-bold uppercase italic tracking-widest">Video Explicativo</p>
@@ -788,7 +788,7 @@ export default function Modulos() {
                  {ovaSteps.map((_, i) => (
                    <div 
                      key={i} 
-                     className={`h-1 transition-all rounded-full ${i === activeOvaStep ? 'w-8 bg-[#059669]' : 'w-2 bg-white/10'}`} 
+                     className={`h-1 transition-all rounded-full ${i === activeOvaStep ? 'w-8 bg-[#1E3A8A]' : 'w-2 bg-white/10'}`} 
                    />
                  ))}
                </div>

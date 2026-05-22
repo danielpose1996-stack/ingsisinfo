@@ -89,13 +89,13 @@ export default function Login() {
   }, [perfil, isSubmitting]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
       <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1E3A8A]/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
       </div>
 
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <GlassCard className="p-8">
+        <GlassCard className="p-8 bg-card border border-card-border shadow-md rounded-xl">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-foreground mb-2">Inicio de Sesión</h2>
             <p className="text-foreground/60 text-sm italic">Accede a tu plataforma SISINFO</p>
@@ -115,15 +115,15 @@ export default function Login() {
                   Correo Electrónico
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="email"
                     value={email}
                     onChange={handleEmailChange}
-                    className={`w-full bg-card border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none transition-all ${
+                    className={`w-full bg-card border rounded-lg py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none transition-all ${
                       emailError 
                         ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20' 
-                        : 'border-card-border focus:border-[#059669]/50 focus:ring-1 focus:ring-[#059669]/20'
+                        : 'border-card-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20'
                     }`}
                     placeholder="tu@unipaz.edu.co"
                     required
@@ -141,12 +141,12 @@ export default function Login() {
                   Contraseña
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-card border border-card-border rounded-xl py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-[#059669]/50 focus:ring-1 focus:ring-[#059669]/20 transition-all"
+                    className="w-full bg-card border border-card-border rounded-lg py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
                     placeholder="••••••••"
                     required
                   />
@@ -164,7 +164,7 @@ export default function Login() {
                   <button 
                     type="button" 
                     onClick={() => window.location.reload()}
-                    className="text-[10px] font-bold uppercase tracking-widest text-[#059669] hover:text-[#047857] mt-1 text-left px-6"
+                    className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary-dark mt-1 text-left px-6"
                   >
                     ¿Sigue cargando? Haz clic aquí para reintentar
                   </button>
@@ -175,7 +175,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isSubmitting || !isEmailValid || !email}
-              className="w-full py-4 rounded-xl text-base shadow-xl shadow-[#059669]/10"
+              className="w-full py-4 rounded-lg text-base shadow-sm"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -192,7 +192,7 @@ export default function Login() {
               <button 
                 type="button"
                 onClick={() => window.location.reload()}
-                className="text-xs font-bold text-[#059669] hover:text-[#047857] bg-[#059669]/5 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
+                className="text-xs font-bold text-primary hover:text-primary-dark bg-blue-50/50 border border-blue-100 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
               >
                 ¿Demora mucho? Click para recargar sesión
               </button>

@@ -143,9 +143,9 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
     return (
       <div className="h-full flex flex-col justify-center max-w-2xl mx-auto text-center space-y-10">
         <div className="relative">
-          <div className="absolute inset-0 bg-[#059669]/20 blur-[100px] rounded-full scale-150" />
+          <div className="absolute inset-0 bg-[#1E3A8A]/20 blur-[100px] rounded-full scale-150" />
           <div className="relative space-y-6">
-            <Award className="w-20 h-20 text-[#059669] mx-auto drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
+            <Award className="w-20 h-20 text-[#1E3A8A] mx-auto drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
             <h2 className="text-4xl lg:text-5xl font-black text-foreground italic uppercase tracking-tighter">
               Evaluación Final
             </h2>
@@ -160,7 +160,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
 
         <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
           <GlassCard className="p-5 border-card-border text-center">
-            <CircleDot className="w-5 h-5 text-[#059669] mx-auto mb-2" />
+            <CircleDot className="w-5 h-5 text-[#1E3A8A] mx-auto mb-2" />
             <p className="text-2xl font-black text-foreground italic">{preguntas.length}</p>
             <p className="text-[9px] text-foreground/30 font-bold uppercase tracking-widest italic">Preguntas</p>
           </GlassCard>
@@ -195,10 +195,10 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
         {/* Score Header */}
         <div className="text-center space-y-6 py-8">
           <div className="relative inline-block">
-            <div className={`absolute inset-0 blur-[60px] rounded-full scale-150 ${passed ? 'bg-[#059669]/30' : 'bg-red-500/20'}`} />
+            <div className={`absolute inset-0 blur-[60px] rounded-full scale-150 ${passed ? 'bg-[#1E3A8A]/30' : 'bg-red-500/20'}`} />
             <div className="relative">
               {passed ? (
-                <Trophy className="w-20 h-20 text-[#059669] mx-auto drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
+                <Trophy className="w-20 h-20 text-[#1E3A8A] mx-auto drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
               ) : (
                 <AlertTriangle className="w-20 h-20 text-red-400 mx-auto drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
               )}
@@ -206,10 +206,10 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
           </div>
 
           <div>
-            <h2 className={`text-6xl font-black italic ${passed ? 'text-[#059669]' : 'text-red-400'}`}>
+            <h2 className={`text-6xl font-black italic ${passed ? 'text-[#1E3A8A]' : 'text-red-400'}`}>
               {percentage}%
             </h2>
-            <p className={`text-lg font-bold italic mt-2 ${passed ? 'text-[#059669]/70' : 'text-red-400/70'}`}>
+            <p className={`text-lg font-bold italic mt-2 ${passed ? 'text-[#1E3A8A]/70' : 'text-red-400/70'}`}>
               {passed ? '¡Evaluación Aprobada!' : 'No Aprobado'}
             </p>
             <p className="text-xs text-foreground/30 italic mt-1">
@@ -227,12 +227,12 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
             <GlassCard
               key={result.question._id}
               className={`p-6 border-2 space-y-3 ${
-                result.isCorrect ? 'border-[#059669]/20 bg-[#059669]/[0.02]' : 'border-red-500/15 bg-red-500/[0.02]'
+                result.isCorrect ? 'border-[#1E3A8A]/20 bg-[#1E3A8A]/[0.02]' : 'border-red-500/15 bg-red-500/[0.02]'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
-                  result.isCorrect ? 'bg-[#059669]/20 text-[#059669]' : 'bg-red-500/15 text-red-400'
+                  result.isCorrect ? 'bg-[#1E3A8A]/20 text-[#1E3A8A]' : 'bg-red-500/15 text-red-400'
                 }`}>
                   {result.isCorrect ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                 </div>
@@ -243,7 +243,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
 
                   {/* Show correct answer */}
                   {!result.isCorrect && (
-                    <div className="mt-2 text-xs text-[#059669] italic">
+                    <div className="mt-2 text-xs text-[#1E3A8A] italic">
                       <span className="font-bold">Respuesta correcta: </span>
                       {result.question.tipo === 'multiple_choice' && result.question.opciones?.[result.question.respuesta_correcta]}
                       {result.question.tipo === 'true_false' && (result.question.respuesta_correcta ? 'Verdadero' : 'Falso')}
@@ -262,7 +262,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
                 </div>
 
                 <span className={`text-xs font-bold italic shrink-0 ${
-                  result.isCorrect ? 'text-[#059669]' : 'text-foreground/20'
+                  result.isCorrect ? 'text-[#1E3A8A]' : 'text-foreground/20'
                 }`}>
                   {result.isCorrect ? `+${result.puntos}` : '0'} pts
                 </span>
@@ -308,7 +308,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
         </div>
         <div className="h-1.5 bg-card rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#059669] rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-[#1E3A8A] rounded-full transition-all duration-500 ease-out"
             style={{ width: `${((currentQuestion + 1) / preguntas.length) * 100}%` }}
           />
         </div>
@@ -322,9 +322,9 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
               onClick={() => setCurrentQuestion(i)}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
                 i === currentQuestion
-                  ? 'w-6 bg-[#059669]'
+                  ? 'w-6 bg-[#1E3A8A]'
                   : answers[q._id] !== undefined
-                    ? 'bg-[#059669]/30'
+                    ? 'bg-[#1E3A8A]/30'
                     : 'bg-card-border'
               }`}
             />
@@ -346,7 +346,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
               {/* Question Type Badge */}
               <div className="flex items-center gap-3">
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest italic border ${
-                  current.tipo === 'multiple_choice' ? 'bg-[#059669]/10 text-[#059669] border-[#059669]/20' :
+                  current.tipo === 'multiple_choice' ? 'bg-[#1E3A8A]/10 text-[#1E3A8A] border-[#1E3A8A]/20' :
                   current.tipo === 'true_false' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                   current.tipo === 'complete_code' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
                   'bg-amber-500/10 text-amber-400 border-amber-500/20'
@@ -375,13 +375,13 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
                         onClick={() => handleAnswer(current._id, optIdx)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
                           answers[current._id] === optIdx
-                            ? 'border-[#059669] bg-[#059669]/5 text-foreground shadow-[0_0_20px_rgba(5,150,105,0.05)]'
+                            ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 text-foreground shadow-[0_0_20px_rgba(5,150,105,0.05)]'
                             : 'border-card-border text-foreground/60 hover:border-foreground/20 hover:text-foreground hover:bg-white/[0.02]'
                         }`}
                       >
                         <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                           answers[current._id] === optIdx
-                            ? 'border-[#059669] bg-[#059669]/20 text-[#059669]'
+                            ? 'border-[#1E3A8A] bg-[#1E3A8A]/20 text-[#1E3A8A]'
                             : 'border-card-border text-foreground/20'
                         }`}>
                           <span className="text-xs font-black italic">{String.fromCharCode(65 + optIdx)}</span>
@@ -402,7 +402,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
                         className={`flex-1 py-6 rounded-3xl border-2 font-bold italic text-lg transition-all ${
                           answers[current._id] === value
                             ? value
-                              ? 'border-[#059669] bg-[#059669]/10 text-[#059669] shadow-[0_0_30px_rgba(5,150,105,0.08)]'
+                              ? 'border-[#1E3A8A] bg-[#1E3A8A]/10 text-[#1E3A8A] shadow-[0_0_30px_rgba(5,150,105,0.08)]'
                               : 'border-red-500 bg-red-500/10 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.08)]'
                             : 'border-card-border text-foreground/30 hover:text-foreground/60 hover:border-foreground/20'
                         }`}

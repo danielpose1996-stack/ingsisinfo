@@ -24,22 +24,22 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs"
           />
           
           {/* Modal Content */}
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`relative w-full ${maxWidth} max-h-full overflow-y-auto bg-[#1a1c22] border border-white/10 rounded-2xl shadow-2xl custom-scrollbar`}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            className={`relative w-full ${maxWidth} max-h-[90vh] overflow-y-auto bg-card border border-card-border rounded-xl shadow-xl custom-scrollbar`}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-white/5 bg-[#1a1c22]/80 backdrop-blur-md">
-              <h3 className="text-xl font-bold text-white italic">{title}</h3>
+            <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-card-border bg-card/90 backdrop-blur-md">
+              <h3 className="text-xl font-bold text-foreground italic">{title}</h3>
               <button 
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

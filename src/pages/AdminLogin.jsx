@@ -46,8 +46,8 @@ export default function AdminLogin() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <GlassCard className="max-w-md w-full p-12 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#059669]/20 mb-6 border border-[#059669]/30">
-            <Lock className="w-10 h-10 text-[#059669]" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 mb-6 border border-blue-200">
+            <Lock className="w-10 h-10 text-[#1E3A8A]" />
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4 italic">Acceso Concedido</h2>
           <p className="text-foreground/60">Cargando panel de gestión global...</p>
@@ -66,7 +66,7 @@ export default function AdminLogin() {
         <GlassCard className="p-10 border-[#1E3A8A]/20">
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-card mb-6 border border-card-border shadow-inner">
-              <ShieldAlert className="w-8 h-8 text-blue-300" />
+              <ShieldAlert className="w-8 h-8 text-[#1E3A8A]" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2 italic tracking-tight">Acceso Administrativo</h2>
             <p className="text-foreground/40 text-sm italic">Área restringida para gestión del sistema</p>
