@@ -23,7 +23,7 @@ export default function Navbar() {
     { name: 'Inicio', path: '/' },
     { name: 'Información', path: '/informacion' },
     { name: 'Módulos', path: '/modulos' },
-    { name: 'Rueda', path: '/#rueda' },
+    { name: 'Rueda', path: 'https://ruedadeproyectos.up.railway.app/', external: true },
     { name: 'Repositorio', path: '/repositorio' },
   ];
 
@@ -54,18 +54,30 @@ export default function Navbar() {
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-2">
               {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={cn(
-                    "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    location.pathname === link.path 
-                      ? "text-white font-bold bg-white/15" 
-                      : "text-white/80 hover:text-white hover:bg-white/10"
-                  )}
-                >
-                  {link.name}
-                </Link>
+                link.external ? (
+                  <a
+                    key={link.name}
+                    href={link.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    {link.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    className={cn(
+                      "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      location.pathname === link.path 
+                        ? "text-white font-bold bg-white/15" 
+                        : "text-white/80 hover:text-white hover:bg-white/10"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                )
               ))}
             </div>
           </div>
@@ -141,19 +153,32 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-[#1E3A8A] border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className={cn(
-                "block px-3 py-2 rounded-md text-base font-medium transition-colors",
-                location.pathname === link.path 
-                  ? "text-white bg-white/15" 
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              )}
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </Link>
+            link.external ? (
+              <a
+                key={link.name}
+                href={link.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                {link.name}
+              </a>
+            ) : (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                  location.pathname === link.path 
+                    ? "text-white bg-white/15" 
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.name}
+              </Link>
+            )
           ))}
           <div className="pt-4 pb-1 border-t border-blue-800">
             {(!user && !isAdmin) ? (
