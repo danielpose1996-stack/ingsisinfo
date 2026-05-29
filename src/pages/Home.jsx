@@ -7,12 +7,12 @@ import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Modal from '../components/Modal';
-import { 
-  ArrowRight, 
-  Image as ImageIcon, 
-  Sparkles, 
-  Download, 
-  FileText, 
+import {
+  ArrowRight,
+  Image as ImageIcon,
+  Sparkles,
+  Download,
+  FileText,
   ChevronRight,
   Calendar,
   ExternalLink,
@@ -82,7 +82,7 @@ export default function Home() {
         loadGallery(),
         loadProjects()
       ]);
-      
+
       if (!cancelled) setLoading(false);
     }
 
@@ -111,7 +111,7 @@ export default function Home() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { staggerChildren: 0.1 }
     }
@@ -129,8 +129,8 @@ export default function Home() {
       >
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1]" />
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -151,13 +151,13 @@ export default function Home() {
             Impulsando la innovación tecnológica y el desarrollo de soluciones informáticas en el Instituto Universitario de la Paz - UNIPAZ.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
+            <button
               onClick={() => window.location.href = '/modulos'}
               className="px-8 py-4 rounded-lg bg-[#1E3A8A] hover:bg-[#1E40AF] text-white font-bold transition-all shadow-md shadow-blue-900/10"
             >
               Explorar Módulos
             </button>
-            <button 
+            <button
               onClick={() => window.location.href = '/informacion'}
               className="px-8 py-4 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all backdrop-blur-xs"
             >
@@ -224,9 +224,9 @@ export default function Home() {
       {/* ═══ PRÓXIMOS EVENTOS + GALERÍA (2 columns) ═══ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          
+
           {/* Events - 2 cols */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-2"
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -305,7 +305,7 @@ export default function Home() {
           </motion.div>
 
           {/* Gallery - 3 cols */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-3"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -445,9 +445,9 @@ export default function Home() {
               <h3 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight leading-tight italic">
                 {selectedNews.titulo}
               </h3>
-              
+
               <div className="w-12 h-1 bg-primary rounded-full" />
-              
+
               <p className="text-foreground/85 text-base leading-relaxed whitespace-pre-wrap font-medium">
                 {selectedNews.contenido}
               </p>
@@ -526,9 +526,9 @@ export default function Home() {
               <h3 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight leading-tight italic">
                 {selectedEvent.titulo}
               </h3>
-              
+
               <div className="w-12 h-1 bg-primary rounded-full" />
-              
+
               <p className="text-foreground/85 text-base leading-relaxed whitespace-pre-wrap font-medium">
                 {selectedEvent.descripcion || 'Sin descripción detallada.'}
               </p>
