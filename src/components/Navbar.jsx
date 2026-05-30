@@ -12,7 +12,20 @@ export default function Navbar() {
   const { user, perfil, isAdmin, cerrarSesion } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
@@ -40,19 +53,26 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1E3A8A] border-b border-blue-800 shadow-md">
+    <nav 
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+        scrolled 
+          ? "bg-[#1E3A8A]/90 backdrop-blur-md border-b border-blue-800/80 shadow-lg py-1" 
+          : "bg-[#1E3A8A] border-b border-blue-800 py-2"
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-            <span className="text-xl font-bold text-white tracking-wide">
+          <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
+            <span className="text-xl font-black text-white tracking-wider font-display transition-transform group-hover:scale-105">
               SISINFO
             </span>
           </Link>
  
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-2">
+            <div className="ml-10 flex items-baseline space-x-1">
               {navLinks.map((link) => (
                 link.external ? (
                   <a
@@ -60,7 +80,7 @@ export default function Navbar() {
                     href={link.path}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
                   >
                     {link.name}
                   </a>
@@ -69,10 +89,10 @@ export default function Navbar() {
                     key={link.name}
                     to={link.path}
                     className={cn(
-                      "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent",
                       location.pathname === link.path 
-                        ? "text-white font-bold bg-white/15" 
-                        : "text-white/80 hover:text-white hover:bg-white/10"
+                        ? "text-white font-bold bg-white/10 backdrop-blur-xs border-white/10 shadow-sm" 
+                        : "text-white/80 hover:text-white hover:bg-white/5"
                     )}
                   >
                     {link.name}

@@ -122,7 +122,12 @@ export default function Home() {
     visible: { y: 0, opacity: 1 }
   };
   return (
-    <div className="space-y-24 pb-24 bg-background">
+    <div className="space-y-24 pb-24 bg-background relative overflow-hidden">
+      {/* Background Floating Mesh Glows (Depth Effect) */}
+      <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" />
+      <div className="absolute top-[45%] right-[-10%] w-[600px] h-[600px] rounded-full mesh-glow-amber animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-5s' }} />
+      <div className="absolute bottom-[15%] left-[5%] w-[450px] h-[450px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-10s' }} />
+
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden"
         style={{ backgroundImage: "url('/hero-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
@@ -141,7 +146,7 @@ export default function Home() {
               <Sparkles className="w-3 h-3 text-blue-300" /> Programa de Ingeniería Informática
             </span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-white drop-shadow-lg">
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter text-white drop-shadow-lg font-display leading-none">
             Semillero de Investigación <br />
             <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
               SISINFO
@@ -188,7 +193,7 @@ export default function Home() {
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Últimas Novedades</span>
               </div>
-              <h2 className="text-3xl font-extrabold text-foreground tracking-tight">Noticias Recientes</h2>
+              <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight font-display">Noticias Recientes</h2>
             </div>
           </div>
 
@@ -239,7 +244,7 @@ export default function Home() {
               </div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Agenda</span>
             </div>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-8">Próximos Eventos</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Próximos Eventos</h2>
 
             <div className="space-y-3">
               {loading ? (
@@ -318,7 +323,7 @@ export default function Home() {
               </div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Momentos</span>
             </div>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-8">Galería de Eventos</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Galería de Eventos</h2>
 
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -382,7 +387,7 @@ export default function Home() {
             </div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Logros</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-8">Proyectos Finalizados</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Proyectos Finalizados</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {proyectos.map((p, idx) => (
               <motion.div

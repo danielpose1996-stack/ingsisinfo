@@ -29,5 +29,10 @@ dist-ssr
 test-*.js
 test-*.cjs
 create-new-test-accounts.cjs
+create-admin.cjs
 build_error.txt
 lint_report.txt
+
+# Agentes de IA y habilidades locales
+.agents/
+skills-lock.json
