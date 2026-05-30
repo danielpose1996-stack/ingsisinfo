@@ -23,7 +23,16 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^(motion|[A-Z_])', argsIgnorePattern: '^_' }],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    },
+  },
+  {
+    files: ['test-*.js', 'create-*.cjs', '*.config.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
     },
   },
 ])

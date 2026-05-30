@@ -9,7 +9,7 @@ import { twMerge } from 'tailwind-merge';
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function Navbar() {
-  const { user, perfil, isAdmin, logoutAdmin, cerrarSesion } = useAuth();
+  const { user, perfil, isAdmin, cerrarSesion } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();

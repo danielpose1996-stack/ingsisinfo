@@ -29,17 +29,6 @@ import {
   Globe
 } from 'lucide-react';
 
-function formatYoutubeUrl(url) {
-  if (!url) return '';
-  let embedUrl = url;
-  if (embedUrl.includes('youtube.com/watch?v=')) {
-    embedUrl = embedUrl.replace('watch?v=', 'embed/');
-  } else if (embedUrl.includes('youtu.be/')) {
-    embedUrl = embedUrl.replace('youtu.be/', 'youtube.com/embed/');
-  }
-  return embedUrl;
-}
-
 export default function Modulos() {
   const navigate = useNavigate();
   const [modulos, setModulos] = useState([]);

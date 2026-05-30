@@ -53,7 +53,7 @@ const colorClasses = {
 };
 
 // ─── Sortable Question Card ───
-function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions }) {
+function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const typeConfig = QUESTION_TYPES.find(t => t.id === question.tipo) || QUESTION_TYPES[0];
   const TypeIcon = typeConfig.icon;
@@ -350,6 +350,8 @@ function SortableQuestion({ question, index, onUpdate, onRemove, totalQuestions 
   );
 }
 
+const generateQuestionId = () => `q-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
 // ─── Main QuizBuilder Component ───
 export default function QuizBuilder({ evaluacion, onChange }) {
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -374,7 +376,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
 
   const handleAddQuestion = (tipo) => {
     const baseQuestion = {
-      _id: `q-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      _id: generateQuestionId(),
       tipo,
       enunciado: '',
       puntos: 10,

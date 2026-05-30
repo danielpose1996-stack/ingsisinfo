@@ -52,7 +52,7 @@ function evaluateAnswer(question, answer) {
   }
 }
 
-export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
+export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -63,31 +63,6 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
 
   const preguntas = evaluacion?.preguntas || [];
   const totalPuntos = preguntas.reduce((sum, q) => sum + (q.puntos || 10), 0);
-
-  // Timer
-  useEffect(() => {
-    if (quizStarted && evaluacion.tiempo_limite > 0 && !isSubmitted) {
-      setTimeLeft(evaluacion.tiempo_limite * 60);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [quizStarted]);
-
-  useEffect(() => {
-    if (timeLeft === null || isSubmitted) return;
-    if (timeLeft <= 0) {
-      handleSubmit();
-      return;
-    }
-    timerRef.current = setTimeout(() => setTimeLeft(t => t - 1), 1000);
-    return () => clearTimeout(timerRef.current);
-  }, [timeLeft, isSubmitted]);
-
-  const formatTime = (seconds) => {
-    if (seconds === null) return '';
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
 
   const handleAnswer = useCallback((qId, value) => {
     setAnswers(prev => ({ ...prev, [qId]: value }));
@@ -114,6 +89,23 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
     }
   }, [preguntas, answers, totalPuntos, evaluacion.nota_minima, onComplete]);
 
+  useEffect(() => {
+    if (timeLeft === null || isSubmitted) return;
+    if (timeLeft <= 0) {
+      setTimeout(() => handleSubmit(), 0);
+      return;
+    }
+    timerRef.current = setTimeout(() => setTimeLeft(t => t - 1), 1000);
+    return () => clearTimeout(timerRef.current);
+  }, [timeLeft, isSubmitted, handleSubmit]);
+
+  const formatTime = (seconds) => {
+    if (seconds === null) return '';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const handleRestart = () => {
     setAnswers({});
     setIsSubmitted(false);
@@ -125,7 +117,7 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
 
   const current = preguntas[currentQuestion];
   const answered = Object.keys(answers).length;
-  const progress = preguntas.length > 0 ? (answered / preguntas.length) * 100 : 0;
+  const _progress = preguntas.length > 0 ? (answered / preguntas.length) * 100 : 0;
 
   // Calculate results
   const results = preguntas.map(q => ({
@@ -179,7 +171,12 @@ export default function QuizPlayer({ evaluacion, recursos, onComplete }) {
         </div>
 
         <Button
-          onClick={() => setQuizStarted(true)}
+          onClick={() => {
+            setQuizStarted(true);
+            if (evaluacion.tiempo_limite > 0) {
+              setTimeLeft(evaluacion.tiempo_limite * 60);
+            }
+          }}
           className="mx-auto gap-3 italic uppercase tracking-widest py-4 px-12 text-sm font-black"
         >
           Comenzar Evaluación <ChevronRight className="w-4 h-4" />
