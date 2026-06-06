@@ -1,10 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import CodeBlock from '@tiptap/extension-code-block';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Image as TiptapImage } from '@tiptap/extension-image';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { toast } from 'react-hot-toast';
+import { subirArchivoOva } from '../lib/supabase';
 import {
   Bold,
   Italic,
@@ -19,7 +26,9 @@ import {
   Heading3,
   Undo,
   Redo,
-  RemoveFormatting
+  RemoveFormatting,
+  Image as ImageIcon,
+  Table as TableIcon
 } from 'lucide-react';
 
 const ToolbarButton = ({ onClick, active, children, title }) => (
@@ -48,6 +57,8 @@ export default function RichTextEditor({
   minHeight = '180px',
   className = '' 
 }) {
+  const fileInputRef = useRef(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -71,6 +82,17 @@ export default function RichTextEditor({
       Placeholder.configure({
         placeholder,
       }),
+      TiptapImage.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-xl border border-card-border my-6 shadow-md block mx-auto',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -95,125 +117,234 @@ export default function RichTextEditor({
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+
+    const toastId = toast.loading('Subiendo imagen...');
+    try {
+      const url = await subirArchivoOva(file);
+      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+      toast.success('Imagen insertada con éxito', { id: toastId });
+    } catch (err) {
+      console.error('Error al subir imagen de OVA:', err);
+      toast.error('Error al subir la imagen: ' + err.message, { id: toastId });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (!editor) return null;
 
   return (
     <div className={`rounded-xl border border-card-border bg-card overflow-hidden transition-all focus-within:border-[#1E3A8A]/50 focus-within:shadow-sm ${className}`}>
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-card-border bg-slate-50">
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          active={editor.isActive('bold')}
-          title="Negrita"
-        >
-          <Bold className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          active={editor.isActive('italic')}
-          title="Cursiva"
-        >
-          <Italic className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          active={editor.isActive('underline')}
-          title="Subrayado"
-        >
-          <UnderlineIcon className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          active={editor.isActive('strike')}
-          title="Tachado"
-        >
-          <Strikethrough className="w-3.5 h-3.5" />
-        </ToolbarButton>
+      {/* Hidden File Input for Image Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        className="hidden"
+      />
 
-        <ToolbarDivider />
+      {/* Toolbar Container */}
+      <div className="flex flex-col border-b border-card-border bg-slate-50">
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-2">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            active={editor.isActive('bold')}
+            title="Negrita"
+          >
+            <Bold className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            active={editor.isActive('italic')}
+            title="Cursiva"
+          >
+            <Italic className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            active={editor.isActive('underline')}
+            title="Subrayado"
+          >
+            <UnderlineIcon className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            active={editor.isActive('strike')}
+            title="Tachado"
+          >
+            <Strikethrough className="w-3.5 h-3.5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          active={editor.isActive('heading', { level: 2 })}
-          title="Título H2"
-        >
-          <Heading2 className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          active={editor.isActive('heading', { level: 3 })}
-          title="Subtítulo H3"
-        >
-          <Heading3 className="w-3.5 h-3.5" />
-        </ToolbarButton>
+          <ToolbarDivider />
 
-        <ToolbarDivider />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            active={editor.isActive('heading', { level: 2 })}
+            title="Título H2"
+          >
+            <Heading2 className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            active={editor.isActive('heading', { level: 3 })}
+            title="Subtítulo H3"
+          >
+            <Heading3 className="w-3.5 h-3.5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive('bulletList')}
-          title="Lista"
-        >
-          <List className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive('orderedList')}
-          title="Lista numerada"
-        >
-          <ListOrdered className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          active={editor.isActive('blockquote')}
-          title="Cita"
-        >
-          <Quote className="w-3.5 h-3.5" />
-        </ToolbarButton>
+          <ToolbarDivider />
 
-        <ToolbarDivider />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            active={editor.isActive('bulletList')}
+            title="Lista"
+          >
+            <List className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            active={editor.isActive('orderedList')}
+            title="Lista numerada"
+          >
+            <ListOrdered className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            active={editor.isActive('blockquote')}
+            title="Cita"
+          >
+            <Quote className="w-3.5 h-3.5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          active={editor.isActive('codeBlock')}
-          title="Bloque de código"
-        >
-          <Code className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={setLink}
-          active={editor.isActive('link')}
-          title="Insertar enlace"
-        >
-          <LinkIcon className="w-3.5 h-3.5" />
-        </ToolbarButton>
+          <ToolbarDivider />
 
-        <ToolbarDivider />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            active={editor.isActive('codeBlock')}
+            title="Bloque de código"
+          >
+            <Code className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={setLink}
+            active={editor.isActive('link')}
+            title="Insertar enlace"
+          >
+            <LinkIcon className="w-3.5 h-3.5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
-          title="Limpiar formato"
-        >
-          <RemoveFormatting className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().undo().run()}
-          title="Deshacer"
-        >
-          <Undo className="w-3.5 h-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().redo().run()}
-          title="Rehacer"
-        >
-          <Redo className="w-3.5 h-3.5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={triggerImageUpload}
+            title="Insertar Imagen desde Computador"
+          >
+            <ImageIcon className="w-3.5 h-3.5" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+            title="Insertar Tabla"
+          >
+            <TableIcon className="w-3.5 h-3.5" />
+          </ToolbarButton>
+
+          <ToolbarDivider />
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+            title="Limpiar formato"
+          >
+            <RemoveFormatting className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().undo().run()}
+            title="Deshacer"
+          >
+            <Undo className="w-3.5 h-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().redo().run()}
+            title="Rehacer"
+          >
+            <Redo className="w-3.5 h-3.5" />
+          </ToolbarButton>
+        </div>
+
+        {/* Dynamic Sub-toolbar for active Table controls */}
+        {editor.isActive('table') && (
+          <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 bg-blue-50/50 border-t border-card-border animate-in slide-in-from-top-1 duration-200">
+            <span className="text-[10px] font-bold text-[#1E3A8A] uppercase tracking-wider mr-2">Tabla:</span>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addColumnBefore().run()}
+              className="px-2 py-1 bg-white border border-card-border rounded text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              + Col Izq
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              className="px-2 py-1 bg-white border border-card-border rounded text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              + Col Der
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              className="px-2 py-1 bg-red-50 border border-red-100 rounded text-[10px] font-bold text-red-600 hover:bg-red-100 transition-colors"
+            >
+              Eliminar Col
+            </button>
+            
+            <div className="w-px h-3.5 bg-slate-200 mx-1" />
+
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addRowBefore().run()}
+              className="px-2 py-1 bg-white border border-card-border rounded text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              + Fila Arriba
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              className="px-2 py-1 bg-white border border-card-border rounded text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              + Fila Abajo
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              className="px-2 py-1 bg-red-50 border border-red-100 rounded text-[10px] font-bold text-red-600 hover:bg-red-100 transition-colors"
+            >
+              Eliminar Fila
+            </button>
+
+            <div className="w-px h-3.5 bg-slate-200 mx-1" />
+
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              className="px-2 py-1 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 transition-colors"
+            >
+              Eliminar Tabla
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Editor Content */}
-      <div className="px-5 py-4 bg-card" style={{ minHeight }}>
+      <div className="px-5 py-4 bg-card animate-in fade-in duration-300" style={{ minHeight }}>
         <EditorContent editor={editor} />
       </div>
     </div>
   );
 }
+
