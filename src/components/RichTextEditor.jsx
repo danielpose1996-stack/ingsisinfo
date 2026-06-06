@@ -10,8 +10,36 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
+import { ResizableNodeView } from '@tiptap/core';
 import { toast } from 'react-hot-toast';
 import { subirArchivoOva } from '../lib/supabase';
+
+// Patch ResizableNodeView to prevent ProseMirror click/drag interception
+if (typeof window !== 'undefined' && ResizableNodeView) {
+  const originalCreateContainer = ResizableNodeView.prototype.createContainer;
+  ResizableNodeView.prototype.createContainer = function() {
+    const el = originalCreateContainer.apply(this, arguments);
+    if (el) el.setAttribute('contenteditable', 'false');
+    return el;
+  };
+
+  const originalCreateWrapper = ResizableNodeView.prototype.createWrapper;
+  ResizableNodeView.prototype.createWrapper = function() {
+    const el = originalCreateWrapper.apply(this, arguments);
+    if (el) el.setAttribute('contenteditable', 'false');
+    return el;
+  };
+
+  const originalCreateHandle = ResizableNodeView.prototype.createHandle;
+  ResizableNodeView.prototype.createHandle = function(direction) {
+    const el = originalCreateHandle.apply(this, arguments);
+    if (el) {
+      el.setAttribute('contenteditable', 'false');
+      el.addEventListener('dragstart', e => e.preventDefault());
+    }
+    return el;
+  };
+}
 import {
   Bold,
   Italic,
