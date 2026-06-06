@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -14,19 +14,27 @@ import { ResizableNodeView } from '@tiptap/core';
 import { toast } from 'react-hot-toast';
 import { subirArchivoOva } from '../lib/supabase';
 
-// Patch ResizableNodeView to prevent ProseMirror click/drag interception
+// Patch ResizableNodeView to prevent ProseMirror click/drag interception and add diagnostic logging
 if (typeof window !== 'undefined' && ResizableNodeView) {
+  console.log('ResizableNodeView found in @tiptap/core, patching prototype...');
+
   const originalCreateContainer = ResizableNodeView.prototype.createContainer;
   ResizableNodeView.prototype.createContainer = function() {
     const el = originalCreateContainer.apply(this, arguments);
-    if (el) el.setAttribute('contenteditable', 'false');
+    if (el) {
+      el.setAttribute('contenteditable', 'false');
+      console.log('Container created with contenteditable="false"', el);
+    }
     return el;
   };
 
   const originalCreateWrapper = ResizableNodeView.prototype.createWrapper;
   ResizableNodeView.prototype.createWrapper = function() {
     const el = originalCreateWrapper.apply(this, arguments);
-    if (el) el.setAttribute('contenteditable', 'false');
+    if (el) {
+      el.setAttribute('contenteditable', 'false');
+      console.log('Wrapper created with contenteditable="false"', el);
+    }
     return el;
   };
 
@@ -36,8 +44,42 @@ if (typeof window !== 'undefined' && ResizableNodeView) {
     if (el) {
       el.setAttribute('contenteditable', 'false');
       el.addEventListener('dragstart', e => e.preventDefault());
+      console.log(`Handle created for direction "${direction}" with contenteditable="false"`);
     }
     return el;
+  };
+
+  const originalResizeStart = ResizableNodeView.prototype.handleResizeStart;
+  ResizableNodeView.prototype.handleResizeStart = function(event, direction) {
+    console.log(`Resize START triggered: direction=${direction}, target=`, event.target);
+    try {
+      originalResizeStart.apply(this, arguments);
+      console.log(`Resize START successful: startWidth=${this.startWidth}, startHeight=${this.startHeight}, startX=${this.startX}, startY=${this.startY}`);
+    } catch (err) {
+      console.error('Error in handleResizeStart:', err);
+    }
+  };
+
+  const originalResize = ResizableNodeView.prototype.handleResize;
+  ResizableNodeView.prototype.handleResize = function(deltaX, deltaY) {
+    console.log(`Resize DRAG: deltaX=${deltaX}, deltaY=${deltaY}`);
+    try {
+      originalResize.apply(this, arguments);
+      console.log(`Resize DRAG successful: new width style=${this.element.style.width}, height style=${this.element.style.height}`);
+    } catch (err) {
+      console.error('Error in handleResize:', err);
+    }
+  };
+
+  const originalMouseUp = ResizableNodeView.prototype.handleMouseUp;
+  ResizableNodeView.prototype.handleMouseUp = function() {
+    console.log('Resize END (mouseup)');
+    try {
+      originalMouseUp.apply(this, arguments);
+      console.log('Resize END successful');
+    } catch (err) {
+      console.error('Error in handleMouseUp:', err);
+    }
   };
 }
 import {
@@ -100,7 +142,7 @@ export default function RichTextEditor({
           class: 'text-[#1E3A8A] underline hover:text-[#1D4ED8] transition-colors',
           target: '_blank',
           rel: 'noopener noreferrer',
-        },
+          },
       }),
       CodeBlock.configure({
         HTMLAttributes: {
@@ -136,6 +178,79 @@ export default function RichTextEditor({
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const editorEl = editor.options.element;
+    if (!editorEl) return;
+
+    // Helper to dynamically set attributes on the actual DOM elements
+    const patchElements = () => {
+      // Find all resize containers
+      const containers = editorEl.querySelectorAll('[data-resize-container]');
+      containers.forEach(container => {
+        if (container.getAttribute('contenteditable') !== 'false') {
+          container.setAttribute('contenteditable', 'false');
+          console.log('[Observer] Patched container contenteditable="false"');
+        }
+      });
+
+      // Find all resize wrappers
+      const wrappers = editorEl.querySelectorAll('[data-resize-wrapper]');
+      wrappers.forEach(wrapper => {
+        if (wrapper.getAttribute('contenteditable') !== 'false') {
+          wrapper.setAttribute('contenteditable', 'false');
+          console.log('[Observer] Patched wrapper contenteditable="false"');
+        }
+      });
+
+      // Find all resize handles
+      const handles = editorEl.querySelectorAll('[data-resize-handle]');
+      handles.forEach(handle => {
+        if (handle.getAttribute('contenteditable') !== 'false') {
+          handle.setAttribute('contenteditable', 'false');
+          
+          // Disable native drag starts on handles
+          handle.addEventListener('dragstart', e => {
+            e.preventDefault();
+            e.stopPropagation();
+          }, { passive: false });
+          
+          // Prevent mousedown from bubbling up to ProseMirror selection handler
+          handle.addEventListener('mousedown', e => {
+            e.stopPropagation();
+          }, { passive: false });
+
+          handle.addEventListener('touchstart', e => {
+            e.stopPropagation();
+          }, { passive: false });
+
+          console.log(`[Observer] Patched handle [${handle.getAttribute('data-resize-handle')}]`);
+        }
+      });
+    };
+
+    // Run patch immediately and on every update
+    patchElements();
+
+    const observer = new MutationObserver(patchElements);
+    observer.observe(editorEl, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'data-resize-state']
+    });
+
+    editor.on('transaction', patchElements);
+    editor.on('selectionUpdate', patchElements);
+
+    return () => {
+      observer.disconnect();
+      editor.off('transaction', patchElements);
+      editor.off('selectionUpdate', patchElements);
+    };
+  }, [editor]);
 
   const setLink = useCallback(() => {
     if (!editor) return;
