@@ -322,3 +322,84 @@
   display: block;
 }
 
+/* Tiptap Resizable Image Styles */
+.tiptap-resizable {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.tiptap-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #1E3A8A;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+.tiptap-resize-handle:hover {
+  transform: scale(1.2);
+}
+
+.tiptap-resize-handle-top {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.tiptap-resize-handle-bottom {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.tiptap-resize-handle-left {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.tiptap-resize-handle-right {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+/* Diagonal handles (often standard) */
+.tiptap-resize-handle-top-left {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.tiptap-resize-handle-top-right {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.tiptap-resize-handle-bottom-left {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.tiptap-resize-handle-bottom-right {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+.tiptap-resizable.is-resizing {
+  outline: 2px solid #1E3A8A;
+}
+
+

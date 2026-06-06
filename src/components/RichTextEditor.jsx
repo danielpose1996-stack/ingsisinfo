@@ -83,8 +83,12 @@ export default function RichTextEditor({
         placeholder,
       }),
       TiptapImage.configure({
+        allowBase64: true,
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-xl border border-card-border my-6 shadow-md block mx-auto',
+        },
+        resize: {
+          enabled: true,
         },
       }),
       Table.configure({
