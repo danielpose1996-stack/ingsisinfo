@@ -3,17 +3,17 @@ require('dotenv').config();
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 
-// IMPORTANTE: Debes colocar tu clave service_role (secreta) aquí o en tu archivo .env como SUPABASE_SERVICE_ROLE_KEY
-// Puedes obtenerla en: Supabase Dashboard -> Settings -> API -> service_role key
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'TU_SERVICE_ROLE_KEY_AQUI';
+// Cargar la clave service_role (secreta) desde el archivo .env como SUPABASE_SERVICE_ROLE_KEY
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL) {
   console.error('❌ Error: No se encontró VITE_SUPABASE_URL en el archivo .env');
   process.exit(1);
 }
 
-if (SERVICE_ROLE_KEY === 'TU_SERVICE_ROLE_KEY_AQUI' || !SERVICE_ROLE_KEY) {
-  console.error('❌ Error: Por favor configura la clave service_role en el script o en tu archivo .env como SUPABASE_SERVICE_ROLE_KEY');
+if (!SERVICE_ROLE_KEY) {
+  console.error('❌ Error: Por favor configura la clave service_role en tu archivo .env como SUPABASE_SERVICE_ROLE_KEY');
+  console.error('Puedes obtenerla en: Supabase Dashboard -> Settings -> API -> service_role key');
   process.exit(1);
 }
 
@@ -25,14 +25,22 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 });
 
 async function crearAdmin() {
+  const adminEmail = process.env.SUPABASE_ADMIN_EMAIL || 'admin.rueda@unipaz.edu.co';
+  const adminPassword = process.env.SUPABASE_ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    console.error('❌ Error: Por favor configura la contraseña del administrador en tu archivo .env como SUPABASE_ADMIN_PASSWORD');
+    process.exit(1);
+  }
+
   console.log('⏳ Iniciando creación de administrador...');
   console.log(`URL de Supabase: ${SUPABASE_URL}`);
-  console.log('Correo: admin.rueda@unipaz.edu.co');
+  console.log(`Correo: ${adminEmail}`);
 
   // 1. Crear el usuario en auth.users a través del API de Administración (Bypassea RLS y restricciones)
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: 'admin.rueda@unipaz.edu.co',
-    password: 'admin023',
+    email: adminEmail,
+    password: adminPassword,
     email_confirm: true,
     user_metadata: { nombre: 'Admin Rueda', rol: 'admin' }
   });
@@ -62,7 +70,7 @@ async function crearAdmin() {
       .from('perfiles')
       .insert({
         user_id: userId,
-        email: 'admin.rueda@unipaz.edu.co',
+        email: adminEmail,
         nombre: 'Admin Rueda',
         rol: 'admin'
       });
