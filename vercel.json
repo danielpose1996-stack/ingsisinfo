@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://dwwhqkowmyrdauzygztb.supabase.co; connect-src 'self' https://dwwhqkowmyrdauzygztb.supabase.co wss://dwwhqkowmyrdauzygztb.supabase.co;"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://dwwhqkowmyrdauzygztb.supabase.co https://images.unsplash.com; connect-src 'self' https://dwwhqkowmyrdauzygztb.supabase.co wss://dwwhqkowmyrdauzygztb.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; frame-src 'self' https://www.youtube.com https://youtube.com;"
         },
         {
           "key": "X-Content-Type-Options",

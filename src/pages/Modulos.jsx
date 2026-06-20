@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo, registrarResultadoOva } from '../lib/supabase';
+import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo, registrarResultadoOva, descargarArchivo } from '../lib/supabase';
 import { sanitizeHTML } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
@@ -313,8 +313,10 @@ export default function Modulos() {
                           variant="outline" 
                           className="w-full gap-2 italic py-3 text-xs"
                           onClick={() => {
-                            const url = p.versiones_proyecto?.[p.versiones_proyecto.length - 1]?.documento_url;
-                            if (url) window.open(url, '_blank');
+                            const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
+                            if (lastVersion?.documento_url) {
+                              descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo);
+                            }
                           }}
                         >
                           <Download className="w-4 h-4" /> REVISAR DOCUMENTO

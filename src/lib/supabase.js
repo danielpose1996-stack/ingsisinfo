@@ -468,7 +468,7 @@ export async function obtenerTodosProyectos() {
             *,
             estudiante:estudiante_id ( nombre, apellido ),
             docente:docente_id ( nombre, apellido ),
-            versiones_proyecto ( documento_url )
+            versiones_proyecto ( documento_url, nombre_archivo )
         `)
         .order('created_at', { ascending: false });
     if (error) throw error;
@@ -482,7 +482,7 @@ export async function obtenerProyectosFinalizados() {
             *,
             estudiante:estudiante_id ( nombre, apellido ),
             docente:docente_id ( nombre, apellido ),
-            versiones_proyecto ( documento_url )
+            versiones_proyecto ( documento_url, nombre_archivo )
         `)
         .eq('terminado', true)
         .order('updated_at', { ascending: false });
@@ -648,7 +648,7 @@ export async function subirArchivoOva(file, pathPrefix = 'ovas') {
     }
 
     const { error: uploadError } = await supabase.storage
-        .from('documentos-proyectos')
+        .from('ovas-publico')
         .upload(fileName, file, { 
             upsert: false,
             contentType: contentType 
@@ -656,7 +656,7 @@ export async function subirArchivoOva(file, pathPrefix = 'ovas') {
     if (uploadError) throw uploadError;
 
     const { data: urlData } = supabase.storage
-        .from('documentos-proyectos')
+        .from('ovas-publico')
         .getPublicUrl(fileName);
     
     return urlData.publicUrl;

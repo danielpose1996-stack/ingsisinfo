@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados, supabase } from '../lib/supabase';
+import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados, descargarArchivo, supabase } from '../lib/supabase';
 import NewsCard from '../components/NewsCard';
 import EventItem from '../components/EventItem';
 import GlassCard from '../components/GlassCard';
@@ -389,31 +389,35 @@ export default function Home() {
           </div>
           <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Proyectos Finalizados</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {proyectos.map((p, idx) => (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="p-6 rounded-xl border border-card-border bg-card shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
-              >
-                <Badge variant="blue" className="w-fit mb-4">{p.categoria || 'Proyecto'}</Badge>
-                <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">{p.titulo}</h3>
-                <p className="text-foreground/75 text-sm line-clamp-3 leading-relaxed flex-grow">{p.descripcion}</p>
-                {p.documento_url && (
-                  <a
-                    href={p.documento_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Ver Documentación</span>
-                  </a>
-                )}
-              </motion.div>
-            ))}
+            {proyectos.map((p, idx) => {
+              const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
+              return (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="p-6 rounded-xl border border-card-border bg-card shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                >
+                  <Badge variant="blue" className="w-fit mb-4">{p.linea_investigacion || 'Proyecto'}</Badge>
+                  <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 uppercase">{p.nombre}</h3>
+                  <div className="text-foreground/70 text-xs italic flex-grow space-y-1 mt-2">
+                    <p><strong className="text-foreground/40 font-mono text-[9px] uppercase tracking-wider">Autor:</strong> {p.estudiante?.nombre} {p.estudiante?.apellido}</p>
+                    <p><strong className="text-foreground/40 font-mono text-[9px] uppercase tracking-wider">Asesor:</strong> {p.docente?.nombre} {p.docente?.apellido}</p>
+                  </div>
+                  {lastVersion?.documento_url && (
+                    <button
+                      onClick={() => descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo)}
+                      className="mt-6 inline-flex items-center gap-2 text-xs font-black text-[#1E3A8A] hover:text-blue-800 transition-colors cursor-pointer bg-transparent border-none p-0 uppercase tracking-wider"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Descargar Documentación</span>
+                    </button>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </section>
       )}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { obtenerProyectosFinalizados, eliminarProyecto } from '../lib/supabase';
+import { obtenerProyectosFinalizados, eliminarProyecto, descargarArchivo } from '../lib/supabase';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -262,7 +262,7 @@ export default function Repositorio() {
                       onClick={() => {
                         const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
                         if (lastVersion?.documento_url) {
-                          window.open(lastVersion.documento_url, '_blank');
+                          descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo);
                         }
                       }}
                     >

@@ -161,7 +161,7 @@ export default function OvaHtmlPlayer() {
             srcDoc={htmlContent} 
             className="w-full h-full border-none absolute inset-0"
             title={ova.titulo}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-forms"
             allowFullScreen
           />
         ) : (
