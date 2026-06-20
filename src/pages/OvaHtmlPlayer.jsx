@@ -60,12 +60,40 @@ export default function OvaHtmlPlayer() {
         let processedHtml = htmlText;
         if (baseUrl) {
           const baseTag = `<base href="${baseUrl}">`;
+          const storageMockScript = `
+            <script>
+              (function() {
+                const makeStorage = () => {
+                  const store = {};
+                  return {
+                    getItem: (key) => store[key] || null,
+                    setItem: (key, value) => { store[key] = String(value); },
+                    removeItem: (key) => { delete store[key]; },
+                    clear: () => { for (const key in store) delete store[key]; },
+                    key: (index) => Object.keys(store)[index] || null,
+                    get length() { return Object.keys(store).length; }
+                  };
+                };
+                try {
+                  window.localStorage;
+                } catch (e) {
+                  Object.defineProperty(window, 'localStorage', { value: makeStorage() });
+                }
+                try {
+                  window.sessionStorage;
+                } catch (e) {
+                  Object.defineProperty(window, 'sessionStorage', { value: makeStorage() });
+                }
+              })();
+            </script>
+          `;
+          const injection = baseTag + storageMockScript;
           if (processedHtml.includes('<head>')) {
-            processedHtml = processedHtml.replace('<head>', `<head>${baseTag}`);
+            processedHtml = processedHtml.replace('<head>', `<head>${injection}`);
           } else if (processedHtml.includes('<HEAD>')) {
-            processedHtml = processedHtml.replace('<HEAD>', `<HEAD>${baseTag}`);
+            processedHtml = processedHtml.replace('<HEAD>', `<HEAD>${injection}`);
           } else {
-            processedHtml = baseTag + processedHtml;
+            processedHtml = injection + processedHtml;
           }
         }
         setHtmlContent(processedHtml);
