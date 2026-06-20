@@ -38,6 +38,12 @@ DROP POLICY IF EXISTS perfiles_select_policy ON public.perfiles;
 DROP POLICY IF EXISTS perfiles_insert_policy ON public.perfiles;
 DROP POLICY IF EXISTS perfiles_update_policy ON public.perfiles;
 DROP POLICY IF EXISTS perfiles_delete_policy ON public.perfiles;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow authenticated read access" ON public.perfiles;
+DROP POLICY IF EXISTS "Allow user update" ON public.perfiles;
+DROP POLICY IF EXISTS "Allow admin insert" ON public.perfiles;
+DROP POLICY IF EXISTS "Allow admin update" ON public.perfiles;
+DROP POLICY IF EXISTS "Allow admin delete" ON public.perfiles;
 
 -- Cualquier usuario autenticado puede leer perfiles (ej. estudiantes buscan docentes, docentes ven estudiantes)
 -- Pero limitamos para que solo lean su propio perfil o perfiles de docentes, a menos que sean admin/docente.
@@ -92,6 +98,11 @@ DROP POLICY IF EXISTS proyectos_select_policy ON public.proyectos;
 DROP POLICY IF EXISTS proyectos_insert_policy ON public.proyectos;
 DROP POLICY IF EXISTS proyectos_update_policy ON public.proyectos;
 DROP POLICY IF EXISTS proyectos_delete_policy ON public.proyectos;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow user read" ON public.proyectos;
+DROP POLICY IF EXISTS "Allow user insert" ON public.proyectos;
+DROP POLICY IF EXISTS "Allow user update" ON public.proyectos;
+DROP POLICY IF EXISTS "Allow admin delete" ON public.proyectos;
 
 -- Lectura: Estudiante/Docente dueño del proyecto, Administrador, o proyectos finalizados (terminado = true)
 CREATE POLICY proyectos_select_policy ON public.proyectos
@@ -141,6 +152,11 @@ DROP POLICY IF EXISTS observaciones_select_policy ON public.observaciones;
 DROP POLICY IF EXISTS observaciones_insert_policy ON public.observaciones;
 DROP POLICY IF EXISTS observaciones_update_policy ON public.observaciones;
 DROP POLICY IF EXISTS observaciones_delete_policy ON public.observaciones;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow user read" ON public.observaciones;
+DROP POLICY IF EXISTS "Allow user insert" ON public.observaciones;
+DROP POLICY IF EXISTS "Allow user update" ON public.observaciones;
+DROP POLICY IF EXISTS "Allow admin delete" ON public.observaciones;
 
 -- Lectura: Si el usuario puede leer el proyecto, puede ver sus observaciones
 CREATE POLICY observaciones_select_policy ON public.observaciones
@@ -198,6 +214,9 @@ CREATE POLICY observaciones_delete_policy ON public.observaciones
 DROP POLICY IF EXISTS notificaciones_select_policy ON public.notificaciones;
 DROP POLICY IF EXISTS notificaciones_insert_policy ON public.notificaciones;
 DROP POLICY IF EXISTS notificaciones_update_policy ON public.notificaciones;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow user read" ON public.notificaciones;
+DROP POLICY IF EXISTS "Allow user update" ON public.notificaciones;
 
 -- Lectura: Solo el destinatario de la notificación o el administrador
 CREATE POLICY notificaciones_select_policy ON public.notificaciones
@@ -231,6 +250,10 @@ CREATE POLICY notificaciones_update_policy ON public.notificaciones
 DROP POLICY IF EXISTS versiones_proyecto_select_policy ON public.versiones_proyecto;
 DROP POLICY IF EXISTS versiones_proyecto_insert_policy ON public.versiones_proyecto;
 DROP POLICY IF EXISTS versiones_proyecto_modify_policy ON public.versiones_proyecto;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow user read" ON public.versiones_proyecto;
+DROP POLICY IF EXISTS "Allow user insert" ON public.versiones_proyecto;
+DROP POLICY IF EXISTS "Allow admin delete" ON public.versiones_proyecto;
 
 -- Lectura: Si el usuario es dueño del proyecto o el proyecto está finalizado
 CREATE POLICY versiones_proyecto_select_policy ON public.versiones_proyecto
@@ -274,6 +297,10 @@ DROP POLICY IF EXISTS resultados_ovas_select_policy ON public.resultados_ovas;
 DROP POLICY IF EXISTS resultados_ovas_insert_policy ON public.resultados_ovas;
 DROP POLICY IF EXISTS resultados_ovas_update_policy ON public.resultados_ovas;
 DROP POLICY IF EXISTS resultados_ovas_delete_policy ON public.resultados_ovas;
+-- Eliminación de políticas previas detectadas en tu panel
+DROP POLICY IF EXISTS "Allow user read" ON public.resultados_ovas;
+DROP POLICY IF EXISTS "Allow user insert" ON public.resultados_ovas;
+DROP POLICY IF EXISTS "Allow user update" ON public.resultados_ovas;
 
 -- Lectura: El estudiante dueño de los resultados, administradores, o docentes (para seguimiento)
 CREATE POLICY resultados_ovas_select_policy ON public.resultados_ovas
