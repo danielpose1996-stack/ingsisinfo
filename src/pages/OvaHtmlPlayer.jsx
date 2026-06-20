@@ -51,7 +51,24 @@ export default function OvaHtmlPlayer() {
            throw new Error('No se pudo descargar el contenido HTML desde el repositorio.');
         }
         const htmlText = await res.text();
-        setHtmlContent(htmlText);
+        
+        // Extract base directory of the uploaded HTML file to resolve relative resources
+        const fileUrl = data.archivo_html_url;
+        const lastSlash = fileUrl.lastIndexOf('/');
+        const baseUrl = lastSlash !== -1 ? fileUrl.substring(0, lastSlash + 1) : '';
+        
+        let processedHtml = htmlText;
+        if (baseUrl) {
+          const baseTag = `<base href="${baseUrl}">`;
+          if (processedHtml.includes('<head>')) {
+            processedHtml = processedHtml.replace('<head>', `<head>${baseTag}`);
+          } else if (processedHtml.includes('<HEAD>')) {
+            processedHtml = processedHtml.replace('<HEAD>', `<HEAD>${baseTag}`);
+          } else {
+            processedHtml = baseTag + processedHtml;
+          }
+        }
+        setHtmlContent(processedHtml);
       } catch (err) {
         setError(err.message);
       } finally {
