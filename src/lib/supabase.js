@@ -10,27 +10,17 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 export const supabase = createClient(SUPABASE_URL || 'https://placeholder.supabase.co', SUPABASE_ANON_KEY || 'placeholder');
 
 // AUTENTICACIÓN
-// ADVERTENCIA DE SEGURIDAD: La asignación de 'rol' desde este payload será IGNORADA por la base de datos
-// si se intenta enviar desde un cliente no autorizado. La asignación real de rol debe manejarse 
-// a través de la Edge Function (usando service_role) o se forzará a 'estudiante' mediante Triggers SQL.
-export async function registrarUsuario(data) {
-    const { data: responseData, error } = await supabase.functions.invoke('create-user', {
-        body: data
+export async function iniciarSesionConGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            queryParams: {
+                hd: 'unipaz.edu.co',
+                prompt: 'select_account'
+            },
+            redirectTo: `${window.location.origin}/login`
+        }
     });
-    
-    if (error) {
-        throw error;
-    }
-    
-    if (responseData && responseData.error) {
-        throw new Error(responseData.error);
-    }
-    
-    return responseData;
-}
-
-export async function iniciarSesion(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data;
 }
@@ -57,33 +47,6 @@ export async function obtenerSesionActual() {
 // PERFILES
 export async function actualizarPerfil(id, updates, isProfileId = false) {
     try {
-        // 1. Si hay una contraseña, primero intentamos actualizar las credenciales de Auth
-        // Nota: Solo se puede hacer vía Edge Function con Service Role desde el cliente anon
-        if (updates.password) {
-            const { password, ...otherUpdates } = updates;
-            
-            // Obtenemos el user_id si estamos usando profile ID
-            let userId = id;
-            if (isProfileId) {
-                const { data: p } = await supabase.from('perfiles').select('user_id').eq('id', id).single();
-                userId = p?.user_id;
-            }
-
-            if (userId) {
-                await supabase.functions.invoke('create-user', { // Reutilizamos o expandimos la función de creación
-                    body: { 
-                        action: 'update',
-                        user_id: userId,
-                        password: password,
-                        ...otherUpdates 
-                    }
-                });
-            }
-            
-            // Ya no necesitamos la contraseña en los updates de la tabla perfiles
-            updates = otherUpdates;
-        }
-
         const query = supabase.from('perfiles').update(updates);
         
         if (isProfileId) {

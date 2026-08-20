@@ -1,210 +1,166 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GlassCard from '../components/GlassCard';
-import RoleSelector from '../components/RoleSelector';
 import Button from '../components/Button';
-import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { useEmailValidation } from '../hooks/useEmailValidation';
+import { ShieldCheck, AlertCircle, Loader2, Sparkles, GraduationCap } from 'lucide-react';
 
 export default function Login() {
-  const [role, setRole] = useState('estudiante');
-  const { email, error: emailError, isValid: isEmailValid, handleChange: handleEmailChange, getNormalizedEmail } = useEmailValidation('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showFailsafe, setShowFailsafe] = useState(false);
-  const { user, perfil } = useAuth();
+  const [errorMessage, setErrorMessage] = useState('');
+  const { user, perfil, loading, authError, iniciarSesionConGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Temporizador de seguridad si el proceso queda detenido en "Verificando..."
-  React.useEffect(() => {
-    let timer;
-    if (isSubmitting) {
-      timer = setTimeout(() => setShowFailsafe(true), 4000);
-    } else {
-      setShowFailsafe(false);
+  // Detectar errores en los parámetros de la URL (retorno de OAuth fallido)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hash = window.location.hash;
+    const errorDesc = params.get('error_description');
+
+    if (errorDesc) {
+      setErrorMessage(decodeURIComponent(errorDesc));
+    } else if (hash.includes('error=')) {
+      setErrorMessage('Hubo un problema al autenticar con Google. Por favor, intenta de nuevo.');
     }
-    return () => clearTimeout(timer);
-  }, [isSubmitting]);
+  }, [location]);
 
-  const handleNavigate = (p) => {
-    if (!p) return;
-    if (p.rol === 'admin') navigate('/dashboard/admin');
-    else navigate(p.rol === 'docente' ? '/dashboard/docente' : '/dashboard/estudiante');
-  };
+  // Si hay error en el AuthContext (por ejemplo, dominio no institucional)
+  useEffect(() => {
+    if (authError) {
+      setErrorMessage(authError);
+      setIsSubmitting(false);
+    }
+  }, [authError]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-    setShowFailsafe(false);
-
-    try {
-      const cleanEmail = getNormalizedEmail();
-      const cleanPassword = password.trim();
-      
-      // 1. Auth directo
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password: cleanPassword
-      });
-
-      if (authError) throw authError;
-
-      // 2. Consulta inmediata del perfil (patrón rápido)
-      const { data: p, error: pError } = await supabase
-        .from('perfiles')
-        .select('*')
-        .eq('user_id', data.user.id)
-        .single();
-
-      if (p) {
-        handleNavigate(p);
+  // Redirección inteligente y automática según el rol del perfil
+  useEffect(() => {
+    if (user && perfil) {
+      if (perfil.rol === 'admin') {
+        navigate('/dashboard/admin', { replace: true });
+      } else if (perfil.rol === 'docente') {
+        navigate('/dashboard/docente', { replace: true });
       } else {
-        // Si no hay perfil inmediato, esperamos al AuthContext
-        console.warn("Perfil no encontrado inmediatamente, esperando a context...");
-        setTimeout(() => {
-          if (!perfil) {
-            setError('Tu cuenta no tiene un perfil asociado. Contacta al administrador.');
-            setIsSubmitting(false);
-          }
-        }, 3000);
+        navigate('/dashboard/estudiante', { replace: true });
       }
+    }
+  }, [user, perfil, navigate]);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setErrorMessage('');
+      setIsSubmitting(true);
+      await iniciarSesionConGoogle();
     } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message === 'Invalid login credentials' 
-        ? 'Correo o contraseña incorrectos.' 
-        : 'Error en el inicio de sesión: ' + err.message);
+      console.error("Error al iniciar sesión con Google:", err);
+      setErrorMessage(err.message || 'No se pudo iniciar el proceso de autenticación con Google.');
       setIsSubmitting(false);
     }
   };
 
-  // Alternativa si el perfil llega tarde mediante el contexto
-  React.useEffect(() => {
-    if (isSubmitting && perfil) {
-      handleNavigate(perfil);
-    }
-  }, [perfil, isSubmitting]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
-      <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
+      {/* Luces de fondo ambientales */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px]" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-400/5 rounded-full blur-[100px]" />
       </div>
 
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <GlassCard className="p-8 bg-card border border-card-border shadow-md rounded-xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-foreground mb-2">Inicio de Sesión</h2>
-            <p className="text-foreground/60 text-sm italic">Accede a tu plataforma SISINFO</p>
+        <GlassCard className="p-8 sm:p-10 bg-card border border-card-border shadow-xl rounded-2xl relative">
+          {/* Encabezado */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-5 text-primary shadow-inner">
+              <GraduationCap className="w-9 h-9" />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold uppercase tracking-wider mb-3">
+              <Sparkles className="w-3.5 h-3.5" /> Portal Académico
+            </div>
+            <h1 className="text-3xl font-black text-foreground tracking-tight">SISINFO</h1>
+            <p className="text-foreground/60 text-sm mt-1">
+              Semillero de Investigación en Sistemas de Información
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-foreground/50 uppercase tracking-widest mb-3 px-1 italic">
-                Selecciona tu Rol
-              </label>
-              <RoleSelector selectedRole={role} onRoleChange={setRole} />
+          {/* Estado de carga de sesión existente */}
+          {loading && user ? (
+            <div className="py-10 text-center space-y-4">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+              <p className="text-sm font-medium text-foreground/70">
+                Verificando credenciales institucionales...
+              </p>
             </div>
-
-            <div className="space-y-4">
-              <div className="relative">
-                <label className="block text-xs font-bold text-foreground/50 uppercase tracking-widest mb-1.5 px-1 italic">
-                  Correo Electrónico
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    className={`w-full bg-card border rounded-lg py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none transition-all ${
-                      emailError 
-                        ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20' 
-                        : 'border-card-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20'
-                    }`}
-                    placeholder="tu@unipaz.edu.co"
-                    required
-                  />
-                </div>
-                {emailError && (
-                  <p className="text-[10px] text-red-500 font-bold italic mt-1 px-1">
-                    {emailError}
-                  </p>
-                )}
-              </div>
-
-              <div className="relative">
-                <label className="block text-xs font-bold text-foreground/50 uppercase tracking-widest mb-1.5 px-1 italic">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-card border border-card-border rounded-lg py-3.5 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {error && (
-              <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in duration-300">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <p>{error}</p>
-                </div>
-                {showFailsafe && (
-                  <button 
-                    type="button" 
-                    onClick={() => window.location.reload()}
-                    className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary-dark mt-1 text-left px-6"
-                  >
-                    ¿Sigue cargando? Haz clic aquí para reintentar
-                  </button>
-                )}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={isSubmitting || !isEmailValid || !email}
-              className="w-full py-4 rounded-lg text-base shadow-sm"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" /> Verificando...
-                </span>
-              ) : (
-                'Entrar'
-              )}
-            </Button>
-          </form>
-
-          {showFailsafe && !error && (
-            <div className="mt-4 text-center">
-              <button 
+          ) : (
+            <div className="space-y-6">
+              {/* Botón de Google OAuth */}
+              <button
                 type="button"
-                onClick={() => window.location.reload()}
-                className="text-xs font-bold text-primary hover:text-primary-dark bg-blue-50/50 border border-blue-100 py-2 px-4 rounded-lg transition-all animate-in fade-in slide-in-from-top-2"
+                onClick={handleGoogleLogin}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-3.5 py-4 px-5 rounded-xl border border-card-border bg-card hover:bg-slate-50 dark:hover:bg-slate-800 text-foreground font-semibold text-sm transition-all duration-200 shadow-sm hover:shadow-md hover:border-primary/40 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
-                ¿Demora mucho? Click para recargar sesión
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    Conectando con Google...
+                  </span>
+                ) : (
+                  <>
+                    {/* SVG oficial del logo de Google */}
+                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                    <span>Continuar con Correo Institucional</span>
+                  </>
+                )}
               </button>
+
+              {/* Mensajes de error */}
+              {errorMessage && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs animate-in zoom-in duration-300">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-bold">Error de autenticación</p>
+                    <p className="opacity-90">{errorMessage}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Nota de Seguridad Institucional */}
+              <div className="pt-6 border-t border-card-border">
+                <div className="flex items-center justify-center gap-2 text-foreground/50 text-xs mb-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="font-semibold text-foreground/70">Acceso Seguro UNIPAZ</span>
+                </div>
+                <p className="text-center text-[11px] text-foreground/50 leading-relaxed">
+                  Solo se permite el ingreso con cuentas activas pertenecientes al dominio{' '}
+                  <strong className="text-foreground/80 font-mono">@unipaz.edu.co</strong>. Los nuevos usuarios ingresan con rol de estudiante por defecto.
+                </p>
+              </div>
             </div>
           )}
-
-          <p className="mt-8 text-center text-xs text-foreground/50 italic px-4">
-            ¿Olvidaste tu contraseña? Contacta con el administrador del semillero.
-          </p>
         </GlassCard>
+
+        {/* Pie informativo */}
+        <p className="mt-8 text-center text-xs text-foreground/40 italic">
+          Instituto Universitario de la Paz - UNIPAZ
+        </p>
       </div>
     </div>
   );
 }
-

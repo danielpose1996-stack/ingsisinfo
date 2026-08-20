@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, iniciarSesion as supabaseLogin, cerrarSesion as supabaseLogout } from '../lib/supabase';
+import { supabase, iniciarSesionConGoogle, cerrarSesion as supabaseLogout } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -14,15 +14,23 @@ export const AuthProvider = ({ children }) => {
     const [perfil, setPerfil] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [authError, setAuthError] = useState(null);
 
     const refreshPerfil = async () => {
         if (!user) return;
-        const { data: p } = await supabase
-            .from('perfiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-        if (p) setPerfil(p);
+        try {
+            const { data: p } = await supabase
+                .from('perfiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+            if (p) {
+                setPerfil(p);
+                setIsAdmin(p.rol === 'admin');
+            }
+        } catch (err) {
+            console.error("Error al refrescar perfil:", err);
+        }
     };
 
     const perfilRef = React.useRef(perfil);
@@ -31,9 +39,23 @@ export const AuthProvider = ({ children }) => {
     // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
+            if (session?.user) {
+                const userEmail = session.user.email?.toLowerCase() || '';
+                
+                // Validación estricta en tiempo de ejecución del dominio institucional
+                if (!userEmail.endsWith('@unipaz.edu.co')) {
+                    console.error("Dominio de correo no autorizado:", userEmail);
+                    setAuthError('Solo se permiten cuentas de correo institucional @unipaz.edu.co');
+                    supabaseLogout().catch(() => {});
+                    setUser(null);
+                    setPerfil(null);
+                    setIsAdmin(false);
+                    setLoading(false);
+                    return;
+                }
+
+                setAuthError(null);
                 setUser(session.user);
-                // Usamos la ref para no depender de perfil en el useEffect
                 if (!perfilRef.current) {
                     setLoading(true);
                 }
@@ -47,10 +69,12 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => subscription.unsubscribe();
-    }, []); // Array VACÍO = Estabilidad total
+    }, []);
 
-    // 2. Efecto separado para cargar el perfil cuando cambia el usuario
+    // 2. Cargar perfil cuando cambia el usuario
     useEffect(() => {
+        let isMounted = true;
+
         async function loadProfile() {
             if (!user) return;
             
@@ -61,17 +85,30 @@ export const AuthProvider = ({ children }) => {
                     .eq('user_id', user.id)
                     .single();
                 
+                if (!isMounted) return;
+
                 if (pError && pError.code === 'PGRST116') {
-                    console.warn("No se encontró perfil, cerrando...");
-                    await supabaseLogout();
-                    setUser(null);
-                    setPerfil(null);
-                    setIsAdmin(false);
+                    // Si el trigger de la BD está procesando el nuevo usuario, esperamos brevemente
+                    console.warn("Perfil en proceso de creación, reintentando lectura...");
+                    setTimeout(async () => {
+                        if (!isMounted || !user) return;
+                        const { data: retryProfile } = await supabase
+                            .from('perfiles')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .single();
+                        
+                        if (retryProfile && isMounted) {
+                            setPerfil(retryProfile);
+                            setIsAdmin(retryProfile.rol === 'admin');
+                            if (retryProfile.rol === 'admin') {
+                                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                            }
+                        }
+                        if (isMounted) setLoading(false);
+                    }, 1200);
                 } else if (p) {
                     setPerfil(p);
-                    
-                    // CORRECCIÓN DE SEGURIDAD: nunca confiar en sessionStorage por encima de la respuesta de la BD.
-                    // Si la BD indica que NO es administrador, forzamos la remoción de sus permisos.
                     if (p.rol === 'admin') {
                         setIsAdmin(true);
                         sessionStorage.setItem('isAdminLoggedIn', 'true');
@@ -79,70 +116,59 @@ export const AuthProvider = ({ children }) => {
                         setIsAdmin(false);
                         sessionStorage.removeItem('isAdminLoggedIn');
                     }
+                    setLoading(false);
                 }
             } catch (err) {
-                console.error("Error cargando perfil:", err);
-            } finally {
-                setLoading(false);
+                console.error("Error al cargar perfil:", err);
+                if (isMounted) setLoading(false);
             }
         }
 
         loadProfile();
+
+        return () => {
+            isMounted = false;
+        };
     }, [user]);
 
-    const loginAdmin = async (email, password) => {
-        // Adaptador de compatibilidad para el inicio de sesión del administrador
-        const data = await supabaseLogin(email, password);
-        if (data) {
-            const { data: p } = await supabase.from('perfiles').select('rol').eq('user_id', data.user.id).single();
-            if (p?.rol === 'admin') {
-                setIsAdmin(true);
-                sessionStorage.setItem('isAdminLoggedIn', 'true');
-                return true;
-            } else {
-                // Si no es administrador, cerrar la sesión inmediatamente
-                await supabaseLogout();
-                return false;
-            }
-        }
-        return false;
-    };
-
-    const logoutAdmin = () => {
-        setIsAdmin(false);
-        sessionStorage.removeItem('isAdminLoggedIn');
-    };
-
-    const iniciarSesion = async (email, password) => {
-        return await supabaseLogin(email, password);
+    const iniciarSesion = async () => {
+        setAuthError(null);
+        return await iniciarSesionConGoogle();
     };
 
     const cerrarSesion = async () => {
         try {
-            // Limpieza optimista (inmediata) de sesión
             setUser(null);
             setPerfil(null);
             setIsAdmin(false);
+            setAuthError(null);
             sessionStorage.removeItem('isAdminLoggedIn');
-            sessionStorage.removeItem('bypassProfile');
+            sessionStorage.removeItem('admin_access_gate');
             
-            // Forzar limpieza de Supabase en LocalStorage inmediatamente
             Object.keys(localStorage).forEach(key => {
                 if (key.startsWith('sb-')) localStorage.removeItem(key);
             });
 
-            // Llamada de red a Supabase para invalidar token en el servidor
             await supabaseLogout();
         } catch (err) {
-            console.error("Error logging out of Supabase:", err.message);
+            console.error("Error al cerrar sesión:", err.message);
         } finally {
-            // Forzar recarga limpia para destruir la instancia en memoria de Supabase
             window.location.href = '/login';
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, perfil, loading, isAdmin, loginAdmin, logoutAdmin, iniciarSesion, cerrarSesion, refreshPerfil }}>
+        <AuthContext.Provider value={{
+            user,
+            perfil,
+            loading,
+            isAdmin,
+            authError,
+            iniciarSesion,
+            iniciarSesionConGoogle,
+            cerrarSesion,
+            refreshPerfil
+        }}>
             {children}
         </AuthContext.Provider>
     );

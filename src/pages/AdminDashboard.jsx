@@ -18,7 +18,6 @@ import {
   crearGaleria,
   eliminarGaleria,
   eliminarUsuario,
-  registrarUsuario,
   actualizarPerfil,
   descargarArchivo,
   obtenerOvasModulo,
@@ -262,41 +261,19 @@ export default function AdminDashboard() {
     setIsUserModalOpen(true);
   };
 
-  const handleCreateUser = async (e) => {
+  const handleSaveUser = async (e) => {
     e.preventDefault();
-    if (!isEmailValid) return;
-
     setIsCreating(true);
     try {
-      const normalizedEmail = getNormalizedEmail();
-      if (isEditMode) {
-        // Lógica de actualización
-        const updates = {
-          nombre: sanitizeText(newUser.nombre),
-          apellido: sanitizeText(newUser.apellido),
-          email: normalizedEmail,
-          rol: newUser.rol,
-          linea_investigacion: newUser.rol === 'docente' ? (newUser.linea_investigacion || 'Ingeniería de Software') : null
-        };
+      const updates = {
+        nombre: sanitizeText(newUser.nombre),
+        apellido: sanitizeText(newUser.apellido),
+        rol: newUser.rol,
+        linea_investigacion: newUser.rol === 'docente' ? (newUser.linea_investigacion || 'Ingeniería de Software') : null
+      };
 
-        // Si se ingresó una contraseña, la incluimos para actualizar Auth
-        if (newUser.password) {
-          updates.password = newUser.password;
-        }
-
-        await actualizarPerfil(editingProfileId, updates, true);
-        toast.success('Usuario actualizado con éxito (Perfil y Credenciales).');
-      } else {
-        // Lógica de creación (existente)
-        await registrarUsuario({ 
-          ...newUser, 
-          nombre: sanitizeText(newUser.nombre),
-          apellido: sanitizeText(newUser.apellido),
-          email: normalizedEmail 
-        });
-
-        toast.success('Usuario creado con éxito. Se ha enviado un correo de confirmación.');
-      }
+      await actualizarPerfil(editingProfileId, updates, true);
+      toast.success('Rol y permisos del usuario actualizados con éxito.');
 
       setIsUserModalOpen(false);
       setNewUser({ nombre: '', apellido: '', password: '', rol: 'estudiante', linea_investigacion: '' });
@@ -305,7 +282,7 @@ export default function AdminDashboard() {
       setEditingProfileId(null);
       await loadAdminData();
     } catch (error) {
-      toast.error('Error en la operación: ' + error.message);
+      toast.error('Error al actualizar permisos: ' + error.message);
     } finally {
       setIsCreating(false);
     }
@@ -899,9 +876,11 @@ export default function AdminDashboard() {
                       <option value="estudiante">ESTUDIANTES</option>
                     </select>
                   </div>
-                  <Button variant="secondary" size="sm" onClick={() => setIsUserModalOpen(true)} className="italic font-bold tracking-widest px-6">
-                    + AÑADIR USUARIO
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 text-[#1E3A8A] text-xs font-semibold">
+                      <ShieldCheck className="w-4 h-4" /> Registro Google OAuth
+                    </div>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -1542,7 +1521,7 @@ export default function AdminDashboard() {
         </AnimatePresence>
       </main>
 
-      {/* Modal de acciones rápidas del administrador */}
+      {/* Modal de administración de rol y permisos */}
       <Modal
         isOpen={isUserModalOpen}
         onClose={() => {
@@ -1551,76 +1530,65 @@ export default function AdminDashboard() {
           setNewUser({ nombre: '', apellido: '', password: '', rol: 'estudiante', linea_investigacion: '' });
           setEmailVal('');
         }}
-        title={isEditMode ? "Editar Usuario SISINFO" : "Creación de Cuenta SISINFO"}
+        title="Modificar Rol y Permisos de Usuario"
       >
-        <p className="text-amber-400 text-xs italic font-medium p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-6">
-          <AlertCircle className="w-4 h-4 inline mr-2" />
-          Las cuentas creadas por el administrador tienen privilegios automáticos según el rol asignado. Se enviará una notificación al usuario.
+        <p className="text-blue-500 text-xs italic font-medium p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-6">
+          <ShieldCheck className="w-4 h-4 inline mr-2 text-[#1E3A8A]" />
+          Los usuarios ingresan con su cuenta institucional de Google. Desde este panel puedes ascender sus permisos a Docente o Administrador.
         </p>
 
-        <form onSubmit={handleCreateUser} className="space-y-4">
+        <form onSubmit={handleSaveUser} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Primer Nombre"
-              value={newUser.nombre}
-              onChange={(e) => setNewUser({...newUser, nombre: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Apellidos"
-              value={newUser.apellido}
-              onChange={(e) => setNewUser({...newUser, apellido: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
-              required
-            />
+            <div>
+              <label className="block text-xs font-bold text-foreground/40 uppercase mb-1">Nombre</label>
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={newUser.nombre}
+                onChange={(e) => setNewUser({...newUser, nombre: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-foreground/40 uppercase mb-1">Apellidos</label>
+              <input
+                type="text"
+                placeholder="Apellidos"
+                value={newUser.apellido}
+                onChange={(e) => setNewUser({...newUser, apellido: e.target.value})}
+                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
+                required
+              />
+            </div>
           </div>
-          <div className="w-full">
+
+          <div>
+            <label className="block text-xs font-bold text-foreground/40 uppercase mb-1">Correo Institucional (Google)</label>
             <input
               type="email"
-              placeholder="Correo Académico (@unipaz.edu.co)"
               value={emailVal}
-              onChange={(e) => {
-                handleEmailChange(e);
-                // setNewUser({...newUser, email: e.target.value}); // Eliminado porque el correo lo gestiona el hook
-              }}
-              className={`w-full bg-card border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none transition-all ${
-                emailError
-                  ? 'border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20'
-                  : 'border-card-border focus:border-[#1E3A8A]'
-              }`}
-              required
+              disabled
+              className="w-full bg-card/50 border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/60 cursor-not-allowed font-mono"
             />
-            {emailError && (
-              <p className="text-[10px] text-red-500 font-bold italic mt-1 px-1">
-                {emailError}
-              </p>
-            )}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div>
+            <label className="block text-xs font-bold text-foreground/40 uppercase mb-1">Rol en la Plataforma</label>
             <select
               value={newUser.rol}
               onChange={(e) => setNewUser({...newUser, rol: e.target.value})}
               className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]"
             >
               <option value="estudiante">Estudiante</option>
-              <option value="docente">Docente</option>
+              <option value="docente">Docente / Director</option>
+              <option value="admin">Administrador Global</option>
             </select>
-             <input
-              type="password"
-              placeholder={isEditMode ? "Nueva Contraseña (opcional)" : "Contraseña"}
-              value={newUser.password}
-              onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-              className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
-              required={!isEditMode}
-            />
           </div>
 
           {newUser.rol === 'docente' && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Línea de Conocimiento</label>
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest px-1 italic">Línea de Conocimiento Asignada</label>
               <select
                 value={newUser.linea_investigacion}
                 onChange={(e) => setNewUser({...newUser, linea_investigacion: e.target.value})}
@@ -1642,11 +1610,11 @@ export default function AdminDashboard() {
             <Button type="button" variant="outline" className="flex-1" onClick={() => setIsUserModalOpen(false)}>Descartar</Button>
             <Button
               type="submit"
-              disabled={isCreating || !isEmailValid || !emailVal}
+              disabled={isCreating}
               variant="secondary"
               className="flex-1 font-bold tracking-widest italic"
             >
-              {isCreating ? 'PROCESANDO...' : (isEditMode ? 'GUARDAR CAMBIOS' : 'CREAR ACCESO')}
+              {isCreating ? 'PROCESANDO...' : 'GUARDAR CAMBIOS'}
             </Button>
           </div>
         </form>
