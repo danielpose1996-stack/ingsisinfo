@@ -9,8 +9,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient(SUPABASE_URL || 'https://placeholder.supabase.co', SUPABASE_ANON_KEY || 'placeholder');
 
-// AUTH
-// SECURITY WARNING: La asignación de 'rol' desde este payload será IGNORADA por la base de datos
+// AUTENTICACIÓN
+// ADVERTENCIA DE SEGURIDAD: La asignación de 'rol' desde este payload será IGNORADA por la base de datos
 // si se intenta enviar desde un cliente no autorizado. La asignación real de rol debe manejarse 
 // a través de la Edge Function (usando service_role) o se forzará a 'estudiante' mediante Triggers SQL.
 export async function registrarUsuario(data) {
@@ -443,7 +443,7 @@ export async function eliminarContenidoModulo(id) {
     if (error) throw error;
 }
 
-// ADMIN AVANZADO
+// ADMINISTRACIÓN AVANZADA
 export async function obtenerTodosPerfiles() {
     const { data, error } = await supabase
         .from('perfiles')
@@ -544,7 +544,7 @@ export async function obtenerTodosUsuarios() {
 
 export async function descargarArchivo(fullUrl, fileName) {
     try {
-        // 1. Extraer el path relativo (fileName en storage) de la URL pública
+        // 1. Extraer la ruta relativa (nombre del archivo en el almacenamiento) de la URL pública
         // Ejemplo: .../storage/v1/object/public/documentos-proyectos/nombre-del-archivo.docx
         const bucketName = 'documentos-proyectos';
         const urlParts = fullUrl.split(`${bucketName}/`);
@@ -579,13 +579,13 @@ export async function descargarArchivo(fullUrl, fileName) {
         console.log("Descarga firmada iniciada para:", finalName);
     } catch (error) {
         console.error('Error crítico en descarga firmada:', error.message);
-        // Fallback último recurso
+        // Alternativa de último recurso
         window.open(fullUrl, '_blank');
     }
 }
 
 // ==========================================
-// OVA MANAGEMENT (Aula Virtual)
+// GESTIÓN DE OVAs (Aula Virtual)
 // ==========================================
 
 export async function obtenerOvaPorId(id) {

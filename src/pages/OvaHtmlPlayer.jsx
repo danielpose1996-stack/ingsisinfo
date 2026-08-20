@@ -36,14 +36,14 @@ export default function OvaHtmlPlayer() {
               parsedEvaluacion = parsed;
             }
           } catch {
-            // No quiz
+            // Sin evaluación tipo quiz
           }
         }
         
         setOva(data);
         setEvaluacion(parsedEvaluacion);
         
-        // Descargamos el contenido HTML directamente con fetch.
+        // Descargamos el contenido HTML mediante una solicitud directa.
         // Esto evita que Supabase convierta forzosamente el tipo de archivo web a text/plain
         // por mecanismos de seguridad (lo cual era la causa del código en texto crudo).
         const res = await fetch(data.archivo_html_url);
@@ -52,7 +52,7 @@ export default function OvaHtmlPlayer() {
         }
         const htmlText = await res.text();
         
-        // Extract base directory of the uploaded HTML file to resolve relative resources
+        // Extraer el directorio base del archivo HTML subido para resolver recursos relativos
         const fileUrl = data.archivo_html_url;
         const lastSlash = fileUrl.lastIndexOf('/');
         const baseUrl = lastSlash !== -1 ? fileUrl.substring(0, lastSlash + 1) : '';
@@ -140,7 +140,7 @@ export default function OvaHtmlPlayer() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-background overflow-hidden relative">
-      {/* HEADER NAV - Se oculta si es fullscreen */}
+      {/* NAVEGACIÓN DEL ENCABEZADO: se oculta en pantalla completa */}
       {!isFullscreen && (
         <header className="h-16 shrink-0 border-b border-card-border bg-card flex items-center justify-between px-6 z-10 shadow-sm">
           <div className="flex items-center gap-4">
@@ -179,7 +179,7 @@ export default function OvaHtmlPlayer() {
         </header>
       )}
 
-      {/* QUIZ MODAL OVERLAY */}
+      {/* CAPA DEL MODAL DE CUESTIONARIO */}
       {showQuizModal && evaluacion && (
         <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col pt-8 px-4 sm:px-12 overflow-y-auto">
            <div className="max-w-4xl w-full mx-auto pb-20">
@@ -199,7 +199,7 @@ export default function OvaHtmlPlayer() {
         </div>
       )}
 
-      {/* IFRAME PLAYER con srcDoc */}
+      {/* REPRODUCTOR IFRAME con srcDoc */}
       <main className="flex-1 w-full h-full relative bg-white">
         {htmlContent ? (
           <iframe 

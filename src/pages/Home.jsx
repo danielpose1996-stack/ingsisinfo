@@ -31,9 +31,9 @@ export default function Home() {
   const hasLoaded = useRef(false);
 
   useEffect(() => {
-    // Wait for Supabase auth to settle before fetching data.
-    // On page refresh, the Supabase client restores the session from localStorage
-    // which briefly puts the client in a transitional state where queries can fail.
+    // Esperar a que la autenticación de Supabase se estabilice antes de solicitar datos.
+    // Al actualizar la página, el cliente de Supabase restaura la sesión desde localStorage,
+    // lo que deja brevemente al cliente en un estado transitorio donde las consultas pueden fallar.
     let cancelled = false;
 
     async function fetchAllData() {
@@ -86,18 +86,18 @@ export default function Home() {
       if (!cancelled) setLoading(false);
     }
 
-    // Wait for the auth state to settle before querying.
-    // This prevents the race condition where queries fire while
-    // Supabase is still restoring the session from localStorage.
+    // Esperar a que el estado de autenticación se estabilice antes de consultar.
+    // Esto evita la condición de carrera que ocurre cuando las consultas se ejecutan
+    // mientras Supabase todavía restaura la sesión desde localStorage.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      // INITIAL_SESSION fires once when Supabase finishes restoring the session.
-      // This is the safe moment to start querying.
+      // INITIAL_SESSION se emite cuando Supabase termina de restaurar la sesión.
+      // Este es el momento seguro para iniciar las consultas.
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         fetchAllData();
       }
     });
 
-    // Fallback: if INITIAL_SESSION doesn't fire within 1.5s, load anyway
+    // Alternativa: cargar de todos modos si INITIAL_SESSION no se emite en 1,5 segundos
     const fallbackTimer = setTimeout(() => {
       fetchAllData();
     }, 1500);
@@ -123,16 +123,16 @@ export default function Home() {
   };
   return (
     <div className="space-y-24 pb-24 bg-background relative overflow-hidden">
-      {/* Background Floating Mesh Glows (Depth Effect) */}
+      {/* Brillos flotantes de fondo en malla (efecto de profundidad) */}
       <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" />
       <div className="absolute top-[45%] right-[-10%] w-[600px] h-[600px] rounded-full mesh-glow-amber animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-5s' }} />
       <div className="absolute bottom-[15%] left-[5%] w-[450px] h-[450px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-10s' }} />
 
-      {/* Hero Section */}
+      {/* Sección principal */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden"
         style={{ backgroundImage: "url('/hero-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
-        {/* Dark overlay for text readability */}
+        {/* Capa oscura para facilitar la lectura del texto */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1]" />
 
         <motion.div
@@ -171,7 +171,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Decorative glow elements */}
+        {/* Elementos decorativos de brillo */}
         <div className="absolute top-1/4 -left-20 w-64 h-64 bg-[#1E3A8A]/10 rounded-full blur-3xl z-[2]" />
         <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-[#1E3A8A]/10 rounded-full blur-3xl z-[2]" />
       </section>
@@ -184,7 +184,7 @@ export default function Home() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          {/* Section Header */}
+          {/* Encabezado de la sección */}
           <div className="flex items-end justify-between mb-8">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -197,7 +197,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* News Grid */}
+          {/* Cuadrícula de noticias */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
@@ -226,11 +226,11 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ═══ PRÓXIMOS EVENTOS + GALERÍA (2 columns) ═══ */}
+      {/* ═══ PRÓXIMOS EVENTOS + GALERÍA (2 columnas) ═══ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-          {/* Events - 2 cols */}
+          {/* Eventos: 2 columnas */}
           <motion.div
             className="lg:col-span-2"
             initial={{ opacity: 0, x: -30 }}
@@ -266,20 +266,20 @@ export default function Home() {
                       className="group relative flex gap-4 p-4 rounded-xl border border-card-border bg-card hover:bg-slate-50 hover:border-primary/30 transition-all duration-300 hover:shadow-sm cursor-pointer"
                       onClick={() => setSelectedEvent(e)}
                     >
-                      {/* Date Badge */}
+                      {/* Insignia de fecha */}
                       <div className="flex flex-col items-center justify-center w-16 h-16 rounded-lg bg-blue-50 border border-blue-200/60 text-[#1E3A8A] flex-shrink-0">
                         <span className="text-2xl font-bold leading-none">{day}</span>
                         <span className="text-[9px] font-bold tracking-widest opacity-80">{month}</span>
                       </div>
 
-                      {/* Event Image */}
+                      {/* Imagen del evento */}
                       {e.imagen_url && (
                         <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-card-border">
                           <img src={e.imagen_url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
                         </div>
                       )}
 
-                      {/* Info */}
+                      {/* Información */}
                       <div className="flex flex-col justify-center min-w-0 flex-1">
                         <h4 className="text-foreground font-bold group-hover:text-primary transition-colors truncate">
                           {e.titulo}
@@ -291,7 +291,7 @@ export default function Home() {
                         )}
                       </div>
 
-                      {/* Arrow */}
+                      {/* Flecha */}
                       <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ChevronRight className="w-4 h-4 text-primary" />
                       </div>
@@ -309,7 +309,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Gallery - 3 cols */}
+          {/* Galería: 3 columnas */}
           <motion.div
             className="lg:col-span-3"
             initial={{ opacity: 0, x: 30 }}
@@ -348,7 +348,7 @@ export default function Home() {
                       alt={g.titulo || ''}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    {/* Hover overlay */}
+                    {/* Capa al pasar el puntero */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
                       <p className="text-white text-sm font-bold truncate transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                         {g.titulo || 'SISINFO'}
@@ -359,7 +359,7 @@ export default function Home() {
                         </p>
                       )}
                     </div>
-                    {/* Corner accent */}
+                    {/* Acento de esquina */}
                     <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/20">
                       <ImageIcon className="w-3.5 h-3.5 text-white" />
                     </div>
@@ -462,7 +462,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Action Buttons */}
+            {/* Botones de acción */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-card-border">
               {selectedNews.pdf_url && (
                 <a
@@ -543,7 +543,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Actions */}
+            {/* Acciones */}
             <div className="flex justify-end pt-4 border-t border-card-border">
               <button
                 onClick={() => setSelectedEvent(null)}
@@ -556,7 +556,7 @@ export default function Home() {
         )}
       </Modal>
 
-      {/* ═══ MODAL DETALLE DE GALERÍA (LIGHTBOX) ═══ */}
+      {/* ═══ MODAL DE DETALLE DE GALERÍA (VISOR) ═══ */}
       <Modal
         isOpen={!!selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
@@ -585,7 +585,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* Actions */}
+            {/* Acciones */}
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setSelectedPhoto(null)}

@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
                 } else if (p) {
                     setPerfil(p);
                     
-                    // SECURITY FIX: Nunca confiar en sessionStorage sobre la respuesta de la DB.
+                    // CORRECCIÓN DE SEGURIDAD: nunca confiar en sessionStorage por encima de la respuesta de la BD.
                     // Si la BD indica que NO es administrador, forzamos la remoción de sus permisos.
                     if (p.rol === 'admin') {
                         setIsAdmin(true);
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     }, [user]);
 
     const loginAdmin = async (email, password) => {
-        // Compatibility wrapper for admin login
+        // Adaptador de compatibilidad para el inicio de sesión del administrador
         const data = await supabaseLogin(email, password);
         if (data) {
             const { data: p } = await supabase.from('perfiles').select('rol').eq('user_id', data.user.id).single();
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
                 sessionStorage.setItem('isAdminLoggedIn', 'true');
                 return true;
             } else {
-                // Not an admin, sign out immediately
+                // Si no es administrador, cerrar la sesión inmediatamente
                 await supabaseLogout();
                 return false;
             }

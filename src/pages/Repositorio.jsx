@@ -134,7 +134,7 @@ export default function Repositorio() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-      {/* Header Section */}
+      {/* Encabezado de la sección */}
       <section>
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
           <div>
@@ -148,7 +148,7 @@ export default function Repositorio() {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filtros */}
         <GlassCard className="p-6 border-card-border bg-card">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="relative">
@@ -185,7 +185,7 @@ export default function Repositorio() {
         </GlassCard>
       </section>
 
-      {/* Grid Projects */}
+      {/* Cuadrícula de proyectos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <AnimatePresence mode="popLayout">
           {filteredProyectos.length > 0 ? (

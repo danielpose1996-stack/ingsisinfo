@@ -18,7 +18,7 @@ export default function Login() {
   const { user, perfil } = useAuth();
   const navigate = useNavigate();
 
-  // Failsafe timer if it hangs in "Verificando..."
+  // Temporizador de seguridad si el proceso queda detenido en "Verificando..."
   React.useEffect(() => {
     let timer;
     if (isSubmitting) {
@@ -53,7 +53,7 @@ export default function Login() {
 
       if (authError) throw authError;
 
-      // 2. Fetch de perfil inmediato (Speedy pattern)
+      // 2. Consulta inmediata del perfil (patrón rápido)
       const { data: p, error: pError } = await supabase
         .from('perfiles')
         .select('*')
@@ -81,7 +81,7 @@ export default function Login() {
     }
   };
 
-  // Fallback si el perfil llega por el contexto tarde
+  // Alternativa si el perfil llega tarde mediante el contexto
   React.useEffect(() => {
     if (isSubmitting && perfil) {
       handleNavigate(perfil);

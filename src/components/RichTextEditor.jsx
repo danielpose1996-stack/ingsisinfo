@@ -14,7 +14,7 @@ import { ResizableNodeView } from '@tiptap/core';
 import { toast } from 'react-hot-toast';
 import { subirArchivoOva } from '../lib/supabase';
 
-// Patch ResizableNodeView to prevent ProseMirror click/drag interception and add diagnostic logging
+// Parchear ResizableNodeView para prevenir la intercepción de clics y arrastres en ProseMirror y añadir registros diagnósticos
 if (typeof window !== 'undefined' && ResizableNodeView) {
   console.log('ResizableNodeView found in @tiptap/core, patching prototype...');
 
@@ -185,9 +185,9 @@ export default function RichTextEditor({
     const editorEl = editor.options.element;
     if (!editorEl) return;
 
-    // Helper to dynamically set attributes on the actual DOM elements
+    // Función auxiliar para asignar atributos dinámicamente en los elementos reales del DOM
     const patchElements = () => {
-      // Find all resize containers
+      // Buscar todos los contenedores de redimensionamiento
       const containers = editorEl.querySelectorAll('[data-resize-container]');
       containers.forEach(container => {
         if (container.getAttribute('contenteditable') !== 'false') {
@@ -196,7 +196,7 @@ export default function RichTextEditor({
         }
       });
 
-      // Find all resize wrappers
+      // Buscar todos los envoltorios de redimensionamiento
       const wrappers = editorEl.querySelectorAll('[data-resize-wrapper]');
       wrappers.forEach(wrapper => {
         if (wrapper.getAttribute('contenteditable') !== 'false') {
@@ -205,19 +205,19 @@ export default function RichTextEditor({
         }
       });
 
-      // Find all resize handles
+      // Buscar todos los controles de redimensionamiento
       const handles = editorEl.querySelectorAll('[data-resize-handle]');
       handles.forEach(handle => {
         if (handle.getAttribute('contenteditable') !== 'false') {
           handle.setAttribute('contenteditable', 'false');
           
-          // Disable native drag starts on handles
+          // Desactivar el inicio del arrastre nativo en los controles
           handle.addEventListener('dragstart', e => {
             e.preventDefault();
             e.stopPropagation();
           }, { passive: false });
           
-          // Prevent mousedown from bubbling up to ProseMirror selection handler
+          // Evitar que mousedown se propague al controlador de selección de ProseMirror
           handle.addEventListener('mousedown', e => {
             e.stopPropagation();
           }, { passive: false });
@@ -231,7 +231,7 @@ export default function RichTextEditor({
       });
     };
 
-    // Run patch immediately and on every update
+    // Ejecutar el parche de inmediato y después de cada actualización
     patchElements();
 
     const observer = new MutationObserver(patchElements);
@@ -289,7 +289,7 @@ export default function RichTextEditor({
 
   return (
     <div className={`rounded-xl border border-card-border bg-card overflow-hidden transition-all focus-within:border-[#1E3A8A]/50 focus-within:shadow-sm ${className}`}>
-      {/* Hidden File Input for Image Upload */}
+      {/* Selector de archivo oculto para cargar imágenes */}
       <input
         type="file"
         ref={fileInputRef}
@@ -298,7 +298,7 @@ export default function RichTextEditor({
         className="hidden"
       />
 
-      {/* Toolbar Container */}
+      {/* Contenedor de la barra de herramientas */}
       <div className="flex flex-col border-b border-card-border bg-slate-50">
         <div className="flex flex-wrap items-center gap-0.5 px-3 py-2">
           <ToolbarButton
@@ -424,7 +424,7 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        {/* Dynamic Sub-toolbar for active Table controls */}
+        {/* Subbarra dinámica con controles para la tabla activa */}
         {editor.isActive('table') && (
           <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 bg-blue-50/50 border-t border-card-border animate-in slide-in-from-top-1 duration-200">
             <span className="text-[10px] font-bold text-[#1E3A8A] uppercase tracking-wider mr-2">Tabla:</span>
@@ -487,11 +487,10 @@ export default function RichTextEditor({
         )}
       </div>
 
-      {/* Editor Content */}
+      {/* Contenido del editor */}
       <div className="px-5 py-4 bg-card animate-in fade-in duration-300" style={{ minHeight }}>
         <EditorContent editor={editor} />
       </div>
     </div>
   );
 }
-

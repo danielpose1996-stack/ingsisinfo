@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   useEffect(() => {
-    // Always light mode for academic design
+    // Mantener siempre el modo claro para el diseño académico
     const root = window.document.documentElement;
     root.classList.remove('dark');
     root.classList.add('light');

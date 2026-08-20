@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Scoring Logic ───
+// ─── Lógica de calificación ───
 function evaluateAnswer(question, answer) {
   if (answer === null || answer === undefined || answer === '') return false;
 
@@ -73,7 +73,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
     setShowResults(true);
     clearTimeout(timerRef.current);
 
-    // Calculate once to notify parent
+    // Calcular una sola vez para notificar al componente padre
     const finalResults = preguntas.map(q => ({
       question: q,
       answer: answers[q._id],
@@ -119,7 +119,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
   const answered = Object.keys(answers).length;
   const _progress = preguntas.length > 0 ? (answered / preguntas.length) * 100 : 0;
 
-  // Calculate results
+  // Calcular los resultados
   const results = preguntas.map(q => ({
     question: q,
     answer: answers[q._id],
@@ -130,7 +130,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
   const percentage = totalPuntos > 0 ? Math.round((score / totalPuntos) * 100) : 0;
   const passed = percentage >= (evaluacion.nota_minima || 60);
 
-  // ─── Start Screen ───
+  // ─── Pantalla inicial ───
   if (!quizStarted) {
     return (
       <div className="h-full flex flex-col justify-center max-w-2xl mx-auto text-center space-y-10">
@@ -185,11 +185,11 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
     );
   }
 
-  // ─── Results Screen ───
+  // ─── Pantalla de resultados ───
   if (showResults) {
     return (
       <div className="space-y-8 max-w-3xl mx-auto pb-10">
-        {/* Score Header */}
+        {/* Encabezado de la calificación */}
         <div className="text-center space-y-6 py-8">
           <div className="relative inline-block">
             <div className={`absolute inset-0 blur-[60px] rounded-full scale-150 ${passed ? 'bg-[#1E3A8A]/30' : 'bg-red-500/20'}`} />
@@ -215,7 +215,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
           </div>
         </div>
 
-        {/* Question Review */}
+        {/* Revisión de preguntas */}
         <div className="space-y-4">
           <h3 className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] italic">
             Revisión de Respuestas
@@ -238,7 +238,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
                     {idx + 1}. {result.question.enunciado}
                   </p>
 
-                  {/* Show correct answer */}
+                  {/* Mostrar la respuesta correcta */}
                   {!result.isCorrect && (
                     <div className="mt-2 text-xs text-[#1E3A8A] italic">
                       <span className="font-bold">Respuesta correcta: </span>
@@ -249,7 +249,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
                     </div>
                   )}
 
-                  {/* Explanation */}
+                  {/* Explicación */}
                   {result.question.explicacion && (
                     <div className="mt-3 flex items-start gap-2 p-3 rounded-xl bg-card/30 border border-card-border/30">
                       <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
@@ -268,7 +268,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
           ))}
         </div>
 
-        {/* Retry Button */}
+        {/* Botón para volver a intentar */}
         <div className="flex justify-center pt-4">
           <Button
             onClick={handleRestart}
@@ -282,10 +282,10 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
     );
   }
 
-  // ─── Question View ───
+  // ─── Vista de la pregunta ───
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Progress Bar */}
+      {/* Barra de progreso */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs">
           <span className="text-foreground/30 font-bold italic">
@@ -310,7 +310,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
           />
         </div>
 
-        {/* Question dots */}
+        {/* Indicadores de preguntas */}
         <div className="flex items-center gap-1.5 justify-center">
           {preguntas.map((q, i) => (
             <button
@@ -329,7 +329,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
         </div>
       </div>
 
-      {/* Question Card */}
+      {/* Tarjeta de la pregunta */}
       {current && (
         <AnimatePresence mode="wait">
           <motion.div
@@ -340,7 +340,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
           >
             <GlassCard className="p-8 border-card-border space-y-6">
-              {/* Question Type Badge */}
+              {/* Insignia del tipo de pregunta */}
               <div className="flex items-center gap-3">
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest italic border ${
                   current.tipo === 'multiple_choice' ? 'bg-[#1E3A8A]/10 text-[#1E3A8A] border-[#1E3A8A]/20' :
@@ -361,7 +361,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
                 {current.enunciado}
               </h3>
 
-              {/* Answer Area */}
+              {/* Área de respuesta */}
               <div className="space-y-3">
                 {current.tipo === 'multiple_choice' && (
                   <div className="space-y-3">
@@ -442,7 +442,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
         </AnimatePresence>
       )}
 
-      {/* Navigation */}
+      {/* Navegación */}
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
@@ -473,7 +473,7 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
   );
 }
 
-// ─── Code with blanks renderer ───
+// ─── Renderizador de código con espacios en blanco ───
 function renderCodeWithBlanks(template, questionId, answers, onAnswer) {
   if (!template) return null;
   const parts = template.split('___');

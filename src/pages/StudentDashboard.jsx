@@ -43,7 +43,7 @@ export default function StudentDashboard() {
   const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Modals state
+  // Estado de modales
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
@@ -51,18 +51,18 @@ export default function StudentDashboard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
   
-  // Registration form state
+  // Estado del formulario de registro
   const [docentes, setDocentes] = useState([]);
   const [newProject, setNewProject] = useState({ nombre: '', estado: 'propuesta', docenteId: '', linea_investigacion: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Correction flow state
+  // Estado del flujo de corrección
   const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
   const [correctionComment, setCorrectionComment] = useState('');
   const [correctionFile, setCorrectionFile] = useState(null);
 
-  // Edit profile state
+  // Estado de edición de perfil
   const [editProfileData, setEditProfileData] = useState({
     nombre: '',
     apellido: '',
@@ -227,7 +227,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header Section */}
+      {/* Sección de encabezado */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-card-border">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Panel de Estudiante</h1>
@@ -257,7 +257,7 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Pestañas */}
       <div className="flex gap-2 p-1 bg-card border border-card-border rounded-2xl w-fit">
         <button 
           onClick={() => setActiveTab('perfil')}
@@ -279,7 +279,7 @@ export default function StudentDashboard() {
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Contenido de la pestaña */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -452,9 +452,9 @@ export default function StudentDashboard() {
         </motion.div>
       </AnimatePresence>
 
-      {/* --- MODALS --- */}
+      {/* --- MODALES --- */}
 
-      {/* New Project Modal */}
+      {/* Modal de nuevo proyecto */}
       <Modal 
         isOpen={isProjectModalOpen} 
         onClose={() => setIsProjectModalOpen(false)}
@@ -555,7 +555,7 @@ export default function StudentDashboard() {
         </form>
       </Modal>
 
-      {/* Project Detail Modal */}
+      {/* Modal de detalle del proyecto */}
       <Modal 
         isOpen={!!selectedProyecto} 
         onClose={() => setSelectedProyecto(null)}
@@ -746,7 +746,7 @@ export default function StudentDashboard() {
         </form>
       </Modal>
 
-      {/* Correction Modal */}
+      {/* Modal de corrección */}
       <Modal
         isOpen={isCorrectionModalOpen}
         onClose={() => {
@@ -809,7 +809,7 @@ export default function StudentDashboard() {
         </form>
       </Modal>
 
-      {/* Delete Project Modal */}
+      {/* Modal de eliminación del proyecto */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -834,7 +834,7 @@ export default function StudentDashboard() {
         </div>
       </Modal>
 
-      {/* Notifications Modal */}
+      {/* Modal de notificaciones */}
       <Modal
         isOpen={isNotificationsModalOpen}
         onClose={() => setIsNotificationsModalOpen(false)}

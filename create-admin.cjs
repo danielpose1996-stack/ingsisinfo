@@ -37,7 +37,7 @@ async function crearAdmin() {
   console.log(`URL de Supabase: ${SUPABASE_URL}`);
   console.log(`Correo: ${adminEmail}`);
 
-  // 1. Crear el usuario en auth.users a través del API de Administración (Bypassea RLS y restricciones)
+  // 1. Crear el usuario en auth.users mediante la API de administración (omite RLS y restricciones)
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email: adminEmail,
     password: adminPassword,

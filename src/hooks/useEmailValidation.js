@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 
 /**
  * useEmailValidation
- * Unified hook for email validation in the frontend.
- * Enforces the @unipaz.edu.co domain.
+ * Hook unificado para validar correos electrónicos en el frontend.
+ * Exige el dominio @unipaz.edu.co.
  */
 export function useEmailValidation(initialValue = '') {
   const [email, setEmail] = useState(initialValue);
@@ -11,7 +11,7 @@ export function useEmailValidation(initialValue = '') {
   const [isValid, setIsValid] = useState(true);
 
   const validate = useCallback((value) => {
-    // Normalization: trim and lowercase
+    // Normalización: eliminar espacios externos y convertir a minúsculas
     const cleanEmail = value.trim().toLowerCase();
     
     if (!cleanEmail) {
@@ -20,7 +20,7 @@ export function useEmailValidation(initialValue = '') {
       return false;
     }
 
-    // Regex for standard email format + unipaz.edu.co domain
+    // Expresión regular para el formato estándar de correo y el dominio unipaz.edu.co
     const unipazRegex = /^[a-zA-Z0-9._%+-]+@unipaz\.edu\.co$/;
     
     if (!unipazRegex.test(cleanEmail)) {

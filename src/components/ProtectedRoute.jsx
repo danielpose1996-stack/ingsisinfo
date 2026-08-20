@@ -15,12 +15,12 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     );
   }
 
-  // If trying to access admin route, must be admin
+  // Para acceder a una ruta de administración se debe poseer el rol de administrador
   if (adminOnly && !isAdmin) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  // If trying to access protected route, must be logged in OR be admin
+  // Para acceder a una ruta protegida se debe haber iniciado sesión o ser administrador
   if (!adminOnly && !user && !isAdmin) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

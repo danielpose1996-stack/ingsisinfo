@@ -39,7 +39,7 @@ export default function Modulos() {
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   
-  // Modal for subpages
+  // Modal para subpáginas
   const [selectedSubpage, setSelectedSubpage] = useState(null);
   const [selectedOva, setSelectedOva] = useState(null);
   const [ovas, setOvas] = useState([]);
@@ -117,14 +117,14 @@ export default function Modulos() {
     return embedUrl;
   };
 
-  // OVA Viewer State
+  // Estado del visualizador de OVA
   const [activeOvaStep, setActiveOvaStep] = useState(0);
 
-  // Derived steps for the selected OVA
+  // Pasos derivados para el OVA seleccionado
   const getOvaSteps = (ova) => {
     if (!ova) return [];
     
-    // Parse evaluacion from actividad_final
+    // Extraer evaluación de actividad_final
     let evaluacion = null;
     if (ova.actividad_final) {
       try {
@@ -133,7 +133,7 @@ export default function Modulos() {
           evaluacion = parsed;
         }
       } catch {
-        // Legacy text format, not a quiz
+        // Formato de texto heredado, no es una evaluación tipo quiz
       }
     }
 
@@ -254,7 +254,7 @@ export default function Modulos() {
             exit={{ opacity: 0 }}
             className="space-y-8"
           >
-            {/* Detail Header */}
+            {/* Encabezado del detalle */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-card-border">
               <div className="flex items-center gap-6">
                 <button 
@@ -284,7 +284,7 @@ export default function Modulos() {
               </div>
             </div>
 
-            {/* Content List */}
+            {/* Lista de contenido */}
             <div className="min-h-[400px]">
               {contentLoading ? (
                 <div className="flex items-center justify-center h-full py-20">
@@ -459,7 +459,7 @@ export default function Modulos() {
         )}
       </AnimatePresence>
 
-      {/* Subpage Modal */}
+      {/* Modal de subpágina */}
       <Modal
         isOpen={!!selectedSubpage}
         onClose={() => setSelectedSubpage(null)}
@@ -476,7 +476,7 @@ export default function Modulos() {
         </div>
       </Modal>
 
-      {/* OVA Viewer Modal - Redesigned as an Interactive Player */}
+      {/* Modal del visor de OVA, rediseñado como reproductor interactivo */}
       <Modal
         isOpen={!!selectedOva}
         onClose={() => setSelectedOva(null)}
@@ -484,7 +484,7 @@ export default function Modulos() {
         maxWidth="max-w-6xl"
       >
         <div className="flex flex-col lg:flex-row h-[75vh] -m-6 overflow-hidden">
-          {/* Sidebar Navigation */}
+          {/* Navegación lateral */}
           <div className="w-full lg:w-72 bg-white/[0.02] border-r border-card-border flex flex-col h-full shrink-0">
             <div className="p-6 border-b border-card-border">
               <div className="flex items-center justify-between mb-4">
@@ -532,7 +532,7 @@ export default function Modulos() {
             </div>
           </div>
 
-          {/* Interaction Stage */}
+          {/* Área de interacción */}
           <div className="flex-grow flex flex-col h-full overflow-hidden bg-background">
             <div className="flex-grow overflow-y-auto custom-scrollbar p-8 lg:p-12">
               <AnimatePresence mode="wait">
@@ -582,7 +582,7 @@ export default function Modulos() {
                          <div className="text-5xl font-black text-foreground/5 italic select-none">0{activeOvaStep + 1}</div>
                        </div>
 
-                       {/* Video Block */}
+                       {/* Bloque de video */}
                        {currentStep.content.video_url && (
                          <div className="aspect-video rounded-3xl overflow-hidden border border-card-border bg-black/40">
                            <iframe
@@ -595,7 +595,7 @@ export default function Modulos() {
                          </div>
                        )}
 
-                       {/* Image Block */}
+                       {/* Bloque de imagen */}
                        {currentStep.content.imagen_url && (
                          <div className="rounded-3xl overflow-hidden border border-card-border">
                            <img
@@ -606,7 +606,7 @@ export default function Modulos() {
                          </div>
                        )}
 
-                       {/* Note Block */}
+                       {/* Bloque de nota */}
                        {currentStep.content.tipo === 'nota' && (
                          <div className="p-8 rounded-3xl bg-amber-500/5 border border-amber-500/15">
                            <div className="flex items-center gap-3 mb-4">
@@ -624,7 +624,7 @@ export default function Modulos() {
                          </div>
                        )}
 
-                       {/* Code Block */}
+                       {/* Bloque de código */}
                        {currentStep.content.tipo === 'codigo' && currentStep.content.codigo && (
                          <div className="rounded-3xl bg-[#0d1117] border border-[#30363d] overflow-hidden">
                            <div className="flex items-center gap-2 px-6 py-3 bg-[#161b22] border-b border-[#30363d]">
@@ -641,7 +641,7 @@ export default function Modulos() {
                          </div>
                        )}
 
-                       {/* Resource Block */}
+                       {/* Bloque de recurso */}
                        {currentStep.content.tipo === 'recurso' && currentStep.content.recurso_url && (
                          <div className="p-8 rounded-3xl bg-cyan-500/5 border border-cyan-500/15 flex items-center justify-between gap-6">
                            <div className="flex items-center gap-5">
@@ -663,7 +663,7 @@ export default function Modulos() {
                          </div>
                        )}
 
-                       {/* Main Text Content (for texto/default blocks, or additional content on other blocks) */}
+                       {/* Contenido textual principal para bloques de texto/predeterminados o contenido adicional */}
                        {currentStep.content.contenido && currentStep.content.tipo !== 'nota' && (
                          <GlassCard className="p-10 border-card-border bg-card">
                            <div
@@ -677,7 +677,7 @@ export default function Modulos() {
                          </GlassCard>
                        )}
 
-                       {/* Legacy recurso_url support */}
+                       {/* Compatibilidad heredada con recurso_url */}
                        {currentStep.content.recurso_url && currentStep.content.tipo !== 'recurso' && (
                          <div className="p-8 rounded-3xl bg-[#1E3A8A]/5 border border-[#1E3A8A]/10 flex items-center justify-between gap-6">
                            <div className="flex items-center gap-5">
@@ -704,14 +704,14 @@ export default function Modulos() {
                   {currentStep?.tipo === 'final' && (
                     <div className="h-full flex flex-col justify-center">
                       {currentStep.content.evaluacion ? (
-                        /* Interactive Quiz */
+                        /* Cuestionario interactivo */
                         <QuizPlayer
                           evaluacion={currentStep.content.evaluacion}
                           recursos={currentStep.content.recursos}
                           onComplete={handleQuizComplete}
                         />
                       ) : (
-                        /* Legacy text-based evaluation */
+                        /* Evaluación heredada basada en texto */
                         <div className="max-w-3xl mx-auto text-center space-y-12">
                           <div className="relative">
                             <div className="absolute inset-0 bg-[#1E3A8A]/20 blur-[100px] rounded-full scale-150" />
@@ -762,7 +762,7 @@ export default function Modulos() {
               </AnimatePresence>
             </div>
 
-            {/* Navigation Controls */}
+            {/* Controles de navegación */}
             <div className="p-6 border-t border-card-border bg-card/50 flex items-center justify-between">
                <div className="flex items-center gap-4">
                  <Button 

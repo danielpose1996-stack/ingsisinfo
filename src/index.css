@@ -9,7 +9,7 @@
   --color-blue-500: #1E3A8A;
   --color-amber-500: #d97706;
   
-  /* Semantic variables for themes */
+  /* Variables semánticas para los temas */
   --color-background: var(--background);
   --color-foreground: var(--text);
   --color-card: var(--card-bg);
@@ -36,13 +36,13 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Headings with Outfit Display Font */
+  /* Encabezados con fuente Tipográfica Outfit */
   h1, h2, h3, h4, h5, h6, .font-display {
     font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.02em;
   }
 
-  /* Focus Indicator for Keyboard Users (WCAG 2.4.7 focus visible) */
+  /* Indicador de Foco para Navegación por Teclado (Cumplimiento WCAG 2.4.7) */
   :focus {
     outline: none;
   }
@@ -53,7 +53,7 @@
     box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
   }
 
-  /* Global Scrollbar */
+  /* Barra de Desplazamiento Global */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -68,7 +68,7 @@
     background: color-mix(in srgb, var(--scrollbar-thumb), black 10%);
   }
 
-  /* Dropdown (Select/Option) Contrast Fix */
+  /* Corrección de contraste para listas desplegables (select/option) */
   select {
     background-color: var(--card-bg);
     color: var(--text);
@@ -81,7 +81,7 @@
     color: var(--text);
   }
 
-  /* Improve selection contrast */
+  /* Mejora del contraste de selección */
   ::selection {
     background-color: var(--selection-bg);
     color: var(--selection-text);
@@ -107,7 +107,7 @@
     background: rgba(30, 58, 138, 0.2);
   }
 
-  /* Premium Glassmorphism Effect */
+  /* Efecto avanzado de cristal esmerilado */
   .glass-effect {
     background: rgba(255, 255, 255, 0.7);
     backdrop-blur: 16px;
@@ -115,7 +115,7 @@
     box-shadow: 0 8px 32px 0 rgba(30, 58, 138, 0.04), inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* Floating Mesh Glow Animation */
+  /* Animación de brillo flotante en malla */
   @keyframes float-slow {
     0%, 100% {
       transform: translate(0px, 0px) scale(1);
@@ -142,7 +142,7 @@
 }
 
 /* ═══════════════════════════════════════ */
-/* TipTap Rich Text Editor Styles         */
+/* Estilos del Editor Enriquecido TipTap   */
 /* ═══════════════════════════════════════ */
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -266,7 +266,7 @@
   color: color-mix(in srgb, var(--text), transparent 50%);
 }
 
-/* Tiptap Rich Text Editor - Tables and Images Styles */
+/* Editor de texto enriquecido TipTap: estilos de tablas e imágenes */
 .tiptap table {
   border-collapse: collapse;
   table-layout: fixed;
@@ -322,7 +322,7 @@
   display: block;
 }
 
-/* Tiptap Resizable Image Styles using data attributes */
+/* Estilos de imágenes redimensionables de TipTap mediante atributos de datos */
 [data-resize-container] {
   position: relative;
   display: inline-block !important;
@@ -361,7 +361,7 @@
   transform: scale(1.25);
 }
 
-/* Diagonal handles (positioned exactly on corners using !important) */
+/* Controles diagonales posicionados en las esquinas mediante !important */
 [data-resize-handle="top-left"] {
   top: -6px !important;
   left: -6px !important;

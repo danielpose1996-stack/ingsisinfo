@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 
-// Lazy load pages
+// Carga diferida de páginas
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
@@ -24,7 +24,7 @@ function AdminGatekeeper({ children }) {
   const { isAdmin } = useAuth();
   const hasGateKey = sessionStorage.getItem('admin_access_gate') === 'true';
 
-  // Si ya está logueado como admin, o si viene del footer con la "llave"
+  // Si ya inició sesión como administrador o viene del pie de página con la "llave"
   if (isAdmin || hasGateKey) {
     return children;
   }
@@ -70,7 +70,7 @@ function App() {
             } 
           />
           
-          {/* Protected Routes */}
+          {/* Rutas protegidas */}
           <Route 
             path="/dashboard/estudiante" 
             element={

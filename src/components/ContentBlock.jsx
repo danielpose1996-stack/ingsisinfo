@@ -282,9 +282,9 @@ export default function ContentBlock({
           : 'border-card-border bg-card/20 hover:border-card-border/80'
       }`}
     >
-      {/* Block Header */}
+      {/* Encabezado del bloque */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-card-border/50">
-        {/* Drag Handle */}
+        {/* Control de arrastre */}
         <button
           type="button"
           {...attributes}
@@ -295,12 +295,12 @@ export default function ContentBlock({
           <GripVertical className="w-4 h-4" />
         </button>
 
-        {/* Section Number */}
+        {/* Número de sección */}
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black italic ${colorClasses[typeConfig.color]}`}>
           {String(index + 1).padStart(2, '0')}
         </div>
 
-        {/* Title Input */}
+        {/* Título de la sección */}
         <input
           type="text"
           placeholder="Título de la sección..."
@@ -309,7 +309,7 @@ export default function ContentBlock({
           className="flex-1 bg-transparent text-lg font-bold text-foreground focus:outline-none italic placeholder:text-foreground/20 tracking-tight"
         />
 
-        {/* Type Selector */}
+        {/* Selector de tipo */}
         <div className="relative">
           <button
             type="button"
@@ -347,7 +347,7 @@ export default function ContentBlock({
           )}
         </div>
 
-        {/* Delete */}
+        {/* Botón de eliminar */}
         <button
           type="button"
           onClick={onRemove}
@@ -358,12 +358,12 @@ export default function ContentBlock({
         </button>
       </div>
 
-      {/* Block Content */}
+      {/* Contenido del bloque */}
       <div className="p-6">
         {renderBlockContent()}
       </div>
 
-      {/* Attached File Indicator */}
+      {/* Indicador de archivo adjunto */}
       {section.recurso_url && blockType === 'texto' && (
         <div className="mx-6 mb-6 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#1E3A8A]/5 border border-[#1E3A8A]/15 text-[#1E3A8A]">
           <FileText className="w-4 h-4" />

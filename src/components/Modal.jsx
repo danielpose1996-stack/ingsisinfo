@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
+          {/* Fondo superpuesto */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -27,7 +27,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs"
           />
           
-          {/* Modal Content */}
+          {/* Contenido de la ventana modal */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -57,7 +57,7 @@ export default function OvaEditor({
   const sectionRefs = useRef({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Generate unique IDs for sections if they don't have them
+  // Generar IDs únicos para las secciones si no cuentan con uno
   useEffect(() => {
     const needsIds = ovaForm.contenido.some((s, i) => !s._id);
     if (needsIds) {
@@ -98,7 +98,7 @@ export default function OvaEditor({
       ...ovaForm,
       contenido: [...ovaForm.contenido, newSection],
     });
-    // Scroll to new section after render
+    // Desplazarse a la nueva sección tras el renderizado
     setTimeout(() => {
       const el = document.getElementById(`section-${ovaForm.contenido.length}`);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -121,6 +121,14 @@ export default function OvaEditor({
     setOvaForm({ ...ovaForm, contenido: newContenido });
   };
 
+  const scrollToSection = (id) => {
+    setActiveSection(id);
+    const element = sectionRefs.current[id];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -130,33 +138,20 @@ export default function OvaEditor({
     }
   };
 
-  const scrollToSection = (sectionId) => {
-    setActiveSection(sectionId);
-    const el = document.getElementById(sectionId);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   const sidebarSections = [
     { id: 'datos-generales', label: 'Datos Generales', icon: FileText },
-    { id: 'introduccion', label: 'Introducción', icon: MessageSquare },
-    ...ovaForm.contenido.map((s, i) => ({
-      id: `section-${i}`,
-      label: s.titulo || `Sección ${i + 1}`,
-      icon: Layers,
-      isContent: true,
-    })),
-    { id: 'recursos', label: 'Material Complementario', icon: FileDown },
-    { id: 'evaluacion', label: 'Evaluación Final', icon: Award },
+    { id: 'pedagogia', label: 'Información Pedagógica', icon: Target },
+    { id: 'secciones', label: `Secciones (${ovaForm.contenido.length})`, icon: Layers },
   ];
 
   return (
     <div className="flex gap-8 min-h-[80vh]">
       {/* ═══════════════════════════════════════ */}
-      {/* SIDEBAR - Navigation Index */}
+      {/* BARRA LATERAL - Índice de Navegación     */}
       {/* ═══════════════════════════════════════ */}
       <div className="hidden lg:block w-64 shrink-0">
         <div className="sticky top-6 space-y-6">
-          {/* Back + Title */}
+          {/* Volver y Título */}
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -173,7 +168,7 @@ export default function OvaEditor({
             </div>
           </div>
 
-          {/* Status Toggle */}
+          {/* Alternador de Estado */}
           <div className="flex gap-2">
             <button
               type="button"
@@ -199,7 +194,7 @@ export default function OvaEditor({
             </button>
           </div>
 
-          {/* Section Index */}
+          {/* Índice de Secciones */}
           <GlassCard className="p-4 border-card-border bg-card/30">
             <h4 className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] italic mb-4">
               Índice de Secciones
@@ -233,7 +228,7 @@ export default function OvaEditor({
             </button>
           </GlassCard>
 
-          {/* Save Button */}
+          {/* Botón de Guardar */}
           <Button
             onClick={handleSave}
             disabled={isSaving}
@@ -246,7 +241,7 @@ export default function OvaEditor({
       </div>
 
       {/* ═══════════════════════════════════════ */}
-      {/* MAIN EDITOR AREA */}
+      {/* ÁREA PRINCIPAL DEL EDITOR                */}
       {/* ═══════════════════════════════════════ */}
       <div className="flex-1 space-y-8 min-w-0">
         <AnimatePresence>
@@ -292,7 +287,7 @@ export default function OvaEditor({
           )}
         </AnimatePresence>
 
-        {/* Mobile Header */}
+        {/* Encabezado móvil */}
         <div className="lg:hidden flex items-center justify-between gap-4 pb-4 border-b border-card-border">
           <div className="flex items-center gap-3">
             <button
@@ -345,7 +340,7 @@ export default function OvaEditor({
                 </select>
               </div>
 
-              {/* Title */}
+              {/* Título */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Título del OVA *</label>
                 <input
@@ -357,7 +352,7 @@ export default function OvaEditor({
                 />
               </div>
 
-              {/* Objective */}
+              {/* Objetivo */}
               {ovaForm.tipo !== 'html' && (
                 <div className="space-y-2">
                   <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Objetivo Pedagógico *</label>
@@ -370,7 +365,7 @@ export default function OvaEditor({
                 </div>
               )}
 
-              {/* Cover Image */}
+              {/* Imagen de portada */}
               <div className="space-y-2">
                 <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Imagen de Portada</label>
                 {ovaForm.imagen_portada ? (
@@ -397,7 +392,7 @@ export default function OvaEditor({
                 )}
               </div>
 
-              {/* Description */}
+              {/* Descripción */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Descripción Breve</label>
                 <input
@@ -515,7 +510,7 @@ export default function OvaEditor({
               </SortableContext>
             </DndContext>
 
-            {/* Add Section Button (bottom) */}
+            {/* Botón inferior para añadir una sección */}
             <button
               type="button"
               onClick={handleAddSection}
@@ -587,7 +582,7 @@ export default function OvaEditor({
           </>
         )}
 
-        {/* ─── EVALUACIÓN FINAL (full width) ─── */}
+        {/* ─── EVALUACIÓN FINAL (ancho completo) ─── */}
         <section id="evaluacion" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-6">
             <div className="flex items-center justify-between">
@@ -605,7 +600,7 @@ export default function OvaEditor({
           </GlassCard>
         </section>
 
-        {/* ─── BOTTOM SAVE BAR (Mobile) ─── */}
+        {/* ─── BARRA INFERIOR DE GUARDADO (MÓVIL) ─── */}
         <div className="lg:hidden pt-6 border-t border-card-border flex gap-4 pb-10">
           <Button
             onClick={onCancel}

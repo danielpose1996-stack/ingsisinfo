@@ -5,8 +5,8 @@ export default function Footer() {
   const navigate = useNavigate();
 
   const handleAdminGateway = (e) => {
-    // Hidden click handler for admins
-    if (e.detail === 2) { // Double click as extra layer of "discretion"
+    // Manejador de clics oculto para el acceso discreto de administradores
+    if (e.detail === 2) { // Doble clic como capa adicional de discreción
       sessionStorage.setItem('admin_access_gate', 'true');
       navigate('/admin/login');
     }
@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="relative border-t border-white/10 pt-20 pb-10 overflow-hidden"
       style={{ backgroundImage: "url('/footer-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center top', backgroundRepeat: 'no-repeat' }}
     >
-      {/* Dark overlay for readability */}
+      {/* Capa oscura para mejorar la legibilidad */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/95 via-[#0f172a]/90 to-[#0f172a]/95 z-0" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -6,7 +6,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // CORS check on OPTIONS
+  // Verificación de CORS para solicitudes OPTIONS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const token = authHeader.replace(/^Bearer\s/i, '')
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
 
-    // Reject if using anon key as Bearer token
+    // Rechazar si se usa la clave anónima como token Bearer
     if (token === anonKey) {
       return new Response(
         JSON.stringify({ error: 'Acceso denegado: el token anónimo no puede realizar operaciones de administración' }),
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseClient = createClient(supabaseUrl, anonKey ?? '')
 
-    // Validate token with Supabase Auth
+    // Validar el token mediante Supabase Auth
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     if (userError || !user) {
       return new Response(
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Query perfiles to verify if the user has 'admin' role
+    // Consultar perfiles para verificar si el usuario tiene el rol 'admin'
     const { data: profile, error: profileError } = await supabaseClient
       .from('perfiles')
       .select('rol')
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Auth validation passed! Now initialize client with SERVICE ROLE key
+    // Autenticación validada: inicializar el cliente con la clave SERVICE ROLE
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     if (!serviceRoleKey) {
       throw new Error('SUPABASE_SERVICE_ROLE_KEY no está configurada en las variables de entorno de la Edge Function')
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       }
     })
 
-    // Parse the body
+    // Interpretar el cuerpo de la solicitud
     const body = await req.json()
     const { action, user_id, password, email, nombre, apellido, rol, linea_investigacion } = body
 
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
         )
       }
 
-      // Update password in Auth if provided
+      // Actualizar la contraseña en Auth si fue proporcionada
       if (password) {
         const { error: updateAuthError } = await adminClient.auth.admin.updateUserById(user_id, {
           password: password
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else {
-      // Create user flow
+      // Flujo de creación de usuario
       if (!email || !password || !nombre || !apellido || !rol) {
         return new Response(
           JSON.stringify({ error: 'Faltan campos obligatorios para la creación del usuario' }),
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
         )
       }
 
-      // 1. Create the user in Auth
+      // 1. Crear el usuario en Auth
       const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
         )
       }
 
-      // 2. Insert profile in public.perfiles
+      // 2. Insertar el perfil en public.perfiles
       const { error: profileInsertError } = await adminClient
         .from('perfiles')
         .insert({
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
         })
 
       if (profileInsertError) {
-        // Attempt rollback of created Auth user to keep state clean
+        // Intentar revertir el usuario creado en Auth para conservar un estado limpio
         await adminClient.auth.admin.deleteUser(authData.user.id)
         return new Response(
           JSON.stringify({ error: `Error al registrar perfil: ${profileInsertError.message}` }),

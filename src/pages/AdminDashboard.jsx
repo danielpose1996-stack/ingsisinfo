@@ -73,7 +73,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Helper to normalize strings for robust comparison (removes accents/spaces/case)
+// Función auxiliar para normalizar cadenas en comparaciones (elimina acentos, espacios y mayúsculas)
 const normalize = (str) => {
   if (!str) return '';
   return str.toString()
@@ -94,24 +94,24 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [loadingPublic, setLoadingPublic] = useState(false);
 
-  // Public Content State (Inicio)
+  // Estado del contenido público (Inicio)
   const [noticiasAdmin, setNoticiasAdmin] = useState([]);
   const [eventosAdmin, setEventosAdmin] = useState([]);
   const [galeriaAdmin, setGaleriaAdmin] = useState([]);
 
-  // Public Selection/Modal States
+  // Estado de selección y modales públicos
   const [isPublicModalOpen, setIsPublicModalOpen] = useState(false);
   const [publicType, setPublicType] = useState('noticia'); // 'noticia', 'evento', 'galeria'
   const [editingPublicItem, setEditingPublicItem] = useState(null);
   const [publicForm, setPublicForm] = useState({});
 
-  // Modal states
+  // Estado de los modales
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isProyectoModalOpen, setIsProyectoModalOpen] = useState(false);
   const [selectedProyecto, setSelectedProyecto] = useState(null);
 
-  // Aula Virtual / OVA State
+  // Estado del Aula Virtual y Objetos Virtuales de Aprendizaje (OVAs)
   const [selectedModuloAula, setSelectedModuloAula] = useState(null);
   const [ovas, setOvas] = useState([]);
   const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
     linea_investigacion: '' // Usaremos el campo existente en DB
   });
 
-  // Filtering states
+  // Estado de los filtros
   const [filterLinea, setFilterLinea] = useState('');
   const [filterFase, setFilterFase] = useState('');
   const [searchUserTerm, setSearchUserTerm] = useState('');
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
     }
   }, [user, perfil]);
 
-  // Autoguardado Effect
+  // Efecto de autoguardado
   useEffect(() => {
     if (isOvaFormOpen && ovaForm.titulo) {
       const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
@@ -167,14 +167,14 @@ export default function AdminDashboard() {
     }
   }, [ovaForm, isOvaFormOpen, editingOva]);
 
-  // Check for Draft when modal opens
+  // Verificar existencia de borrador al abrir el modal
   useEffect(() => {
     if (isOvaFormOpen) {
       const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
       const saved = localStorage.getItem(draftKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Only show if it's different from current form (or if current is empty)
+        // Mostrar solo si difiere del formulario actual o si el formulario está vacío
         if (parsed.titulo !== ovaForm.titulo || parsed.descripcion !== ovaForm.descripcion || parsed.contenido?.length !== ovaForm.contenido?.length) {
           setDraftData(parsed);
           setHasDraft(true);
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
       setUsuarios(users || []);
       setModulos(mods || []);
 
-      // Calculate basic stats
+      // Calcular estadísticas básicas
       const validProys = proys || [];
       const validUsers = users || [];
       
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
 
   const handleEditOva = (ova) => {
     setEditingOva(ova);
-    // Parse evaluacion: try JSON from actividad_final, fallback to legacy text
+    // Interpretar la evaluación: intentar JSON desde actividad_final y recurrir al texto heredado
     let evaluacion = { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
     if (ova.actividad_final) {
       try {
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
           evaluacion = parsed;
         }
       } catch {
-        // Legacy: actividad_final is plain text/HTML, not a quiz
+        // Formato heredado: actividad_final contiene texto o HTML, no un cuestionario
         evaluacion.instrucciones = ova.actividad_final;
       }
     }
@@ -393,20 +393,20 @@ export default function AdminDashboard() {
     }
 
     try {
-      // Clean internal _id fields before saving to DB, but keep rich HTML content
+      // Limpiar campos internos _id antes de guardar en la BD y conservar el contenido HTML enriquecido
       const cleanedContenido = ovaForm.contenido.map(({ _id, ...c }) => ({
         ...c,
         titulo: sanitizeText(c.titulo),
       }));
 
-      // Serialize evaluacion (quiz) into actividad_final as JSON
+      // Serializar la evaluación (cuestionario) como JSON dentro de actividad_final
       const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
-      // Clean _id from questions before saving
+      // Limpiar _id de las preguntas antes de guardar
       const cleanedEvaluacion = {
         ...evaluacionData,
         preguntas: (evaluacionData.preguntas || []).map(({ _id, ...q }) => ({
           ...q,
-          _id: _id, // keep _id for quiz questions (needed for player keying)
+          _id: _id, // Conservar _id para identificar las preguntas en el reproductor
         })),
       };
 
@@ -718,13 +718,13 @@ export default function AdminDashboard() {
     }
   };
 
-  // Tracking filters
+  // Filtros de seguimiento
   const [searchEstudiante, setSearchEstudiante] = useState('');
   const [filterOva, setFilterOva] = useState('');
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-background">
-      {/* Sidebar Navigation */}
+      {/* Navegación lateral */}
       <aside className="w-full lg:w-72 bg-card border-r border-card-border p-6 space-y-8">
         <div className="flex items-center gap-3 px-2 mb-10">
           <div className="w-10 h-10 rounded-xl bg-[#1E3A8A]/10 flex items-center justify-center border border-[#1E3A8A]/20">
@@ -760,7 +760,7 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Área principal de contenido */}
       <main className="flex-1 p-6 lg:p-10">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
@@ -785,7 +785,7 @@ export default function AdminDashboard() {
           >
             {activeTab === 'stats' && (
               <div className="space-y-8">
-                {/* Stats Grid */}
+                {/* Cuadrícula de estadísticas */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <GlassCard className="p-8 border-card-border hover:border-[#1E3A8A]/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
@@ -832,7 +832,7 @@ export default function AdminDashboard() {
                   </GlassCard>
                 </div>
 
-                {/* Recent Activity / Projects */}
+                {/* Actividad y proyectos recientes */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                    <GlassCard className="p-6">
                      <h3 className="text-xl font-bold text-foreground mb-6 italic flex items-center gap-2">
@@ -1161,7 +1161,7 @@ export default function AdminDashboard() {
                       />
                    ) : (
                      <div className="space-y-6">
-                       {/* LIST OF OVAs */}
+                       {/* LISTA DE OVAs */}
                        <div className="flex items-center justify-between mb-2">
                          <div>
                             <h3 className="text-2xl font-black text-foreground italic tracking-tight uppercase">
@@ -1270,7 +1270,7 @@ export default function AdminDashboard() {
                                   className="w-full h-full object-cover" 
                                   onError={(e) => {
                                     e.target.onerror = null; 
-                                    e.target.src = ''; // Clear src to prevent broken image icon
+                                    e.target.src = ''; // Limpiar src para evitar el icono de imagen dañada
                                     e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-foreground/10"><ImageIcon className="w-12 h-12" /></div>';
                                   }}
                                 />
@@ -1427,7 +1427,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Metrics Highlight */}
+                {/* Resumen destacado de métricas */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <GlassCard className="p-6 border-[#1E3A8A]/20 bg-[#1E3A8A]/5">
                     <div className="flex items-center gap-4">
@@ -1542,7 +1542,7 @@ export default function AdminDashboard() {
         </AnimatePresence>
       </main>
 
-      {/* Admin Quick Action Modal */}
+      {/* Modal de acciones rápidas del administrador */}
       <Modal
         isOpen={isUserModalOpen}
         onClose={() => {
@@ -1584,7 +1584,7 @@ export default function AdminDashboard() {
               value={emailVal}
               onChange={(e) => {
                 handleEmailChange(e);
-                // setNewUser({...newUser, email: e.target.value}); // Removed as email is managed by hook
+                // setNewUser({...newUser, email: e.target.value}); // Eliminado porque el correo lo gestiona el hook
               }}
               className={`w-full bg-card border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none transition-all ${
                 emailError
@@ -1652,7 +1652,7 @@ export default function AdminDashboard() {
         </form>
       </Modal>
 
-      {/* Admin Project History Modal */}
+      {/* Modal del historial de proyectos del administrador */}
       <Modal
         isOpen={isProyectoModalOpen}
         onClose={() => {
@@ -1740,7 +1740,7 @@ export default function AdminDashboard() {
         )}
       </Modal>
 
-      {/* Admin Public Content Modal (News, Events, Gallery) */}
+      {/* Modal de contenido público del administrador (noticias, eventos y galería) */}
       <Modal
         isOpen={isPublicModalOpen}
         onClose={() => {

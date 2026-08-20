@@ -52,7 +52,7 @@ const colorClasses = {
   amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
 };
 
-// ─── Sortable Question Card ───
+// ─── Tarjeta de pregunta ordenable ───
 function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const typeConfig = QUESTION_TYPES.find(t => t.id === question.tipo) || QUESTION_TYPES[0];
@@ -88,7 +88,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions
     if ((question.opciones || []).length <= 2) return;
     const newOpciones = [...question.opciones];
     newOpciones.splice(optIdx, 1);
-    // Adjust correct answer index if needed
+    // Ajustar el índice de la respuesta correcta si es necesario
     let newCorrect = question.respuesta_correcta;
     if (optIdx === newCorrect) newCorrect = 0;
     else if (optIdx < newCorrect) newCorrect--;
@@ -262,7 +262,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions
           : 'border-card-border bg-card/20 hover:border-card-border/80'
       }`}
     >
-      {/* Question Header */}
+      {/* Encabezado de la pregunta */}
       <div className="flex items-center gap-3 px-5 py-3.5">
         <button
           type="button"
@@ -314,7 +314,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions
         </div>
       </div>
 
-      {/* Question Body (expandable) */}
+      {/* Cuerpo de la pregunta (desplegable) */}
       {isExpanded && (
         <div className="px-5 pb-5 space-y-4 border-t border-card-border/30 pt-4">
           {/* Enunciado */}
@@ -328,7 +328,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions
             />
           </div>
 
-          {/* Type-specific editor */}
+          {/* Editor específico del tipo de pregunta */}
           {renderQuestionEditor()}
 
           {/* Explicación (feedback) */}
@@ -352,7 +352,7 @@ function SortableQuestion({ question, index, onUpdate, onRemove, _totalQuestions
 
 const generateQuestionId = () => `q-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-// ─── Main QuizBuilder Component ───
+// ─── Componente principal QuizBuilder ───
 export default function QuizBuilder({ evaluacion, onChange }) {
   const [showAddMenu, setShowAddMenu] = useState(false);
 
@@ -424,7 +424,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
 
   return (
     <div className="space-y-6">
-      {/* ─── Configuration Row ─── */}
+      {/* ─── Fila de configuración ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-2">
           <label className="flex items-center gap-1.5 text-[10px] text-foreground/30 font-bold uppercase tracking-widest italic">
@@ -475,7 +475,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
         </div>
       </div>
 
-      {/* ─── Instructions ─── */}
+      {/* ─── Instrucciones ─── */}
       <div className="space-y-2">
         <label className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest italic ml-1">
           Instrucciones para el Estudiante
@@ -488,7 +488,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
         />
       </div>
 
-      {/* ─── Questions List ─── */}
+      {/* ─── Lista de preguntas ─── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <label className="text-[10px] text-foreground/30 font-bold uppercase tracking-widest italic">
@@ -532,7 +532,7 @@ export default function QuizBuilder({ evaluacion, onChange }) {
         )}
       </div>
 
-      {/* ─── Add Question Button ─── */}
+      {/* ─── Botón para añadir una pregunta ─── */}
       <div className="relative">
         <button
           type="button"

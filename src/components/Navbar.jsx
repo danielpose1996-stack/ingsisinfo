@@ -63,14 +63,14 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logotipo */}
           <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
             <span className="text-xl font-black text-white tracking-wider font-display transition-transform group-hover:scale-105">
               SISINFO
             </span>
           </Link>
  
-          {/* Desktop Navigation */}
+          {/* Navegación de escritorio */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-1">
               {navLinks.map((link) => (
@@ -102,7 +102,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Auth Button / Avatar */}
+          {/* Botón de Autenticación / Avatar */}
           <div className="hidden md:flex items-center gap-4">
 
             {(!user && !isAdmin) ? (
@@ -169,7 +169,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Navegación móvil */}
       {isOpen && (
         <div className="md:hidden bg-[#1E3A8A] border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (

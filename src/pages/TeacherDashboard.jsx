@@ -50,18 +50,18 @@ export default function TeacherDashboard() {
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Modals state
+  // Estado de modales
   const [isObsModalOpen, setIsObsModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [selectedProyecto, setSelectedProyecto] = useState(null);
   
-  // Action states
+  // Estado de acciones
   const [observacion, setObservacion] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalFile, setFinalFile] = useState(null);
   const [confirmPass, setConfirmPass] = useState('');
 
-  // Aula Virtual State
+  // Estado del Aula Virtual
   const [docenteModulo, setDocenteModulo] = useState(null);
   const [ovas, setOvas] = useState([]);
   const [loadingOvas, setLoadingOvas] = useState(false);
@@ -69,7 +69,7 @@ export default function TeacherDashboard() {
   const [editingOva, setEditingOva] = useState(null);
   const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
 
-  // Persistence State
+  // Estado de persistencia (borradores)
   const [hasDraft, setHasDraft] = useState(false);
   const [draftData, setDraftData] = useState(null);
   const [hasLoadedInitial, setHasLoadedInitial] = useState(false);
@@ -100,7 +100,7 @@ export default function TeacherDashboard() {
     }
   }, [isOvaFormOpen, editingOva]);
 
-  // 2. Efecto de Autoguardado (sync con localStorage)
+  // 2. Efecto de autoguardado (sincronización con localStorage)
   useEffect(() => {
     if (isOvaFormOpen && ovaForm) {
       const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
@@ -122,7 +122,7 @@ export default function TeacherDashboard() {
       const data = await obtenerProyectosDocente(perfil.id);
       setProyectos(data);
 
-      // Auto-detect module for Aula Virtual
+      // Auto-detectar módulo para el Aula Virtual
       const modulos = await obtenerModulos();
       const match = modulos.find(m => m.nombre === perfil.linea_investigacion);
       if (match) {
@@ -169,7 +169,7 @@ export default function TeacherDashboard() {
     setDraftData(null);
   };
 
-  // ─── OVA Handlers ───
+  // ─── Controladores de OVA ───
   const handleCreateOva = () => {
     setEditingOva(null);
     setOvaForm({
@@ -385,7 +385,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header */}
+      {/* Encabezado */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-card-border">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Panel de Docente</h1>
@@ -451,7 +451,7 @@ export default function TeacherDashboard() {
                         <span><strong className="text-foreground">{p.versiones_proyecto?.length || 0}</strong> versiones · <strong className="text-foreground">{p.observaciones?.length || 0}</strong> observaciones</span>
                       </div>
 
-                      {/* Phase Selector */}
+                      {/* Selector de fase */}
                       <div className="pt-2">
                         <p className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest mb-2 italic">Fase Actual</p>
                         <div className="flex gap-1 bg-background/50 p-1 rounded-lg border border-card-border">
@@ -563,7 +563,7 @@ export default function TeacherDashboard() {
             />
           ) : (
             <div className="space-y-6">
-              {/* Module Header + Create Button */}
+              {/* Encabezado del módulo y botón de creación */}
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-2xl font-black text-foreground italic tracking-tight uppercase">
@@ -576,7 +576,7 @@ export default function TeacherDashboard() {
                 </Button>
               </div>
 
-              {/* OVA List */}
+              {/* Lista de OVAs */}
               {loadingOvas ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3].map(i => <div key={i} className="h-64 rounded-3xl bg-card animate-pulse" />)}
@@ -641,9 +641,9 @@ export default function TeacherDashboard() {
         </div>
       )}
 
-      {/* --- MODALS --- */}
+      {/* --- MODALES --- */}
       
-      {/* Observation Modal */}
+      {/* Modal de observación */}
       <Modal 
         isOpen={isObsModalOpen} 
         onClose={() => setIsObsModalOpen(false)}
@@ -698,7 +698,7 @@ export default function TeacherDashboard() {
         </form>
       </Modal>
 
-      {/* Finalize Modal */}
+      {/* Modal de finalización */}
       <Modal 
         isOpen={isFinalizeModalOpen} 
         onClose={() => setIsFinalizeModalOpen(false)}
@@ -755,5 +755,4 @@ export default function TeacherDashboard() {
     </div>
   );
 }
-
 
