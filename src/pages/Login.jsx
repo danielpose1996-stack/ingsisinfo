@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GlassCard from '../components/GlassCard';
-import Button from '../components/Button';
-import { ShieldCheck, AlertCircle, Loader2, Sparkles, GraduationCap } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,55 +57,96 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background relative overflow-hidden">
-      {/* Luces de fondo ambientales */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-400/5 rounded-full blur-[100px]" />
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-[#F4F6F9] dark:bg-slate-950 font-sans antialiased selection:bg-blue-500/20">
+      
+      {/* Contenedor Principal / Tarjeta */}
+      <div className="w-full max-w-[500px]">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.07)] rounded-[28px] p-8 sm:p-12 transition-all">
+          
+          {/* Header: Escudo Académico + Badge */}
+          <div className="flex items-center justify-center gap-3.5 mb-7">
+            {/* Ícono de Escudo Institucional con Birrete y Libro */}
+            <div className="shrink-0">
+              <svg className="w-13 h-15 text-[#1E3A8A] dark:text-blue-400 drop-shadow-sm" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Contorno del escudo */}
+                <path
+                  d="M24 3L8 9V24C8 36.5 14.8 47.5 24 51.5C33.2 47.5 40 36.5 40 24V9L24 3Z"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="fill-blue-50/50 dark:fill-blue-950/30"
+                />
+                {/* Birrete de graduación */}
+                <path
+                  d="M24 14.5L15 19L24 23.5L33 19L24 14.5Z"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M18.5 21V26C18.5 26 20.8 28 24 28C27.2 28 29.5 26 29.5 26V21"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+                <path d="M33 19V24.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                {/* Libro abierto */}
+                <path
+                  d="M16 34.5C18.5 33 21.5 33 24 34.5C26.5 33 29.5 33 32 34.5V42.5C29.5 41 26.5 41 24 42.5C21.5 41 18.5 41 16 42.5V34.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path d="M24 34.5V42.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </div>
 
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <GlassCard className="p-8 sm:p-10 bg-card border border-card-border shadow-xl rounded-2xl relative">
-          {/* Encabezado */}
+            {/* Badge de Portal */}
+            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-[#EDF2F7] dark:bg-slate-800 text-[#1E3A8A] dark:text-blue-300 text-[11px] font-bold tracking-wider uppercase">
+              Portal de Aprendizaje
+            </span>
+          </div>
+
+          {/* Título & Subtítulo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-5 text-primary shadow-inner">
-              <GraduationCap className="w-9 h-9" />
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5" /> Portal Académico
-            </div>
-            <h1 className="text-3xl font-black text-foreground tracking-tight">SISINFO</h1>
-            <p className="text-foreground/60 text-sm mt-1">
-              Semillero de Investigación en Sistemas de Información
+            <h1 className="text-4xl font-black text-[#0F172A] dark:text-white tracking-tight">
+              SISINFO
+            </h1>
+            <p className="text-[#64748B] dark:text-slate-400 text-base font-normal mt-1.5">
+              Semillero de Investigación
             </p>
           </div>
 
-          {/* Estado de carga de sesión existente */}
+          {/* Estado de verificación o Botón de Acción */}
           {loading && user ? (
-            <div className="py-10 text-center space-y-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-              <p className="text-sm font-medium text-foreground/70">
+            <div className="py-8 text-center space-y-3">
+              <Loader2 className="w-7 h-7 animate-spin text-[#1E3A8A] dark:text-blue-400 mx-auto" />
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Verificando credenciales institucionales...
               </p>
             </div>
           ) : (
             <div className="space-y-6">
+              
               {/* Botón de Google OAuth */}
               <button
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-3.5 py-4 px-5 rounded-xl border border-card-border bg-card hover:bg-slate-50 dark:hover:bg-slate-800 text-foreground font-semibold text-sm transition-all duration-200 shadow-sm hover:shadow-md hover:border-primary/40 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full flex items-center justify-center gap-3.5 py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-800 text-[#0F172A] dark:text-slate-100 font-semibold text-sm transition-all duration-200 shadow-sm hover:shadow hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#1E3A8A] dark:text-blue-400" />
                     Conectando con Google...
                   </span>
                 ) : (
                   <>
-                    {/* SVG oficial del logo de Google */}
-                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                    {/* SVG oficial del logo de Google (G multicolor) */}
+                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                       <path
                         fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -130,37 +169,47 @@ export default function Login() {
                 )}
               </button>
 
-              {/* Mensajes de error */}
+              {/* Mensajes de error en caso de fallo */}
               {errorMessage && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs animate-in zoom-in duration-300">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="font-bold">Error de autenticación</p>
+                <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 text-xs animate-in zoom-in duration-200">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold">Error de acceso</p>
                     <p className="opacity-90">{errorMessage}</p>
                   </div>
                 </div>
               )}
 
+              {/* Separador con punto central sutil */}
+              <div className="relative flex py-2 items-center">
+                <div className="grow border-t border-slate-100 dark:border-slate-800"></div>
+                <span className="shrink mx-3.5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                <div className="grow border-t border-slate-100 dark:border-slate-800"></div>
+              </div>
+
               {/* Nota de Seguridad Institucional */}
-              <div className="pt-6 border-t border-card-border">
-                <div className="flex items-center justify-center gap-2 text-foreground/50 text-xs mb-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="font-semibold text-foreground/70">Acceso Seguro UNIPAZ</span>
+              <div className="text-center space-y-2.5">
+                <div className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-[13px]">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span>Acceso Seguro UNIPAZ</span>
                 </div>
-                <p className="text-center text-[11px] text-foreground/50 leading-relaxed">
+                <p className="text-center text-xs text-[#64748B] dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
                   Solo se permite el ingreso con cuentas activas pertenecientes al dominio{' '}
-                  <strong className="text-foreground/80 font-mono">@unipaz.edu.co</strong>. Los nuevos usuarios ingresan con rol de estudiante por defecto.
+                  <strong className="text-[#1E3A8A] dark:text-blue-400 font-semibold">@unipaz.edu.co</strong>. Los nuevos usuarios ingresan con rol de estudiante por defecto.
                 </p>
               </div>
+
             </div>
           )}
-        </GlassCard>
 
-        {/* Pie informativo */}
-        <p className="mt-8 text-center text-xs text-foreground/40 italic">
-          Instituto Universitario de la Paz - UNIPAZ
+        </div>
+
+        {/* Pie de página institucional */}
+        <p className="mt-8 text-center text-xs text-[#64748B] dark:text-slate-500 font-normal tracking-wide">
+          Instituto Universitario de la Paz – UNIPAZ
         </p>
       </div>
+
     </div>
   );
 }
