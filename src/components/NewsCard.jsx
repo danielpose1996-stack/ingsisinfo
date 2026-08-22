@@ -1,6 +1,5 @@
 import React from 'react';
-import GlassCard from './GlassCard';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { Calendar, ChevronRight, ExternalLink } from 'lucide-react';
 
 export default function NewsCard({ noticia, onClick }) {
   const { titulo, contenido, fecha, imagen_url, enlace_url } = noticia;
@@ -13,15 +12,15 @@ export default function NewsCard({ noticia, onClick }) {
   };
   
   return (
-    <GlassCard 
-      hover 
+    <div 
       onClick={onClick} 
       onKeyDown={handleKeyDown}
       tabIndex="0"
       aria-label={`Noticia: ${titulo}`}
-      className="flex flex-col h-full overflow-hidden p-0 group cursor-pointer hover:shadow-md transition-all duration-300 border border-card-border hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden flex flex-col h-full hover:shadow-md transition-all duration-300 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]"
     >
-      <div className="relative h-48 overflow-hidden bg-slate-100">
+      {/* Imagen de la noticia con fecha superpuesta */}
+      <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-800">
         {imagen_url ? (
           <img 
             src={imagen_url} 
@@ -30,41 +29,50 @@ export default function NewsCard({ noticia, onClick }) {
             onError={(e) => {
               e.target.onerror = null; 
               e.target.src = ''; 
-              e.target.parentElement.innerHTML = '<div class="w-full h-full bg-slate-100 flex items-center justify-center text-4xl" aria-hidden="true">🖼️</div>';
+              e.target.parentElement.innerHTML = '<div class="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-3xl" aria-hidden="true">📰</div>';
             }}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center" aria-hidden="true">
-            <span className="text-slate-400 text-4xl">📢</span>
+          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center" aria-hidden="true">
+            <span className="text-slate-400 text-3xl">📰</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white/90 font-medium">
-          <Calendar className="w-3.5 h-3.5 text-white/95" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs text-white text-[11px] font-semibold">
+          <Calendar className="w-3.5 h-3.5 text-white/90" aria-hidden="true" />
           <span>{new Date(fecha).toLocaleDateString()}</span>
         </div>
       </div>
-      <div className="p-5 flex flex-col flex-grow bg-card">
-        <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+
+      {/* Contenido textual */}
+      <div className="p-5 flex flex-col flex-grow">
+        <h3 className="text-sm font-bold text-[#0F172A] dark:text-white uppercase tracking-tight line-clamp-2 mb-2 group-hover:text-[#1E3A8A] dark:group-hover:text-blue-400 transition-colors">
           {titulo}
         </h3>
-        <p className="text-foreground/75 text-sm line-clamp-3 leading-relaxed flex-grow">
+        <p className="text-xs text-[#64748B] dark:text-slate-400 line-clamp-3 leading-relaxed mb-4 flex-grow">
           {contenido}
         </p>
-        {enlace_url && (
-          <a
-            href={enlace_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`Leer artículo completo sobre: ${titulo} (se abre en una nueva pestaña)`}
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors group/link"
-          >
-            <span>Leer artículo</span>
-            <ExternalLink className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" aria-hidden="true" />
-          </a>
-        )}
+
+        <div className="pt-2 flex items-center justify-between mt-auto">
+          <div className="text-xs font-bold text-[#1E3A8A] dark:text-blue-400 inline-flex items-center gap-1 group-hover:gap-1.5 transition-all">
+            <span>Leer más</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </div>
+
+          {enlace_url && (
+            <a
+              href={enlace_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Leer artículo externo: ${titulo}`}
+              className="text-xs text-slate-400 hover:text-[#1E3A8A] transition-colors p-1"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          )}
+        </div>
       </div>
-    </GlassCard>
+    </div>
   );
 }

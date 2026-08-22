@@ -5,7 +5,6 @@ import { LogOut, LayoutDashboard, User, Menu, X, ChevronDown } from 'lucide-reac
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function Navbar() {
@@ -57,8 +56,8 @@ export default function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
         scrolled 
-          ? "bg-[#1E3A8A]/90 backdrop-blur-md border-b border-blue-800/80 shadow-lg py-1" 
-          : "bg-[#1E3A8A] border-b border-blue-800 py-2"
+          ? "bg-[#142C61]/95 backdrop-blur-md border-b border-[#1E3A8A]/50 shadow-md py-1" 
+          : "bg-[#15326C] border-b border-[#1B3E84] py-1.5"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,7 +71,7 @@ export default function Navbar() {
  
           {/* Navegación de escritorio */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-1">
+            <div className="flex items-center space-x-1.5">
               {navLinks.map((link) => (
                 link.external ? (
                   <a
@@ -80,7 +79,7 @@ export default function Navbar() {
                     href={link.path}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    className="px-3.5 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200"
                   >
                     {link.name}
                   </a>
@@ -89,10 +88,10 @@ export default function Navbar() {
                     key={link.name}
                     to={link.path}
                     className={cn(
-                      "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent",
+                      "px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                       location.pathname === link.path 
-                        ? "text-white font-bold bg-white/10 backdrop-blur-xs border-white/10 shadow-sm" 
-                        : "text-white/80 hover:text-white hover:bg-white/5"
+                        ? "text-white font-bold bg-[#2A4B8F] shadow-inner" 
+                        : "text-white/80 hover:text-white hover:bg-white/10"
                     )}
                   >
                     {link.name}
@@ -104,21 +103,21 @@ export default function Navbar() {
 
           {/* Botón de Autenticación / Avatar */}
           <div className="hidden md:flex items-center gap-4">
-
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-blue-900 font-semibold text-sm transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-slate-50 text-[#15326C] font-bold text-sm transition-all shadow-sm active:scale-[0.98]"
               >
-                Inicio de Sesión
+                <User className="w-4 h-4 text-[#15326C]" />
+                <span>Inicio de Sesión</span>
               </Link>
             ) : (
               <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-white/10 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-[#1E3A8A] flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-full bg-white text-[#15326C] flex items-center justify-center font-bold text-sm shadow-sm">
                     {getInitial()}
                   </div>
                   <ChevronDown className={cn("w-4 h-4 text-white/70 transition-transform", isDropdownOpen && "rotate-180")} />
@@ -158,10 +157,9 @@ export default function Navbar() {
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 focus:outline-none"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -171,7 +169,7 @@ export default function Navbar() {
 
       {/* Navegación móvil */}
       {isOpen && (
-        <div className="md:hidden bg-[#1E3A8A] border-b border-blue-800 px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-[#15326C] border-b border-[#1B3E84] px-3 pt-2 pb-4 space-y-1">
           {navLinks.map((link) => (
             link.external ? (
               <a
@@ -179,7 +177,7 @@ export default function Navbar() {
                 href={link.path}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}
@@ -191,8 +189,8 @@ export default function Navbar() {
                 className={cn(
                   "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                   location.pathname === link.path 
-                    ? "text-white bg-white/15" 
-                    : "text-white/70 hover:text-white hover:bg-white/10"
+                    ? "text-white bg-[#2A4B8F] font-bold" 
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 )}
                 onClick={() => setIsOpen(false)}
               >
@@ -200,14 +198,15 @@ export default function Navbar() {
               </Link>
             )
           ))}
-          <div className="pt-4 pb-1 border-t border-blue-800">
+          <div className="pt-4 pb-1 border-t border-[#1B3E84]">
             {(!user && !isAdmin) ? (
               <Link 
                 to="/login"
-                className="w-full text-center block px-4 py-2 rounded-lg bg-white text-blue-900 font-bold"
+                className="w-full text-center flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-[#15326C] font-bold shadow-sm"
                 onClick={() => setIsOpen(false)}
               >
-                Inicio de Sesión
+                <User className="w-4 h-4 text-[#15326C]" />
+                <span>Inicio de Sesión</span>
               </Link>
             ) : (
               <>

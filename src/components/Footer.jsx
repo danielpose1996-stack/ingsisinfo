@@ -1,80 +1,149 @@
-import { Mail, Phone, MapPin, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Mail, MapPin, Shield, Github, Facebook } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Footer() {
   const navigate = useNavigate();
 
   const handleAdminGateway = (e) => {
     // Manejador de clics oculto para el acceso discreto de administradores
-    if (e.detail === 2) { // Doble clic como capa adicional de discreción
+    if (e.detail === 2) {
       sessionStorage.setItem('admin_access_gate', 'true');
       navigate('/admin/login');
     }
   };
 
   return (
-    <footer className="relative border-t border-white/10 pt-20 pb-10 overflow-hidden"
-      style={{ backgroundImage: "url('/footer-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center top', backgroundRepeat: 'no-repeat' }}
-    >
-      {/* Capa oscura para mejorar la legibilidad */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/95 via-[#0f172a]/90 to-[#0f172a]/95 z-0" />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-1 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                 <Shield className="w-6 h-6 text-blue-400" />
+    <footer className="bg-[#0C1B33] text-white border-t border-white/10 pt-16 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Contenido Principal en 4 Columnas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-14 pb-12 border-b border-white/10">
+          
+          {/* Columna 1: Identidad Institucional */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              {/* Escudo lineal */}
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-blue-400">
+                <Shield className="w-4 h-4" />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight italic">SISINFO</span>
+              <span className="text-xl font-black text-white tracking-wider font-display">
+                SISINFO
+              </span>
             </div>
-            <p className="text-white/50 text-sm leading-relaxed italic">
-              Semillero de investigación de ingeniería informática - UNIPAZ
+            
+            <p className="text-white/60 text-xs leading-relaxed max-w-xs">
+              Semillero de investigación de ingeniería informática – UNIPAZ
             </p>
+
+            {/* Iconos de Redes / Contacto */}
+            <div className="flex items-center gap-2.5 pt-2">
+              <a
+                href="mailto:sisinfo@unipaz.edu.co"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
+                title="Correo Institucional"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
+                title="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://github.com/danielpose1996-stack/ingsisinfo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
+                title="GitHub"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
+          {/* Columna 2: Plataforma */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6 italic">Plataforma</h4>
-            <ul className="space-y-4 text-sm text-white/50 font-medium italic">
-              <li><a href="/" className="hover:text-blue-400 transition-colors">Inicio</a></li>
-              <li><a href="/modulos" className="hover:text-blue-400 transition-colors">Aula Virtual</a></li>
-              <li><a href="/login" className="hover:text-blue-400 transition-colors">Estudiantes / Docentes</a></li>
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5">
+              Plataforma
+            </h4>
+            <ul className="space-y-3 text-xs text-white/65">
+              <li>
+                <Link to="/" className="hover:text-white transition-colors">
+                  Inicio
+                </Link>
+              </li>
+              <li>
+                <Link to="/modulos" className="hover:text-white transition-colors">
+                  Aula Virtual
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-white transition-colors">
+                  Estudiantes / Docentes
+                </Link>
+              </li>
             </ul>
           </div>
 
+          {/* Columna 3: Contacto */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6 italic">Contacto</h4>
-            <ul className="space-y-4 text-sm text-white/50 italic">
-              <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-blue-400/60" /> sisinfo@unipaz.edu.co</li>
-              
-              <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-blue-400/60" /> UNIPAZ, Barrancabermeja</li>
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5">
+              Contacto
+            </h4>
+            <ul className="space-y-3 text-xs text-white/65">
+              <li className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4 text-blue-400 shrink-0" />
+                <span>sisinfo@unipaz.edu.co</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-blue-400 shrink-0" />
+                <span>UNIPAZ, Barrancabermeja</span>
+              </li>
             </ul>
           </div>
 
+          {/* Columna 4: Legal */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-6 italic">Legal</h4>
-            <ul className="space-y-4 text-sm text-white/50 italic">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Privacidad de Datos</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Términos Académicos</a></li>
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5">
+              Legal
+            </h4>
+            <ul className="space-y-3 text-xs text-white/65">
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Privacidad de Datos
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Términos Académicos
+                </a>
+              </li>
             </ul>
           </div>
+
         </div>
 
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Barra Inferior */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-white/50">
           <p 
-            className="text-[10px] text-white/50 font-bold uppercase tracking-tighter italic cursor-default select-none"
             onClick={handleAdminGateway}
-            title="© SISINFO"
+            className="cursor-default select-none hover:text-white/70 transition-colors"
+            title="SISINFO"
           >
-            © {new Date().getFullYear()} SISINFO - UNIPAZ. Todos los derechos reservados.
+            © {new Date().getFullYear()} SISINFO - UNIPAZ. TODOS LOS DERECHOS RESERVADOS.
           </p>
-          <div className="flex items-center gap-6">
-             <div className="h-6 w-px bg-white/10" />
-             <p className="text-[10px] text-white/70 font-black italic tracking-widest underline decoration-blue-500/20">Desarrollado por el equipo de Ingeniería Informática - UNIPAZ</p>
-          </div>
+          
+          <p className="text-white/60 font-medium">
+            Desarrollado por el equipo de Ingeniería Informática - UNIPAZ
+          </p>
         </div>
+
       </div>
     </footer>
   );
 }
-

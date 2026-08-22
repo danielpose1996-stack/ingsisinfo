@@ -2,21 +2,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados, descargarArchivo, supabase } from '../lib/supabase';
 import NewsCard from '../components/NewsCard';
-import EventItem from '../components/EventItem';
-import GlassCard from '../components/GlassCard';
-import Button from '../components/Button';
-import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import {
-  ArrowRight,
-  Image as ImageIcon,
-  Sparkles,
-  Download,
   FileText,
-  ChevronRight,
   Calendar,
+  Image as ImageIcon,
+  ChevronRight,
+  ArrowRight,
+  Download,
   ExternalLink,
-  FileDown
+  FileDown,
+  Terminal
 } from 'lucide-react';
 
 export default function Home() {
@@ -31,9 +27,6 @@ export default function Home() {
   const hasLoaded = useRef(false);
 
   useEffect(() => {
-    // Esperar a que la autenticación de Supabase se estabilice antes de solicitar datos.
-    // Al actualizar la página, el cliente de Supabase restaura la sesión desde localStorage,
-    // lo que deja brevemente al cliente en un estado transitorio donde las consultas pueden fallar.
     let cancelled = false;
 
     async function fetchAllData() {
@@ -61,7 +54,7 @@ export default function Home() {
       const loadGallery = async () => {
         try {
           const data = await obtenerGaleria();
-          if (!cancelled) setGaleria(data.slice(0, 6));
+          if (!cancelled) setGaleria(data.slice(0, 3));
         } catch (err) {
           console.error("Error cargando galería:", err);
         }
@@ -86,18 +79,12 @@ export default function Home() {
       if (!cancelled) setLoading(false);
     }
 
-    // Esperar a que el estado de autenticación se estabilice antes de consultar.
-    // Esto evita la condición de carrera que ocurre cuando las consultas se ejecutan
-    // mientras Supabase todavía restaura la sesión desde localStorage.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      // INITIAL_SESSION se emite cuando Supabase termina de restaurar la sesión.
-      // Este es el momento seguro para iniciar las consultas.
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         fetchAllData();
       }
     });
 
-    // Alternativa: cargar de todos modos si INITIAL_SESSION no se emite en 1,5 segundos
     const fallbackTimer = setTimeout(() => {
       fetchAllData();
     }, 1500);
@@ -109,320 +96,272 @@ export default function Home() {
     };
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
-  };
   return (
-    <div className="space-y-24 pb-24 bg-background relative overflow-hidden">
-      {/* Brillos flotantes de fondo en malla (efecto de profundidad) */}
-      <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" />
-      <div className="absolute top-[45%] right-[-10%] w-[600px] h-[600px] rounded-full mesh-glow-amber animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-5s' }} />
-      <div className="absolute bottom-[15%] left-[5%] w-[450px] h-[450px] rounded-full mesh-glow-blue animate-float-slow -z-10 pointer-events-none" style={{ animationDelay: '-10s' }} />
+    <div className="space-y-20 pb-20 bg-background text-foreground">
 
-      {/* Sección principal */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden"
-        style={{ backgroundImage: "url('/hero-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+      {/* ═══ 1. HERO PRINCIPAL ═══ */}
+      <section 
+        className="relative h-[78vh] min-h-[540px] flex items-center justify-center overflow-hidden"
+        style={{ 
+          backgroundImage: "url('/hero-bg.jpg')", 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center', 
+          backgroundRepeat: 'no-repeat' 
+        }}
       >
-        {/* Capa oscura para facilitar la lectura del texto */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-[1]" />
+        {/* Capa de overlay azul oscuro elegante y uniforme para lectura óptima */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1E36]/90 via-[#0F1E36]/80 to-[#0F1E36]/90 z-0" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 text-center px-4 max-w-4xl"
-        >
-          <div className="flex justify-center mb-6">
-            <span className="px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-widest uppercase flex items-center gap-2 backdrop-blur-xs">
-              <Sparkles className="w-3 h-3 text-blue-300" /> Programa de Ingeniería Informática
-            </span>
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          {/* Badge lineal sobrio */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold tracking-wider uppercase mb-6 shadow-sm">
+            <Terminal className="w-3.5 h-3.5 text-blue-300" />
+            <span>Programa de Ingeniería Informática</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter text-white drop-shadow-lg font-display leading-none">
+
+          {/* Título Principal */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-5 tracking-tight text-white leading-tight font-display drop-shadow-sm">
             Semillero de Investigación <br />
-            <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
+            <span className="text-white">
               SISINFO
             </span>
           </h1>
-          <p className="text-white/80 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            Impulsando la innovación tecnológica y el desarrollo de soluciones informáticas en el Instituto Universitario de la Paz - UNIPAZ.
+
+          {/* Subtítulo */}
+          <p className="text-white/85 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+            Impulsando la innovación tecnológica y el desarrollo de soluciones informáticas en el Instituto Universitario de la Paz – UNIPAZ.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          {/* Botones de Acción */}
+          <div className="flex flex-col sm:flex-row gap-3.5 justify-center">
             <button
               onClick={() => window.location.href = '/modulos'}
-              className="px-8 py-4 rounded-lg bg-[#1E3A8A] hover:bg-[#1E40AF] text-white font-bold transition-all shadow-md shadow-blue-900/10"
+              className="px-8 py-3.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] cursor-pointer"
             >
               Explorar Módulos
             </button>
             <button
               onClick={() => window.location.href = '/informacion'}
-              className="px-8 py-4 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all backdrop-blur-xs"
+              className="px-8 py-3.5 rounded-xl bg-black/30 hover:bg-white/10 text-white font-bold text-sm border border-white/30 backdrop-blur-xs transition-all duration-200 active:scale-[0.98] cursor-pointer"
             >
               Saber más
             </button>
           </div>
-        </motion.div>
-
-        {/* Elementos decorativos de brillo */}
-        <div className="absolute top-1/4 -left-20 w-64 h-64 bg-[#1E3A8A]/10 rounded-full blur-3xl z-[2]" />
-        <div className="absolute bottom-1/4 -right-20 w-64 h-64 bg-[#1E3A8A]/10 rounded-full blur-3xl z-[2]" />
+        </div>
       </section>
 
-      {/* ═══ NOTICIAS RECIENTES ═══ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Encabezado de la sección */}
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Últimas Novedades</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight font-display">Noticias Recientes</h2>
+      {/* ═══ 2. NOTICIAS RECIENTES ═══ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div>
+          {/* Encabezado de Sección */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2 text-[#15326C] dark:text-blue-400">
+              <FileText className="w-4 h-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Últimas Novedades</span>
             </div>
+            <h2 className="text-3xl font-black text-[#0F172A] dark:text-white tracking-tight">
+              Noticias Recientes
+            </h2>
           </div>
 
-          {/* Cuadrícula de noticias */}
+          {/* Cuadrícula de Noticias */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-72 rounded-xl bg-card animate-pulse border border-card-border" />
+                <div key={i} className="h-80 rounded-2xl bg-card animate-pulse border border-card-border" />
               ))}
             </div>
           ) : noticias.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {noticias.map((n, idx) => (
-                <motion.div
-                  key={n.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                >
-                  <NewsCard noticia={n} onClick={() => setSelectedNews(n)} />
-                </motion.div>
+              {noticias.map((n) => (
+                <NewsCard key={n.id} noticia={n} onClick={() => setSelectedNews(n)} />
               ))}
             </div>
           ) : (
-            <GlassCard className="p-12 text-center bg-card">
-              <p className="text-foreground/40 italic">No hay noticias recientes.</p>
-            </GlassCard>
+            <div className="p-12 text-center bg-card rounded-2xl border border-card-border">
+              <p className="text-foreground/50 text-sm">No hay noticias recientes registradas.</p>
+            </div>
           )}
-        </motion.div>
+        </div>
       </section>
 
-      {/* ═══ PRÓXIMOS EVENTOS + GALERÍA (2 columnas) ═══ */}
+      {/* ═══ 3. PRÓXIMOS EVENTOS & GALERÍA DE EVENTOS (2 COLUMNAS) ═══ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-          {/* Eventos: 2 columnas */}
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-primary" />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Agenda</span>
+          {/* Columna Izquierda: Próximos Eventos (5 cols) */}
+          <div className="lg:col-span-5">
+            <div className="flex items-center gap-2 mb-2 text-[#15326C] dark:text-blue-400">
+              <Calendar className="w-4 h-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Agenda</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Próximos Eventos</h2>
+            <h2 className="text-3xl font-black text-[#0F172A] dark:text-white tracking-tight mb-6">
+              Próximos Eventos
+            </h2>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {loading ? (
                 [1, 2, 3].map(i => (
-                  <div key={i} className="h-24 rounded-xl bg-card animate-pulse border border-card-border" />
+                  <div key={i} className="h-20 rounded-2xl bg-card animate-pulse border border-card-border" />
                 ))
               ) : eventos.length > 0 ? (
-                eventos.map((e, idx) => {
+                eventos.map((e) => {
                   const date = new Date(e.fecha_evento);
                   const day = date.getDate();
-                  const month = date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase();
+                  const month = date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
                   return (
-                    <motion.div
+                    <div
                       key={e.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.1 }}
-                      className="group relative flex gap-4 p-4 rounded-xl border border-card-border bg-card hover:bg-slate-50 hover:border-primary/30 transition-all duration-300 hover:shadow-sm cursor-pointer"
+                      className="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 transition-all duration-200 shadow-sm hover:shadow cursor-pointer"
                       onClick={() => setSelectedEvent(e)}
                     >
                       {/* Insignia de fecha */}
-                      <div className="flex flex-col items-center justify-center w-16 h-16 rounded-lg bg-blue-50 border border-blue-200/60 text-[#1E3A8A] flex-shrink-0">
-                        <span className="text-2xl font-bold leading-none">{day}</span>
-                        <span className="text-[9px] font-bold tracking-widest opacity-80">{month}</span>
+                      <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/60 text-[#15326C] dark:text-blue-300 shrink-0">
+                        <span className="text-xl font-black leading-none">{day}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest mt-0.5">{month}</span>
                       </div>
 
-                      {/* Imagen del evento */}
+                      {/* Imagen pequeña si existe */}
                       {e.imagen_url && (
-                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-card-border">
-                          <img src={e.imagen_url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                        <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-slate-100 dark:border-slate-800">
+                          <img src={e.imagen_url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                         </div>
                       )}
 
-                      {/* Información */}
-                      <div className="flex flex-col justify-center min-w-0 flex-1">
-                        <h4 className="text-foreground font-bold group-hover:text-primary transition-colors truncate">
+                      {/* Título & Detalle */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-[#0F172A] dark:text-white group-hover:text-[#1E3A8A] dark:group-hover:text-blue-400 transition-colors truncate">
                           {e.titulo}
                         </h4>
                         {e.descripcion && (
-                          <p className="text-foreground/60 text-xs mt-1 line-clamp-1">
+                          <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 line-clamp-1">
                             {e.descripcion}
                           </p>
                         )}
                       </div>
 
-                      {/* Flecha */}
-                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ChevronRight className="w-4 h-4 text-primary" />
-                      </div>
-                    </motion.div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#1E3A8A] dark:group-hover:text-blue-400 transition-colors shrink-0" />
+                    </div>
                   );
                 })
               ) : (
-                <GlassCard className="p-10 text-center bg-card">
-                  <div className="w-12 h-12 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-5 h-5 text-primary/60" />
-                  </div>
-                  <p className="text-foreground/40 italic text-sm">No hay eventos próximos programados.</p>
-                </GlassCard>
+                <div className="p-8 text-center bg-card rounded-2xl border border-card-border">
+                  <p className="text-foreground/50 text-xs">No hay eventos próximos programados.</p>
+                </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
-          {/* Galería: 3 columnas */}
-          <motion.div
-            className="lg:col-span-3"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
-                <ImageIcon className="w-4 h-4 text-slate-600" />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Momentos</span>
+          {/* Columna Derecha: Galería de Eventos (7 cols) */}
+          <div className="lg:col-span-7">
+            <div className="flex items-center gap-2 mb-2 text-[#15326C] dark:text-blue-400">
+              <ImageIcon className="w-4 h-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Momentos</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Galería de Eventos</h2>
+            <h2 className="text-3xl font-black text-[#0F172A] dark:text-white tracking-tight mb-6">
+              Galería de Eventos
+            </h2>
 
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="aspect-square rounded-xl bg-card animate-pulse border border-card-border" />
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="aspect-square rounded-2xl bg-card animate-pulse border border-card-border" />
                 ))}
               </div>
             ) : galeria.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {galeria.slice(0, 6).map((g, idx) => (
-                  <motion.div
-                    key={g.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.06 }}
-                    className="group relative aspect-square rounded-xl overflow-hidden border border-card-border shadow-sm cursor-pointer"
-                    onClick={() => setSelectedPhoto(g)}
-                  >
-                    <img
-                      src={g.imagen_url}
-                      alt={g.titulo || ''}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    {/* Capa al pasar el puntero */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
-                      <p className="text-white text-sm font-bold truncate transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                        {g.titulo || 'SISINFO'}
-                      </p>
-                      {g.eventos?.titulo && (
-                        <p className="text-white/75 text-[10px] font-medium uppercase tracking-wider mt-1 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
-                          {g.eventos.titulo}
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {galeria.map((g) => (
+                    <div
+                      key={g.id}
+                      className="group relative aspect-square rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md cursor-pointer transition-all duration-300"
+                      onClick={() => setSelectedPhoto(g)}
+                    >
+                      <img
+                        src={g.imagen_url}
+                        alt={g.titulo || 'SISINFO'}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Overlay sutil al hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3.5">
+                        <p className="text-white text-xs font-bold truncate">
+                          {g.titulo || 'SISINFO'}
                         </p>
-                      )}
+                      </div>
                     </div>
-                    {/* Acento de esquina */}
-                    <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/20">
-                      <ImageIcon className="w-3.5 h-3.5 text-white" />
-                    </div>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
+
+                {/* Enlace ver más fotos */}
+                <div className="mt-5">
+                  <button
+                    onClick={() => window.location.href = '/informacion'}
+                    className="text-xs font-bold text-[#15326C] dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 inline-flex items-center gap-1.5 hover:gap-2.5 transition-all cursor-pointer"
+                  >
+                    <span>Ver más fotos</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ) : (
-              <GlassCard className="p-16 text-center bg-card">
-                <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
-                  <ImageIcon className="w-5 h-5 text-slate-400" />
-                </div>
-                <p className="text-foreground/40 italic text-sm">La galería está vacía.</p>
-              </GlassCard>
+              <div className="p-12 text-center bg-card rounded-2xl border border-card-border">
+                <p className="text-foreground/50 text-xs">No hay fotografías en la galería.</p>
+              </div>
             )}
-          </motion.div>
+          </div>
+
         </div>
       </section>
 
-      {/* ═══ PRÓXIMOS PROYECTOS FINALIZADOS ═══ */}
+      {/* ═══ 4. PROYECTOS FINALIZADOS (Si existen) ═══ */}
       {proyectos.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
-              <FileDown className="w-4 h-4 text-primary" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Logros</span>
+          <div className="flex items-center gap-2 mb-2 text-[#15326C] dark:text-blue-400">
+            <FileDown className="w-4 h-4" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">Logros</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-8 font-display">Proyectos Finalizados</h2>
+          <h2 className="text-3xl font-black text-[#0F172A] dark:text-white tracking-tight mb-8">
+            Proyectos Finalizados
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {proyectos.map((p, idx) => {
+            {proyectos.map((p) => {
               const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
               return (
-                <motion.div
+                <div
                   key={p.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="p-6 rounded-xl border border-card-border bg-card shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
+                  className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                 >
-                  <Badge variant="blue" className="w-fit mb-4">{p.linea_investigacion || 'Proyecto'}</Badge>
-                  <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2 uppercase">{p.nombre}</h3>
-                  <div className="text-foreground/70 text-xs italic flex-grow space-y-1 mt-2">
-                    <p><strong className="text-foreground/40 font-mono text-[9px] uppercase tracking-wider">Autor:</strong> {p.estudiante?.nombre} {p.estudiante?.apellido}</p>
-                    <p><strong className="text-foreground/40 font-mono text-[9px] uppercase tracking-wider">Asesor:</strong> {p.docente?.nombre} {p.docente?.apellido}</p>
+                  <div>
+                    <span className="inline-block px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-[#15326C] dark:text-blue-300 text-xs font-bold mb-3">
+                      {p.linea_investigacion || 'Proyecto'}
+                    </span>
+                    <h3 className="text-base font-bold text-[#0F172A] dark:text-white mb-2 line-clamp-2 uppercase">
+                      {p.nombre}
+                    </h3>
+                    <div className="text-xs text-[#64748B] dark:text-slate-400 space-y-1 mt-2">
+                      <p><strong className="text-slate-400 font-mono text-[10px] uppercase">Autor:</strong> {p.estudiante?.nombre} {p.estudiante?.apellido}</p>
+                      <p><strong className="text-slate-400 font-mono text-[10px] uppercase">Asesor:</strong> {p.docente?.nombre} {p.docente?.apellido}</p>
+                    </div>
                   </div>
+                  
                   {lastVersion?.documento_url && (
                     <button
                       onClick={() => descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo)}
-                      className="mt-6 inline-flex items-center gap-2 text-xs font-black text-[#1E3A8A] hover:text-blue-800 transition-colors cursor-pointer bg-transparent border-none p-0 uppercase tracking-wider"
+                      className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[#15326C] dark:text-blue-400 hover:underline cursor-pointer bg-transparent border-none p-0 uppercase tracking-wider"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3.5 h-3.5" />
                       <span>Descargar Documentación</span>
                     </button>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </section>
       )}
 
-      {/* ═══ MODAL DETALLE DE NOTICIA ═══ */}
+      {/* ═══ MODALES (DETALLE NOTICIA, EVENTO, FOTO) ═══ */}
+      {/* Modal Noticia */}
       <Modal
         isOpen={!!selectedNews}
         onClose={() => setSelectedNews(null)}
@@ -430,8 +369,8 @@ export default function Home() {
         maxWidth="max-w-2xl"
       >
         {selectedNews && (
-          <div className="space-y-6 animate-in fade-in">
-            <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-100 border border-card-border shadow-md">
+          <div className="space-y-6">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
               {selectedNews.imagen_url ? (
                 <img
                   src={selectedNews.imagen_url}
@@ -439,37 +378,33 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <span className="text-6xl">📢</span>
+                <div className="w-full h-full bg-slate-100 flex items-center justify-center text-5xl">
+                  📢
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-primary bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200 font-bold">
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white bg-black/50 backdrop-blur-xs px-3 py-1.5 rounded-full font-semibold">
                 <Calendar className="w-3.5 h-3.5" />
                 {new Date(selectedNews.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight leading-tight italic">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">
                 {selectedNews.titulo}
               </h3>
-
-              <div className="w-12 h-1 bg-primary rounded-full" />
-
-              <p className="text-foreground/85 text-base leading-relaxed whitespace-pre-wrap font-medium">
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                 {selectedNews.contenido}
               </p>
             </div>
 
-            {/* Botones de acción */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-card-border">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
               {selectedNews.pdf_url && (
                 <a
                   href={selectedNews.pdf_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-sm text-sm cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all"
                 >
                   <FileDown className="w-4 h-4" />
                   Descargar PDF Adjunto
@@ -480,15 +415,15 @@ export default function Home() {
                   href={selectedNews.enlace_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-200 transition-all text-sm"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all"
                 >
-                  Leer Artículo Completo
+                  <span>Leer Artículo Completo</span>
                   <ExternalLink className="w-4 h-4" />
                 </a>
               )}
               <button
                 onClick={() => setSelectedNews(null)}
-                className="px-6 py-4 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 font-bold transition-all text-sm border border-slate-200 cursor-pointer"
+                className="px-5 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs border border-slate-200 cursor-pointer"
               >
                 Cerrar
               </button>
@@ -497,7 +432,7 @@ export default function Home() {
         )}
       </Modal>
 
-      {/* ═══ MODAL DETALLE DE EVENTO ═══ */}
+      {/* Modal Evento */}
       <Modal
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
@@ -505,8 +440,8 @@ export default function Home() {
         maxWidth="max-w-2xl"
       >
         {selectedEvent && (
-          <div className="space-y-6 animate-in fade-in">
-            <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-100 border border-card-border shadow-md">
+          <div className="space-y-6">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
               {selectedEvent.imagen_url ? (
                 <img
                   src={selectedEvent.imagen_url}
@@ -514,40 +449,30 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <span className="text-6xl">📅</span>
+                <div className="w-full h-full bg-slate-100 flex items-center justify-center text-5xl">
+                  📅
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-primary bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200 font-bold">
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white bg-black/50 backdrop-blur-xs px-3 py-1.5 rounded-full font-semibold">
                 <Calendar className="w-3.5 h-3.5" />
                 {new Date(selectedEvent.fecha_evento).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-primary text-[10px] font-black uppercase tracking-wider italic">
-                  {selectedEvent.tipo === 'proximo' ? 'Próximo Evento' : 'Evento Pasado'}
-                </span>
-              </div>
-
-              <h3 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight leading-tight italic">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">
                 {selectedEvent.titulo}
               </h3>
-
-              <div className="w-12 h-1 bg-primary rounded-full" />
-
-              <p className="text-foreground/85 text-base leading-relaxed whitespace-pre-wrap font-medium">
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                 {selectedEvent.descripcion || 'Sin descripción detallada.'}
               </p>
             </div>
 
-            {/* Acciones */}
-            <div className="flex justify-end pt-4 border-t border-card-border">
+            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="px-6 py-4 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 font-bold transition-all text-sm border border-slate-200 cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs border border-slate-200 cursor-pointer"
               >
                 Cerrar
               </button>
@@ -556,16 +481,16 @@ export default function Home() {
         )}
       </Modal>
 
-      {/* ═══ MODAL DE DETALLE DE GALERÍA (VISOR) ═══ */}
+      {/* Modal Foto Galería */}
       <Modal
         isOpen={!!selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
-        title="Galería de Momentos"
+        title="Fotografía SISINFO"
         maxWidth="max-w-3xl"
       >
         {selectedPhoto && (
-          <div className="space-y-6 animate-in fade-in">
-            <div className="relative max-h-[60vh] w-full rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-card-border shadow-md">
+          <div className="space-y-6">
+            <div className="relative max-h-[60vh] w-full rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200 shadow-sm">
               <img
                 src={selectedPhoto.imagen_url}
                 alt={selectedPhoto.titulo || ''}
@@ -573,23 +498,21 @@ export default function Home() {
               />
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <h4 className="text-lg font-bold text-foreground italic">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+              <h4 className="text-base font-bold text-[#0F172A] dark:text-white">
                 {selectedPhoto.titulo || 'Fotografía de SISINFO'}
               </h4>
               {selectedPhoto.eventos?.titulo && (
-                <div className="flex items-center gap-2 text-xs text-primary font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  <span>Evento vinculado: {selectedPhoto.eventos.titulo}</span>
-                </div>
+                <p className="text-xs text-[#15326C] dark:text-blue-400 font-semibold">
+                  Evento vinculado: {selectedPhoto.eventos.titulo}
+                </p>
               )}
             </div>
 
-            {/* Acciones */}
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setSelectedPhoto(null)}
-                className="px-6 py-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 font-bold transition-all text-sm border border-slate-200 cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs border border-slate-200 cursor-pointer"
               >
                 Volver
               </button>
@@ -597,6 +520,7 @@ export default function Home() {
           </div>
         )}
       </Modal>
+
     </div>
   );
 }
