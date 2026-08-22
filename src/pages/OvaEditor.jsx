@@ -37,7 +37,8 @@ import {
   FileText,
   Target,
   MessageSquare,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,6 +49,7 @@ export default function OvaEditor({
   onSave,
   onCancel,
   onFileUpload,
+  uploadingFiles = {},
   hasDraft,
   draftData,
   onRecoverDraft,
@@ -59,7 +61,7 @@ export default function OvaEditor({
 
   // Generar IDs únicos para las secciones si no cuentan con uno
   useEffect(() => {
-    const needsIds = ovaForm.contenido.some((s, i) => !s._id);
+    const needsIds = ovaForm.contenido?.some((s, i) => !s._id);
     if (needsIds) {
       setOvaForm({
         ...ovaForm,
@@ -96,11 +98,11 @@ export default function OvaEditor({
     };
     setOvaForm({
       ...ovaForm,
-      contenido: [...ovaForm.contenido, newSection],
+      contenido: [...(ovaForm.contenido || []), newSection],
     });
     // Desplazarse a la nueva sección tras el renderizado
     setTimeout(() => {
-      const el = document.getElementById(`section-${ovaForm.contenido.length}`);
+      const el = document.getElementById(`section-${ovaForm.contenido?.length || 0}`);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   };
@@ -141,7 +143,7 @@ export default function OvaEditor({
   const sidebarSections = [
     { id: 'datos-generales', label: 'Datos Generales', icon: FileText },
     { id: 'pedagogia', label: 'Información Pedagógica', icon: Target },
-    { id: 'secciones', label: `Secciones (${ovaForm.contenido.length})`, icon: Layers },
+    { id: 'secciones', label: `Secciones (${ovaForm.contenido?.length || 0})`, icon: Layers },
   ];
 
   return (
@@ -156,7 +158,7 @@ export default function OvaEditor({
             <button
               type="button"
               onClick={onCancel}
-              className="p-2 rounded-xl bg-card hover:bg-white/10 text-foreground/60 transition-colors"
+              className="p-2 rounded-xl bg-card hover:bg-white/10 text-foreground/60 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -173,9 +175,9 @@ export default function OvaEditor({
             <button
               type="button"
               onClick={() => setOvaForm({ ...ovaForm, estado: 'borrador' })}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest italic border transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest italic border transition-all cursor-pointer ${
                 ovaForm.estado === 'borrador'
-                  ? 'border-amber-500/30 text-amber-400 bg-amber-500/5'
+                  ? 'border-amber-500/30 text-amber-500 bg-amber-500/10'
                   : 'border-card-border text-foreground/30 hover:text-foreground/50'
               }`}
             >
@@ -184,9 +186,9 @@ export default function OvaEditor({
             <button
               type="button"
               onClick={() => setOvaForm({ ...ovaForm, estado: 'publicado' })}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest italic border transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest italic border transition-all cursor-pointer ${
                 ovaForm.estado === 'publicado'
-                  ? 'border-[#1E3A8A]/30 text-[#1E3A8A] bg-[#1E3A8A]/5'
+                  ? 'border-[#10346E]/30 text-[#10346E] dark:text-blue-400 bg-[#10346E]/10'
                   : 'border-card-border text-foreground/30 hover:text-foreground/50'
               }`}
             >
@@ -199,33 +201,22 @@ export default function OvaEditor({
             <h4 className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] italic mb-4">
               Índice de Secciones
             </h4>
-            <nav className="space-y-1 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
-              {sidebarSections.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => scrollToSection(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all group ${
-                    activeSection === item.id
-                      ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]'
-                      : 'text-foreground/40 hover:text-foreground/70 hover:bg-white/3'
-                  }`}
-                >
-                  <item.icon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-[11px] font-bold italic truncate">
-                    {item.label}
-                  </span>
-                </button>
-              ))}
-            </nav>
-
-            <button
-              type="button"
-              onClick={handleAddSection}
-              className="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#1E3A8A]/20 text-[#1E3A8A] hover:bg-[#1E3A8A]/5 transition-all text-[10px] font-bold uppercase tracking-widest italic"
-            >
-              <PlusCircle className="w-3.5 h-3.5" /> Añadir Sección
-            </button>
+            <div className="space-y-1">
+              {sidebarSections.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => scrollToSection(item.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all text-left italic cursor-pointer"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-foreground/30" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </GlassCard>
 
           {/* Botón de Guardar */}
@@ -252,15 +243,15 @@ export default function OvaEditor({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mb-6"
             >
-              <div className="bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-[#1E3A8A]/5">
+              <div className="bg-[#10346E]/10 border border-[#10346E]/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#1E3A8A]/20 flex items-center justify-center text-[#1E3A8A]">
+                  <div className="w-12 h-12 rounded-xl bg-[#10346E]/20 flex items-center justify-center text-[#10346E] dark:text-blue-400">
                     <AlertCircle className="w-6 h-6 animate-pulse" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-foreground italic">¡Borrador Detectado!</h4>
                     <p className="text-xs text-foreground/50 italic">
-                      Se encontró una versión guardada de esta OVA ({new Date(draftData?.lastSaved).toLocaleTimeString()}).
+                      Se encontró una versión guardada de este OVA ({new Date(draftData?.lastSaved).toLocaleTimeString()}).
                     </p>
                   </div>
                 </div>
@@ -269,7 +260,7 @@ export default function OvaEditor({
                     variant="outline"
                     size="sm"
                     onClick={onDiscardDraft}
-                    className="text-[10px] font-bold italic border-red-500/20 text-red-400 hover:bg-red-500/10"
+                    className="text-[10px] font-bold italic border-red-500/20 text-red-500 hover:bg-red-500/10"
                   >
                     DESCARTAR
                   </Button>
@@ -307,8 +298,8 @@ export default function OvaEditor({
               onClick={() => setOvaForm({ ...ovaForm, estado: ovaForm.estado === 'publicado' ? 'borrador' : 'publicado' })}
               className={`p-2 rounded-xl transition-all ${
                 ovaForm.estado === 'publicado'
-                  ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]'
-                  : 'bg-amber-500/10 text-amber-400'
+                  ? 'bg-[#10346E]/10 text-[#10346E] dark:text-blue-400'
+                  : 'bg-amber-500/10 text-amber-500'
               }`}
             >
               {ovaForm.estado === 'publicado' ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -323,8 +314,8 @@ export default function OvaEditor({
         {/* ─── DATOS GENERALES ─── */}
         <section id="datos-generales" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-6">
-            <h4 className="flex items-center gap-2 text-[#1E3A8A] text-xs font-black uppercase tracking-[0.2em] italic">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A]" /> Datos Generales
+            <h4 className="flex items-center gap-2 text-[#10346E] dark:text-blue-400 text-xs font-black uppercase tracking-[0.2em] italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10346E] dark:bg-blue-400" /> Datos Generales
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Tipo de OVA */}
@@ -333,7 +324,7 @@ export default function OvaEditor({
                 <select
                   value={ovaForm.tipo || 'manual'}
                   onChange={(e) => setOvaForm({ ...ovaForm, tipo: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#1E3A8A] outline-none transition-all italic font-bold tracking-tight appearance-none"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#10346E] outline-none transition-all italic font-bold tracking-tight appearance-none cursor-pointer"
                 >
                   <option value="manual">OVA Manual (Constructor Interactivo)</option>
                   <option value="html">OVA HTML (Subir paquete .html)</option>
@@ -345,10 +336,10 @@ export default function OvaEditor({
                 <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Título del OVA *</label>
                 <input
                   type="text"
-                  placeholder="Ingrese un título impactante..."
+                  placeholder="Ingrese un título descriptivo..."
                   value={ovaForm.titulo}
                   onChange={(e) => setOvaForm({ ...ovaForm, titulo: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-xl text-foreground focus:border-[#1E3A8A] outline-none transition-all italic font-bold tracking-tight"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-xl text-foreground focus:border-[#10346E] outline-none transition-all italic font-bold tracking-tight"
                 />
               </div>
 
@@ -360,7 +351,7 @@ export default function OvaEditor({
                     placeholder="¿Qué aprenderá el estudiante?"
                     value={ovaForm.objetivo}
                     onChange={(e) => setOvaForm({ ...ovaForm, objetivo: e.target.value })}
-                    className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#1E3A8A] outline-none transition-all italic h-32 resize-none"
+                    className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#10346E] outline-none transition-all italic h-32 resize-none"
                   />
                 </div>
               )}
@@ -368,23 +359,31 @@ export default function OvaEditor({
               {/* Imagen de portada */}
               <div className="space-y-2">
                 <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Imagen de Portada</label>
-                {ovaForm.imagen_portada ? (
+                {uploadingFiles?.['portada'] ? (
+                  <div className="flex flex-col items-center justify-center gap-2 w-full h-32 rounded-2xl border-2 border-[#10346E]/30 dark:border-blue-500/30 bg-[#10346E]/5 dark:bg-blue-950/20">
+                    <Loader2 className="w-7 h-7 text-[#10346E] dark:text-blue-400 animate-spin" />
+                    <span className="text-[11px] text-[#10346E] dark:text-blue-300 font-bold uppercase tracking-wider">
+                      Subiendo imagen de portada...
+                    </span>
+                  </div>
+                ) : ovaForm.imagen_portada ? (
                   <div className="relative group rounded-2xl overflow-hidden border border-card-border aspect-video">
                     <img src={ovaForm.imagen_portada} className="w-full h-full object-cover" alt="Portada" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <button
                         type="button"
                         onClick={() => setOvaForm({ ...ovaForm, imagen_portada: '' })}
-                        className="p-3 bg-red-500 text-white rounded-xl"
+                        className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors cursor-pointer"
+                        title="Eliminar imagen"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-2xl border-2 border-dashed border-card-border hover:border-[#1E3A8A]/30 bg-card/20 cursor-pointer transition-all group">
-                    <ImageIcon className="w-6 h-6 text-foreground/30 group-hover:text-[#1E3A8A] transition-colors" />
-                    <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">
+                  <label className="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-2xl border-2 border-dashed border-card-border hover:border-[#10346E]/40 bg-card/20 cursor-pointer transition-all group">
+                    <ImageIcon className="w-6 h-6 text-foreground/30 group-hover:text-[#10346E] transition-colors" />
+                    <span className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic group-hover:text-[#10346E]">
                       Subir Imagen .JPG / .PNG
                     </span>
                     <input type="file" accept="image/*" onChange={(e) => onFileUpload(e, 'portada')} className="hidden" />
@@ -400,7 +399,7 @@ export default function OvaEditor({
                   placeholder="Resumen del contenido del OVA..."
                   value={ovaForm.descripcion}
                   onChange={(e) => setOvaForm({ ...ovaForm, descripcion: e.target.value })}
-                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#1E3A8A] outline-none transition-all italic"
+                  className="w-full bg-card border border-card-border rounded-xl py-4 px-5 text-sm text-foreground focus:border-[#10346E] outline-none transition-all italic"
                 />
               </div>
 
@@ -408,26 +407,41 @@ export default function OvaEditor({
               {ovaForm.tipo === 'html' && (
                 <div className="space-y-2 md:col-span-2 mt-4">
                   <label className="text-xs text-foreground/40 font-bold uppercase italic ml-1">Archivo HTML *</label>
-                  {ovaForm.archivo_html_url ? (
-                    <div className="flex items-center justify-between text-xs text-foreground bg-[#1E3A8A]/10 p-5 rounded-2xl border border-[#1E3A8A]/30 italic shadow-inner">
+                  {uploadingFiles?.['html'] ? (
+                    <div className="flex flex-col items-center justify-center gap-3 w-full h-36 rounded-3xl border-2 border-[#10346E]/30 bg-[#10346E]/5 dark:bg-blue-950/20">
+                      <Loader2 className="w-8 h-8 text-[#10346E] dark:text-blue-400 animate-spin" />
+                      <div className="text-center">
+                        <span className="block text-sm text-[#10346E] dark:text-blue-300 font-bold uppercase tracking-wider">
+                          Subiendo paquete HTML...
+                        </span>
+                        <span className="block text-[10px] text-slate-400 font-medium">Almacenando en servidor seguro</span>
+                      </div>
+                    </div>
+                  ) : ovaForm.archivo_html_url ? (
+                    <div className="flex items-center justify-between text-xs text-foreground bg-[#10346E]/10 dark:bg-blue-950/40 p-5 rounded-2xl border border-[#10346E]/20 shadow-inner">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-[#1E3A8A]/20 rounded-xl">
-                          <FileText className="w-6 h-6 text-[#1E3A8A]" />
+                        <div className="p-3 bg-[#10346E]/20 rounded-xl">
+                          <FileText className="w-6 h-6 text-[#10346E] dark:text-blue-400" />
                         </div>
                         <div>
                           <p className="font-bold text-foreground mb-1 uppercase tracking-wider text-sm">Archivo .html Cargado</p>
-                          <p className="text-[10px] text-foreground/60 uppercase tracking-widest">Listo para visualización</p>
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Listo para visualización</p>
                         </div>
                       </div>
-                      <button type="button" onClick={() => setOvaForm({ ...ovaForm, archivo_html_url: '' })} className="text-red-400 hover:text-red-300 transition-colors p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl">
+                      <button 
+                        type="button" 
+                        onClick={() => setOvaForm({ ...ovaForm, archivo_html_url: '' })} 
+                        className="text-red-400 hover:text-red-300 transition-colors p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl cursor-pointer"
+                        title="Eliminar archivo"
+                      >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center gap-3 w-full h-36 rounded-3xl border-2 border-dashed border-[#1E3A8A]/40 hover:border-[#1E3A8A] bg-[#1E3A8A]/5 hover:bg-[#1E3A8A]/10 cursor-pointer transition-all duration-300 group">
-                      <FileDown className="w-10 h-10 text-[#1E3A8A]/60 group-hover:text-[#1E3A8A] group-hover:-translate-y-1 transition-all" />
+                    <label className="flex flex-col items-center justify-center gap-3 w-full h-36 rounded-3xl border-2 border-dashed border-[#10346E]/40 hover:border-[#10346E] bg-[#10346E]/5 hover:bg-[#10346E]/10 cursor-pointer transition-all duration-300 group">
+                      <FileDown className="w-10 h-10 text-[#10346E]/60 group-hover:text-[#10346E] group-hover:-translate-y-1 transition-all" />
                       <div className="text-center">
-                        <span className="block text-sm text-[#1E3A8A] font-black uppercase tracking-widest italic mb-1">
+                        <span className="block text-sm text-[#10346E] font-black uppercase tracking-widest italic mb-1">
                           Sube tu archivo HTML
                         </span>
                         <span className="block text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">Solo extensión .html aceptada</span>
@@ -445,8 +459,8 @@ export default function OvaEditor({
         {ovaForm.tipo !== 'html' && (
           <section id="introduccion" className="scroll-mt-6">
             <GlassCard className="p-8 border-card-border space-y-4">
-              <h4 className="flex items-center gap-2 text-[#1E3A8A] text-xs font-black uppercase tracking-[0.2em] italic">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A]" /> Introducción
+              <h4 className="flex items-center gap-2 text-[#10346E] dark:text-blue-400 text-xs font-black uppercase tracking-[0.2em] italic">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10346E] dark:bg-blue-400" /> Introducción
               </h4>
               <RichTextEditor
                 content={ovaForm.introduccion || ''}
@@ -462,13 +476,13 @@ export default function OvaEditor({
         {ovaForm.tipo !== 'html' && (
           <section className="space-y-4">
             <div className="flex justify-between items-center px-1">
-              <h4 className="flex items-center gap-2 text-[#1E3A8A] text-xs font-black uppercase tracking-[0.2em] italic">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A]" /> Estructura de Contenido
+              <h4 className="flex items-center gap-2 text-[#10346E] dark:text-blue-400 text-xs font-black uppercase tracking-[0.2em] italic">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10346E] dark:bg-blue-400" /> Estructura de Contenido
               </h4>
               <button
                 type="button"
                 onClick={handleAddSection}
-                className="flex items-center gap-2 text-[10px] font-bold text-[#1E3A8A] hover:text-[#1E40AF] transition-colors uppercase tracking-widest italic"
+                className="flex items-center gap-2 text-[10px] font-bold text-[#10346E] dark:text-blue-400 hover:text-blue-600 transition-colors uppercase tracking-widest italic cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" /> Añadir Sección
               </button>
@@ -480,12 +494,12 @@ export default function OvaEditor({
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={ovaForm.contenido.map(s => s._id)}
+                items={(ovaForm.contenido || []).map(s => s._id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-6">
                   <AnimatePresence>
-                    {ovaForm.contenido.map((section, idx) => (
+                    {(ovaForm.contenido || []).map((section, idx) => (
                       <motion.div
                         key={section._id}
                         id={`section-${idx}`}
@@ -514,7 +528,7 @@ export default function OvaEditor({
             <button
               type="button"
               onClick={handleAddSection}
-              className="w-full py-6 rounded-3xl border-2 border-dashed border-card-border hover:border-[#1E3A8A]/30 text-foreground/20 hover:text-[#1E3A8A] transition-all flex items-center justify-center gap-3 group"
+              className="w-full py-6 rounded-3xl border-2 border-dashed border-card-border hover:border-[#10346E]/30 text-foreground/20 hover:text-[#10346E] transition-all flex items-center justify-center gap-3 group cursor-pointer"
             >
               <PlusCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="text-xs font-bold uppercase tracking-widest italic">Añadir nueva sección</span>
@@ -528,23 +542,28 @@ export default function OvaEditor({
             <div id="recursos" className="scroll-mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Material Complementario */}
               <GlassCard className="p-8 border-card-border space-y-6">
-                <h4 className="flex items-center gap-2 text-[#1E3A8A] text-xs font-black uppercase tracking-[0.2em] italic">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A]" /> Material Complementario
+                <h4 className="flex items-center gap-2 text-[#10346E] dark:text-blue-400 text-xs font-black uppercase tracking-[0.2em] italic">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10346E] dark:bg-blue-400" /> Material Complementario
                 </h4>
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-card/20 border border-card-border space-y-3">
                     <label className="flex items-center gap-2 text-[10px] text-foreground/40 font-bold italic uppercase tracking-widest">
                       <FileDown className="w-3 h-3" /> Guía PDF
                     </label>
-                    {ovaForm.recursos.pdf_url ? (
-                      <div className="flex items-center justify-between text-xs text-foreground bg-[#1E3A8A]/10 p-3 rounded-xl italic">
-                        <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-[#1E3A8A]" /> Archivo cargado</span>
-                        <button type="button" onClick={() => setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: '' } })} className="text-red-400 hover:text-red-300 transition-colors">
+                    {uploadingFiles?.['pdf'] ? (
+                      <div className="flex items-center justify-center gap-2 text-xs text-[#10346E] dark:text-blue-400 bg-[#10346E]/5 p-3 rounded-xl">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="font-bold text-[10px] uppercase tracking-wider">Subiendo PDF...</span>
+                      </div>
+                    ) : ovaForm.recursos?.pdf_url ? (
+                      <div className="flex items-center justify-between text-xs text-foreground bg-[#10346E]/10 p-3 rounded-xl italic">
+                        <span className="flex items-center gap-2"><FileText className="w-4 h-4 text-[#10346E]" /> Archivo cargado</span>
+                        <button type="button" onClick={() => setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: '' } })} className="text-red-400 hover:text-red-300 transition-colors cursor-pointer">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
-                      <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-card-border text-foreground/40 hover:text-foreground/60 hover:border-[#1E3A8A]/20 cursor-pointer transition-all text-[10px] font-bold uppercase tracking-widest italic">
+                      <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-card-border text-foreground/40 hover:text-foreground/60 hover:border-[#10346E]/20 cursor-pointer transition-all text-[10px] font-bold uppercase tracking-widest italic">
                         <PlusCircle className="w-3.5 h-3.5" /> Subir documento PDF
                         <input type="file" accept=".pdf" onChange={(e) => onFileUpload(e, 'pdf')} className="hidden" />
                       </label>
@@ -558,7 +577,7 @@ export default function OvaEditor({
                     <input
                       type="text"
                       placeholder="https://youtube.com/..."
-                      value={ovaForm.recursos.youtube_url}
+                      value={ovaForm.recursos?.youtube_url || ''}
                       onChange={(e) => setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, youtube_url: e.target.value } })}
                       className="w-full bg-transparent border-b border-card-border py-2 text-xs text-foreground focus:border-red-500 outline-none italic transition-all"
                     />
@@ -571,7 +590,7 @@ export default function OvaEditor({
                     <input
                       type="text"
                       placeholder="https://..."
-                      value={ovaForm.recursos.link_externo}
+                      value={ovaForm.recursos?.link_externo || ''}
                       onChange={(e) => setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, link_externo: e.target.value } })}
                       className="w-full bg-transparent border-b border-card-border py-2 text-xs text-foreground focus:border-blue-500 outline-none italic transition-all"
                     />
@@ -586,8 +605,8 @@ export default function OvaEditor({
         <section id="evaluacion" className="scroll-mt-6">
           <GlassCard className="p-8 border-card-border space-y-6">
             <div className="flex items-center justify-between">
-              <h4 className="flex items-center gap-2 text-[#1E3A8A] text-xs font-black uppercase tracking-[0.2em] italic">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A]" /> Evaluación Final — Quiz Interactivo
+              <h4 className="flex items-center gap-2 text-[#10346E] dark:text-blue-400 text-xs font-black uppercase tracking-[0.2em] italic">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10346E] dark:bg-blue-400" /> Evaluación Final — Quiz Interactivo
               </h4>
               <div className="flex items-center gap-2 text-[9px] text-foreground/20 italic">
                 <Award className="w-3 h-3" /> Sistema de evaluación tipo quiz

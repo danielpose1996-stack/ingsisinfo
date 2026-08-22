@@ -33,6 +33,7 @@ export function useOvaManager(moduloId) {
   const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const [draftData, setDraftData] = useState(null);
+  const [uploadingFiles, setUploadingFiles] = useState({});
 
   // Cargar OVAs del módulo
   const loadOvas = useCallback(async (targetModuloId) => {
@@ -269,8 +270,15 @@ export function useOvaManager(moduloId) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const uploadKey = sectionIndex >= 0 ? `${type}_${sectionIndex}` : type;
+    const fileTypeLabel = type === 'portada' ? 'imagen de portada' : (type === 'html' ? 'paquete HTML' : 'documento');
+    const toastId = toast.loading(`Subiendo ${fileTypeLabel}...`);
+
+    setUploadingFiles(prev => ({ ...prev, [uploadKey]: true }));
+
     try {
       const url = await subirArchivoOva(file, `ovas/${Date.now()}`);
+      
       setOvaForm((prev) => {
         if (!prev) return prev;
         if (type === 'portada') {
@@ -290,10 +298,14 @@ export function useOvaManager(moduloId) {
         }
         return prev;
       });
-      toast.success('Archivo subido con éxito.');
+      toast.success(`¡${fileTypeLabel.charAt(0).toUpperCase() + fileTypeLabel.slice(1)} subido con éxito!`, { id: toastId });
     } catch (error) {
       console.error('Error al subir archivo:', error);
-      toast.error('Error al subir archivo: ' + error.message);
+      toast.error('Error al subir archivo: ' + error.message, { id: toastId });
+    } finally {
+      setUploadingFiles(prev => ({ ...prev, [uploadKey]: false }));
+      // Limpiar el input para permitir volver a seleccionar el mismo archivo si es necesario
+      if (e.target) e.target.value = '';
     }
   }, []);
 
@@ -308,6 +320,7 @@ export function useOvaManager(moduloId) {
     setIsOvaFormOpen,
     hasDraft,
     draftData,
+    uploadingFiles,
     handleRecoverDraft,
     handleDiscardDraft,
     handleCreateOva,

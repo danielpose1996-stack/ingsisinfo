@@ -22,6 +22,7 @@ export default function OvaManagerView({ modulo }) {
     setIsOvaFormOpen,
     hasDraft,
     draftData,
+    uploadingFiles,
     handleRecoverDraft,
     handleDiscardDraft,
     handleCreateOva,
@@ -55,6 +56,7 @@ export default function OvaManagerView({ modulo }) {
         onSave={handleSaveOva}
         onCancel={() => setIsOvaFormOpen(false)}
         onFileUpload={handleOvaFileUpload}
+        uploadingFiles={uploadingFiles}
         hasDraft={hasDraft}
         draftData={draftData}
         onRecoverDraft={handleRecoverDraft}
