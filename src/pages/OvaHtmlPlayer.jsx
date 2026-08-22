@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { obtenerOvaPorId, registrarResultadoOva } from '../lib/supabase';
-import { ArrowLeft, ExternalLink, Loader2, Award, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, Award, X, AlertTriangle, BookOpen, Settings } from 'lucide-react';
 import Button from '../components/Button';
+import GlassCard from '../components/GlassCard';
 import QuizPlayer from '../components/QuizPlayer';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,8 +25,11 @@ export default function OvaHtmlPlayer() {
     async function loadOva() {
       try {
         const data = await obtenerOvaPorId(id);
-        if (!data || data.tipo !== 'html') {
-          throw new Error('OVA no encontrado o no es de tipo HTML válido.');
+        if (!data) {
+          throw new Error('El objeto virtual de aprendizaje (OVA) no fue encontrado.');
+        }
+        if (data.tipo !== 'html') {
+          throw new Error('Este recurso no es un OVA de tipo HTML interactivo.');
         }
         
         let parsedEvaluacion = null;
@@ -43,12 +47,14 @@ export default function OvaHtmlPlayer() {
         setOva(data);
         setEvaluacion(parsedEvaluacion);
         
+        if (!data.archivo_html_url || data.archivo_html_url.includes('documentos-proyectos')) {
+          throw new Error('El archivo .html de este OVA no está adjunto o se encuentra en un almacenamiento anterior.');
+        }
+
         // Descargamos el contenido HTML mediante una solicitud directa.
-        // Esto evita que Supabase convierta forzosamente el tipo de archivo web a text/plain
-        // por mecanismos de seguridad (lo cual era la causa del código en texto crudo).
         const res = await fetch(data.archivo_html_url);
         if (!res.ok) {
-           throw new Error('No se pudo descargar el contenido HTML desde el repositorio.');
+           throw new Error('No se pudo descargar el archivo HTML desde el repositorio en la nube.');
         }
         const htmlText = await res.text();
         
@@ -116,14 +122,42 @@ export default function OvaHtmlPlayer() {
   }
 
   if (error || !ova) {
+    const isStaff = perfil?.rol === 'admin' || perfil?.rol === 'docente';
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
-        <p className="text-red-500 italic mb-6 text-center">Error: {error || 'No se pudo cargar el OVA.'}</p>
-        {!isFullscreen && (
-          <Button onClick={() => navigate(-1)} variant="outline" className="gap-2 italic">
-            <ArrowLeft className="w-4 h-4" /> Volver
-          </Button>
-        )}
+        <GlassCard className="max-w-md w-full p-8 text-center border-card-border space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-500">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-foreground italic mb-2">
+              Contenido HTML No Disponible
+            </h2>
+            <p className="text-xs text-foreground/60 leading-relaxed">
+              {error || 'El archivo .html asociado a este curso no se encuentra cargado en el servidor.'}
+            </p>
+            {ova?.titulo && (
+              <p className="mt-3 text-xs font-bold text-[#1E3A8A] dark:text-blue-400 italic">
+                OVA: {ova.titulo}
+              </p>
+            )}
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button onClick={() => navigate('/modulos')} variant="outline" className="w-full sm:w-auto gap-2 italic text-xs">
+              <BookOpen className="w-4 h-4" /> Ver Líneas
+            </Button>
+            {isStaff && (
+              <Button 
+                onClick={() => navigate(perfil?.rol === 'admin' ? '/dashboard/admin' : '/dashboard/teacher')} 
+                variant="primary" 
+                className="w-full sm:w-auto gap-2 italic text-xs bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none"
+              >
+                <Settings className="w-4 h-4" /> Ir a Gestionar OVA
+              </Button>
+            )}
+          </div>
+        </GlassCard>
       </div>
     );
   }

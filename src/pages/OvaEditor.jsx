@@ -417,7 +417,7 @@ export default function OvaEditor({
                         <span className="block text-[10px] text-slate-400 font-medium">Almacenando en servidor seguro</span>
                       </div>
                     </div>
-                  ) : ovaForm.archivo_html_url ? (
+                  ) : ovaForm.archivo_html_url && !ovaForm.archivo_html_url.includes('documentos-proyectos') ? (
                     <div className="flex items-center justify-between text-xs text-foreground bg-[#10346E]/10 dark:bg-blue-950/40 p-5 rounded-2xl border border-[#10346E]/20 shadow-inner">
                       <div className="flex items-center gap-4">
                         <div className="p-3 bg-[#10346E]/20 rounded-xl">
@@ -425,29 +425,37 @@ export default function OvaEditor({
                         </div>
                         <div>
                           <p className="font-bold text-foreground mb-1 uppercase tracking-wider text-sm">Archivo .html Cargado</p>
-                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Listo para visualización</p>
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Listo para visualización en servidor activo</p>
                         </div>
                       </div>
                       <button 
                         type="button" 
                         onClick={() => setOvaForm({ ...ovaForm, archivo_html_url: '' })} 
                         className="text-red-400 hover:text-red-300 transition-colors p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl cursor-pointer"
-                        title="Eliminar archivo"
+                        title="Eliminar y reemplazar archivo"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center gap-3 w-full h-36 rounded-3xl border-2 border-dashed border-[#10346E]/40 hover:border-[#10346E] bg-[#10346E]/5 hover:bg-[#10346E]/10 cursor-pointer transition-all duration-300 group">
-                      <FileDown className="w-10 h-10 text-[#10346E]/60 group-hover:text-[#10346E] group-hover:-translate-y-1 transition-all" />
-                      <div className="text-center">
-                        <span className="block text-sm text-[#10346E] font-black uppercase tracking-widest italic mb-1">
-                          Sube tu archivo HTML
-                        </span>
-                        <span className="block text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">Solo extensión .html aceptada</span>
-                      </div>
-                      <input type="file" accept=".html" onChange={(e) => onFileUpload(e, 'html')} className="hidden" />
-                    </label>
+                    <div className="space-y-3">
+                      {ovaForm.archivo_html_url && ovaForm.archivo_html_url.includes('documentos-proyectos') && (
+                        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center gap-3">
+                          <AlertCircle className="w-5 h-5 shrink-0" />
+                          <span>El archivo HTML anterior ya no está disponible en el almacenamiento. Por favor sube el archivo <strong>.html</strong> nuevamente a continuación.</span>
+                        </div>
+                      )}
+                      <label className="flex flex-col items-center justify-center gap-3 w-full h-36 rounded-3xl border-2 border-dashed border-[#10346E]/40 hover:border-[#10346E] bg-[#10346E]/5 hover:bg-[#10346E]/10 cursor-pointer transition-all duration-300 group">
+                        <FileDown className="w-10 h-10 text-[#10346E]/60 group-hover:text-[#10346E] group-hover:-translate-y-1 transition-all" />
+                        <div className="text-center">
+                          <span className="block text-sm text-[#10346E] font-black uppercase tracking-widest italic mb-1">
+                            Sube tu archivo HTML (.html)
+                          </span>
+                          <span className="block text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">Solo extensión .html aceptada</span>
+                        </div>
+                        <input type="file" accept=".html" onChange={(e) => onFileUpload(e, 'html')} className="hidden" />
+                      </label>
+                    </div>
                   )}
                 </div>
               )}

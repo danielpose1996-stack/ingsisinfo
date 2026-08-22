@@ -171,9 +171,11 @@ export function useOvaManager(moduloId) {
       toast.error('El título es obligatorio.');
       return;
     }
-    if (ovaForm.tipo === 'html' && !ovaForm.archivo_html_url) {
-      toast.error('Debe subir un archivo HTML para este tipo de OVA.');
-      return;
+    if (ovaForm.tipo === 'html') {
+      if (!ovaForm.archivo_html_url || ovaForm.archivo_html_url.includes('documentos-proyectos')) {
+        toast.error('Debe subir un archivo HTML (.html) válido para este OVA.');
+        return;
+      }
     }
     if (ovaForm.tipo !== 'html' && (!ovaForm.objetivo || ovaForm.contenido?.length === 0)) {
       toast.error('Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección).');
