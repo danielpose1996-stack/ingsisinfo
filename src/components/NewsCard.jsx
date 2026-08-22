@@ -20,25 +20,23 @@ export default function NewsCard({ noticia, onClick }) {
       className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden flex flex-col h-full hover:shadow-md transition-all duration-300 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]"
     >
       {/* Imagen de la noticia con fecha superpuesta */}
-      <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-800">
-        {imagen_url ? (
+      <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center" aria-hidden="true">
+          <span className="text-slate-400 text-3xl">📰</span>
+        </div>
+        {imagen_url && (
           <img 
             src={imagen_url} 
             alt={`Imagen de la noticia: ${titulo}`} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-0"
             onError={(e) => {
               e.target.onerror = null; 
-              e.target.src = ''; 
-              e.target.parentElement.innerHTML = '<div class="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-3xl" aria-hidden="true">📰</div>';
+              e.target.style.display = 'none';
             }}
           />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center" aria-hidden="true">
-            <span className="text-slate-400 text-3xl">📰</span>
-          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs text-white text-[11px] font-semibold">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs text-white text-[11px] font-semibold z-10">
           <Calendar className="w-3.5 h-3.5 text-white/90" aria-hidden="true" />
           <span>{new Date(fecha).toLocaleDateString()}</span>
         </div>

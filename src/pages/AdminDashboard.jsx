@@ -723,35 +723,45 @@ export default function AdminDashboard() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {noticiasAdmin.map(n => (
-                          <GlassCard key={n.id} className="p-4 border-card-border group hover:border-[#1E3A8A]/30 transition-all">
-                            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-card">
-                              {n.imagen_url ? (
-                                <img 
-                                  src={n.imagen_url} 
-                                  alt="" 
-                                  className="w-full h-full object-cover" 
-                                  onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = ''; // Limpiar src para evitar el icono de imagen dañada
-                                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-foreground/10"><ImageIcon className="w-12 h-12" /></div>';
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-foreground/10">
-                                  <ImageIcon className="w-12 h-12" />
+                          <GlassCard key={n.id} className="p-4 border-card-border group hover:border-[#1E3A8A]/30 transition-all flex flex-col justify-between">
+                            <div>
+                              <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                <div className="absolute inset-0 flex items-center justify-center text-foreground/20 pointer-events-none">
+                                  <ImageIcon className="w-10 h-10" />
                                 </div>
-                              )}
-                              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => handleOpenPublicModal('noticia', n)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-[#1E3A8A] transition-colors">
-                                  <Edit className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => handleDeletePublicItem('noticia', n.id)} className="p-2 rounded-lg bg-black/60 text-white hover:bg-red-500 transition-colors">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                {n.imagen_url && (
+                                  <img 
+                                    src={n.imagen_url} 
+                                    alt={n.titulo || 'Noticia'} 
+                                    className="w-full h-full object-cover relative z-0" 
+                                    onError={(e) => {
+                                      e.target.onerror = null; 
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <div className="absolute top-2 right-2 flex gap-2 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleOpenPublicModal('noticia', n)} 
+                                    className="p-2 rounded-lg bg-black/70 text-white hover:bg-[#1E3A8A] transition-colors shadow-md cursor-pointer"
+                                    title="Editar noticia"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleDeletePublicItem('noticia', n.id)} 
+                                    className="p-2 rounded-lg bg-black/70 text-white hover:bg-red-500 transition-colors shadow-md cursor-pointer"
+                                    title="Eliminar noticia"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </div>
+                              <h4 className="font-bold text-foreground italic mb-1 line-clamp-2">{n.titulo}</h4>
                             </div>
-                            <h4 className="font-bold text-foreground italic mb-1 line-clamp-1">{n.titulo}</h4>
-                            <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic">{new Date(n.fecha).toLocaleDateString()}</p>
+                            <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic mt-2">{new Date(n.fecha).toLocaleDateString()}</p>
                           </GlassCard>
                         ))}
                         {noticiasAdmin.length === 0 && (
