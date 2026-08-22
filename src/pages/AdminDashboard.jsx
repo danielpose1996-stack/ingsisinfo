@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import OvaEditor from './OvaEditor';
+import OvaManagerView from '../components/OvaManagerView';
 import { useAuth } from '../context/AuthContext';
 import { 
   obtenerEstadisticasAdmin, 
@@ -20,11 +20,6 @@ import {
   eliminarUsuario,
   actualizarPerfil,
   descargarArchivo,
-  obtenerOvasModulo,
-  crearOva,
-  actualizarOva,
-  eliminarOva,
-  subirArchivoOva,
   obtenerSeguimientoOvas,
   eliminarResultadoOva,
   eliminarTodoSeguimiento
@@ -110,23 +105,8 @@ export default function AdminDashboard() {
   const [isProyectoModalOpen, setIsProyectoModalOpen] = useState(false);
   const [selectedProyecto, setSelectedProyecto] = useState(null);
 
-  // Estado del Aula Virtual y Objetos Virtuales de Aprendizaje (OVAs)
+  // Estado del Aula Virtual
   const [selectedModuloAula, setSelectedModuloAula] = useState(null);
-  const [ovas, setOvas] = useState([]);
-  const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
-  const [loadingOvas, setLoadingOvas] = useState(false);
-  const [editingOva, setEditingOva] = useState(null);
-  const [ovaForm, setOvaForm] = useState({
-    titulo: '',
-    descripcion: '',
-    imagen_portada: '',
-    objetivo: '',
-    introduccion: '',
-    contenido: [], // [{titulo, contenido, recurso_url}]
-    recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
-    actividad_final: '',
-    estado: 'borrador'
-  });
   const { email: emailVal, setEmail: setEmailVal, error: emailError, isValid: isEmailValid, handleChange: handleEmailChange, getNormalizedEmail } = useEmailValidation('');
   const [newUser, setNewUser] = useState({
     nombre: '',
@@ -146,44 +126,11 @@ export default function AdminDashboard() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
 
-  const [hasDraft, setHasDraft] = useState(false);
-  const [draftData, setDraftData] = useState(null);
-
   useEffect(() => {
     if (user && perfil?.rol === 'admin') {
       loadAdminData();
     }
   }, [user, perfil]);
-
-  // Efecto de autoguardado
-  useEffect(() => {
-    if (isOvaFormOpen && ovaForm.titulo) {
-      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
-      localStorage.setItem(draftKey, JSON.stringify({
-        ...ovaForm,
-        lastSaved: new Date().toISOString()
-      }));
-    }
-  }, [ovaForm, isOvaFormOpen, editingOva]);
-
-  // Verificar existencia de borrador al abrir el modal
-  useEffect(() => {
-    if (isOvaFormOpen) {
-      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
-      const saved = localStorage.getItem(draftKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Mostrar solo si difiere del formulario actual o si el formulario está vacío
-        if (parsed.titulo !== ovaForm.titulo || parsed.descripcion !== ovaForm.descripcion || parsed.contenido?.length !== ovaForm.contenido?.length) {
-          setDraftData(parsed);
-          setHasDraft(true);
-        }
-      }
-    } else {
-      setHasDraft(false);
-      setDraftData(null);
-    }
-  }, [isOvaFormOpen, editingOva]);
 
   async function loadAdminData() {
     setLoading(true);
@@ -288,231 +235,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const loadOvas = async (moduloId) => {
-    setLoadingOvas(true);
-    try {
-      const data = await obtenerOvasModulo(moduloId);
-      setOvas(data);
-    } catch (error) {
-      console.error("Error loading OVAs:", error);
-    } finally {
-      setLoadingOvas(false);
-    }
-  };
-
   const handleSelectModuloAula = (modulo) => {
     setSelectedModuloAula(modulo);
-    loadOvas(modulo.id);
   };
-
-  const handleCreateOva = () => {
-    setEditingOva(null);
-    setOvaForm({
-      titulo: '',
-      descripcion: '',
-      imagen_portada: '',
-      objetivo: '',
-      introduccion: '',
-      contenido: [{ _id: `section-${Date.now()}-0`, titulo: '', contenido: '', recurso_url: '', tipo: 'texto' }],
-      recursos: { pdf_url: '', youtube_url: '', link_externo: '' },
-      actividad_final: '',
-      evaluacion: { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 },
-      estado: 'borrador',
-      tipo: 'manual',
-      archivo_html_url: ''
-    });
-    setIsOvaFormOpen(true);
-  };
-
-  const handleEditOva = (ova) => {
-    setEditingOva(ova);
-    // Interpretar la evaluación: intentar JSON desde actividad_final y recurrir al texto heredado
-    let evaluacion = { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
-    if (ova.actividad_final) {
-      try {
-        const parsed = JSON.parse(ova.actividad_final);
-        if (parsed && parsed.preguntas) {
-          evaluacion = parsed;
-        }
-      } catch {
-        // Formato heredado: actividad_final contiene texto o HTML, no un cuestionario
-        evaluacion.instrucciones = ova.actividad_final;
-      }
-    }
-    setOvaForm({
-      ...ova,
-      contenido: (ova.contenido || []).map((s, i) => ({
-        ...s,
-        _id: s._id || `section-${Date.now()}-${i}`,
-        tipo: s.tipo || 'texto',
-      })),
-      recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
-      tipo: ova.tipo || 'manual',
-      archivo_html_url: ova.archivo_html_url || '',
-      evaluacion,
-    });
-    setIsOvaFormOpen(true);
-  };
-
-  const handleSaveOva = async (e) => {
-    if (e) e.preventDefault();
-    if (!ovaForm.titulo) {
-      toast.error("Por favor completa el título");
-      return;
-    }
-    if (ovaForm.tipo !== 'html' && (!ovaForm.objetivo || ovaForm.contenido.length === 0)) {
-       toast.error("Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección)");
-       return;
-    }
-    if (ovaForm.tipo === 'html' && !ovaForm.archivo_html_url) {
-      toast.error('Debe subir un archivo HTML obligatorio.');
-      return;
-    }
-
-    try {
-      // Limpiar campos internos _id antes de guardar en la BD y conservar el contenido HTML enriquecido
-      const cleanedContenido = ovaForm.contenido.map(({ _id, ...c }) => ({
-        ...c,
-        titulo: sanitizeText(c.titulo),
-      }));
-
-      // Serializar la evaluación (cuestionario) como JSON dentro de actividad_final
-      const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
-      // Limpiar _id de las preguntas antes de guardar
-      const cleanedEvaluacion = {
-        ...evaluacionData,
-        preguntas: (evaluacionData.preguntas || []).map(({ _id, ...q }) => ({
-          ...q,
-          _id: _id, // Conservar _id para identificar las preguntas en el reproductor
-        })),
-      };
-
-      const dataToSave = {
-        titulo: sanitizeText(ovaForm.titulo),
-        descripcion: sanitizeText(ovaForm.descripcion),
-        imagen_portada: ovaForm.imagen_portada || '',
-        objetivo: sanitizeText(ovaForm.objetivo),
-        introduccion: ovaForm.introduccion || '',
-        actividad_final: JSON.stringify(cleanedEvaluacion),
-        contenido: cleanedContenido,
-        recursos: ovaForm.recursos || {},
-        estado: ovaForm.estado || 'borrador',
-        modulo_id: selectedModuloAula.id,
-        tipo: ovaForm.tipo || 'manual',
-        archivo_html_url: ovaForm.archivo_html_url || ''
-      };
-
-      if (editingOva) {
-        await actualizarOva(editingOva.id, dataToSave);
-        localStorage.removeItem(`ova_draft_${editingOva.id}`);
-      } else {
-        await crearOva(dataToSave);
-        localStorage.removeItem('ova_draft_new');
-      }
-
-      setIsOvaFormOpen(false);
-      setHasDraft(false);
-      setDraftData(null);
-      loadOvas(selectedModuloAula.id);
-    } catch (error) {
-      console.error("Error saving OVA:", error);
-      toast.error("Error al guardar OVA");
-    }
-  };
-
-  const handleRecoverDraft = () => {
-    if (draftData) {
-      setOvaForm(draftData);
-      setHasDraft(false);
-      setDraftData(null);
-      toast.success("Borrador recuperado con éxito.");
-    }
-  };
-
-  const handleDiscardDraft = async () => {
-    const res = await Swal.fire({
-      title: '¿Descartar borrador?',
-      text: "Esta acción no se puede deshacer.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Sí, descartar',
-      cancelButtonText: 'Cancelar',
-      background: '#ffffff',
-      color: '#1e293b'
-    });
-    if (res.isConfirmed) {
-      const draftKey = editingOva ? `ova_draft_${editingOva.id}` : 'ova_draft_new';
-      localStorage.removeItem(draftKey);
-      setHasDraft(false);
-      setDraftData(null);
-    }
-  };
-
-  const handleDeleteOva = async (id) => {
-    const res = await Swal.fire({
-      title: '¿Eliminar OVA?',
-      text: "Esta acción no se puede deshacer.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      background: '#ffffff',
-      color: '#1e293b'
-    });
-    if (!res.isConfirmed) return;
-    
-    try {
-      await eliminarOva(id);
-      loadOvas(selectedModuloAula.id);
-    } catch (error) {
-      console.error("Error deleting OVA:", error);
-      toast.error("Error al eliminar OVA: " + error.message);
-    }
-  };
-
-  const handleToggleOvaStatus = async (ova) => {
-    const nuevoEstado = ova.estado === 'publicado' ? 'borrador' : 'publicado';
-    try {
-      await actualizarOva(ova.id, { estado: nuevoEstado });
-      loadOvas(selectedModuloAula.id);
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
-
-
-
-  const handleFileUpload = async (e, type, sectionIndex = -1) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const url = await subirArchivoOva(file, type);
-      if (type === 'portada') {
-        setOvaForm({ ...ovaForm, imagen_portada: url });
-      } else if (type === 'pdf') {
-        setOvaForm({ ...ovaForm, recursos: { ...ovaForm.recursos, pdf_url: url } });
-      } else if (type === 'html') {
-        setOvaForm({ ...ovaForm, archivo_html_url: url });
-      } else if (type === 'seccion' && sectionIndex >= 0) {
-        const newContenido = [...ovaForm.contenido];
-        newContenido[sectionIndex].recurso_url = url;
-        setOvaForm({ ...ovaForm, contenido: newContenido });
-      } else if (type === 'seccion_imagen' && sectionIndex >= 0) {
-        const newContenido = [...ovaForm.contenido];
-        newContenido[sectionIndex].imagen_url = url;
-        setOvaForm({ ...ovaForm, contenido: newContenido });
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      toast.error("Error al subir archivo");
-    }
-  };
-
 
   const navItems = [
     { id: 'stats', label: 'Dashboard', icon: LayoutDashboard },
@@ -1114,110 +839,8 @@ export default function AdminDashboard() {
                    ))}
                  </GlassCard>
 
-                 <div className="lg:col-span-3 space-y-6">
-                   {!selectedModuloAula ? (
-                     <GlassCard className="p-20 flex flex-col items-center justify-center text-center space-y-4">
-                       <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center text-gray-600">
-                         <BookOpen className="w-8 h-8" />
-                       </div>
-                       <h3 className="text-xl font-bold text-foreground italic">Gestión de Contenidos Aula Virtual</h3>
-                       <p className="text-foreground/40 italic max-w-sm leading-relaxed">
-                         Selecciona una línea de aprendizaje a la izquierda para administrar sus OVAs (Objetos Virtuales de Aprendizaje).
-                       </p>
-                     </GlassCard>
-                   ) : isOvaFormOpen ? (
-                      <OvaEditor
-                        ovaForm={ovaForm}
-                        setOvaForm={setOvaForm}
-                        editingOva={editingOva}
-                        onSave={handleSaveOva}
-                        onCancel={() => setIsOvaFormOpen(false)}
-                        onFileUpload={handleFileUpload}
-                        hasDraft={hasDraft}
-                        draftData={draftData}
-                        onRecoverDraft={handleRecoverDraft}
-                        onDiscardDraft={handleDiscardDraft}
-                      />
-                   ) : (
-                     <div className="space-y-6">
-                       {/* LISTA DE OVAs */}
-                       <div className="flex items-center justify-between mb-2">
-                         <div>
-                            <h3 className="text-2xl font-black text-foreground italic tracking-tight uppercase">
-                              {selectedModuloAula.nombre}
-                            </h3>
-                            <p className="text-xs text-foreground/40 italic font-mono uppercase tracking-widest">Gestión de Objetos Virtuales de Aprendizaje</p>
-                         </div>
-                         <Button onClick={handleCreateOva} className="gap-2 italic py-3 px-8 text-xs font-black tracking-[0.2em]">
-                           <Plus className="w-4 h-4" /> CREAR OVA
-                         </Button>
-                       </div>
-
-                       {loadingOvas ? (
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {[1, 2].map(i => <div key={i} className="h-64 rounded-3xl bg-card animate-pulse" />)}
-                         </div>
-                       ) : ovas.length > 0 ? (
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           {ovas.map(ova => (
-                             <GlassCard key={ova.id} className="p-6 border-card-border group hover:border-[#1E3A8A]/30 transition-all duration-500">
-                               <div className="flex justify-between items-start mb-6">
-                                 <Badge variant={ova.estado === 'publicado' ? 'emerald' : 'amber'}>
-                                   {ova.estado?.toUpperCase()}
-                                 </Badge>
-                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                   <button
-                                     onClick={() => handleToggleOvaStatus(ova)}
-                                     title={ova.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
-                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-[#1E3A8A]"
-                                   >
-                                     {ova.estado === 'publicado' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                   </button>
-                                   <button
-                                     onClick={() => handleEditOva(ova)}
-                                     className="p-2 rounded-lg bg-card hover:bg-white/10 text-foreground/60 hover:text-foreground"
-                                   >
-                                     <Edit className="w-4 h-4" />
-                                   </button>
-                                   <button
-                                     onClick={() => handleDeleteOva(ova.id)}
-                                     className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-foreground/60 hover:text-red-400"
-                                   >
-                                     <Trash2 className="w-4 h-4" />
-                                   </button>
-                                 </div>
-                               </div>
-
-                               <h4 className="text-lg font-bold text-foreground italic mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-[#1E3A8A] transition-colors tracking-tight leading-tight">
-                                 {ova.titulo}
-                               </h4>
-
-                               <div className="space-y-4 pt-4 border-t border-card-border">
-                                 <div className="flex items-center justify-between text-[10px]">
-                                   <span className="text-foreground/40 font-bold uppercase tracking-widest italic font-mono">Última Modificación</span>
-                                   <span className="text-foreground/60">{new Date(ova.updated_at).toLocaleDateString()}</span>
-                                 </div>
-                                 <div className="flex items-center justify-between text-[10px]">
-                                   <span className="text-foreground/40 font-bold uppercase tracking-widest italic font-mono">Secciones</span>
-                                   <span className="text-foreground font-black">{ova.contenido?.length || 0}</span>
-                                 </div>
-                               </div>
-                             </GlassCard>
-                           ))}
-                         </div>
-                       ) : (
-                         <GlassCard className="p-20 flex flex-col items-center justify-center text-center space-y-4 bg-card/10 border-dashed">
-                           <BookOpen className="w-12 h-12 text-gray-800 opacity-30" />
-                           <p className="text-foreground/40 italic max-w-xs uppercase tracking-widest text-[10px] font-bold">
-                             No hay OVAs registrados para este módulo
-                           </p>
-                           <Button onClick={handleCreateOva} variant="outline" className="text-[10px] py-2">
-                             EMPEZAR PRIMERA PLANIFICACIÓN
-                           </Button>
-                         </GlassCard>
-                       )}
-                     </div>
-                   )}
+                 <div className="lg:col-span-3">
+                   <OvaManagerView modulo={selectedModuloAula} />
                  </div>
                </div>
             )}
