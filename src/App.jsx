@@ -10,7 +10,6 @@ const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Modulos = lazy(() => import('./pages/Modulos'));
-const Repositorio = lazy(() => import('./pages/Repositorio'));
 const Informacion = lazy(() => import('./pages/Informacion'));
 const OvaHtmlPlayer = lazy(() => import('./pages/OvaHtmlPlayer'));
 
@@ -96,7 +95,7 @@ function App() {
             } 
           />
 
-          <Route path="/repositorio" element={<Repositorio />} />
+          <Route path="/repositorio" element={<Navigate to="/modulos" replace />} />
           
           <Route path="/modulos" element={<Modulos />} />
 

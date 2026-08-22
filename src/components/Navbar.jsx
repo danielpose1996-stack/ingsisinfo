@@ -36,7 +36,6 @@ export default function Navbar() {
     { name: 'Información', path: '/informacion' },
     { name: 'Módulos', path: '/modulos' },
     { name: 'Rueda', path: 'https://ruedadeproyectos.up.railway.app/', external: true },
-    { name: 'Repositorio', path: '/repositorio' },
   ];
 
   const getInitial = () => {

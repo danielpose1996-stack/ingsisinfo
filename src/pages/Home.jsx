@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { obtenerNoticias, obtenerEventos, obtenerGaleria, obtenerProyectosFinalizados, descargarArchivo, supabase } from '../lib/supabase';
+import { obtenerNoticias, obtenerEventos, obtenerGaleria, descargarArchivo, supabase } from '../lib/supabase';
 import NewsCard from '../components/NewsCard';
 import Modal from '../components/Modal';
 import {
@@ -19,7 +19,6 @@ export default function Home() {
   const [noticias, setNoticias] = useState([]);
   const [eventos, setEventos] = useState([]);
   const [galeria, setGaleria] = useState([]);
-  const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -60,20 +59,10 @@ export default function Home() {
         }
       };
 
-      const loadProjects = async () => {
-        try {
-          const data = await obtenerProyectosFinalizados();
-          if (!cancelled) setProyectos(data);
-        } catch (err) {
-          console.error("Error cargando proyectos:", err);
-        }
-      };
-
       await Promise.allSettled([
         loadNews(),
         loadEvents(),
-        loadGallery(),
-        loadProjects()
+        loadGallery()
       ]);
 
       if (!cancelled) setLoading(false);

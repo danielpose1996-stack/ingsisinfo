@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { obtenerModulos, obtenerContenidosModulo, obtenerProyectosFinalizados, obtenerOvasModulo, registrarResultadoOva, descargarArchivo } from '../lib/supabase';
+import { obtenerModulos, obtenerContenidosModulo, obtenerOvasModulo, registrarResultadoOva, descargarArchivo } from '../lib/supabase';
 import { sanitizeHTML } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
@@ -35,8 +35,6 @@ export default function Modulos() {
   const [modulos, setModulos] = useState([]);
   const [selectedModule, setSelectedModule] = useState(null);
   const [contenidos, setContenidos] = useState({ guia: [], video: [], material: [], subpagina: [] });
-  const [proyectosLinea, setProyectosLinea] = useState([]);
-  const [activeTab, setActiveTab] = useState('ovas');
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   
@@ -56,7 +54,7 @@ export default function Modulos() {
     setLoading(true);
     try {
       const data = await obtenerModulos();
-      setModulos(data);
+      setModulos(data || []);
     } catch (error) {
       console.error("Error loading modules:", error);
     } finally {
@@ -64,27 +62,25 @@ export default function Modulos() {
     }
   }
 
-  const fetchContenidos = async (moduloId, moduloNombre) => {
+  const fetchContenidos = async (moduloId) => {
     setContentLoading(true);
     try {
-      const [dataContenido, dataProyectos, dataOvas] = await Promise.all([
+      const [dataContenido, dataOvas] = await Promise.all([
         obtenerContenidosModulo(moduloId),
-        obtenerProyectosFinalizados(),
         obtenerOvasModulo(moduloId)
       ]);
       
       const grouped = {
-        guia: dataContenido.filter(c => c.tipo === 'guia'),
-        video: dataContenido.filter(c => c.tipo === 'video'),
-        material: dataContenido.filter(c => c.tipo === 'material'),
-        subpagina: dataContenido.filter(c => c.tipo === 'subpagina'),
-        ovas: dataOvas.filter(o => o.estado === 'publicado')
+        guia: (dataContenido || []).filter(c => c.tipo === 'guia'),
+        video: (dataContenido || []).filter(c => c.tipo === 'video'),
+        material: (dataContenido || []).filter(c => c.tipo === 'material'),
+        subpagina: (dataContenido || []).filter(c => c.tipo === 'subpagina'),
+        ovas: (dataOvas || []).filter(o => o.estado === 'publicado')
       };
       setContenidos(grouped);
       setOvas(grouped.ovas);
-      setProyectosLinea(dataProyectos.filter(p => p.docente?.linea_investigacion === moduloNombre));
     } catch (error) {
-      console.error("Error al cargar contenidos/proyectos:", error);
+      console.error("Error al cargar contenidos:", error);
     } finally {
       setContentLoading(false);
     }
@@ -92,8 +88,7 @@ export default function Modulos() {
 
   const handleModuleClick = (module) => {
     setSelectedModule(module);
-    setActiveTab('ovas');
-    fetchContenidos(module.id, module.nombre);
+    fetchContenidos(module.id);
   };
 
   const getModuleIcon = (slug) => {
@@ -291,43 +286,7 @@ export default function Modulos() {
                     <p className="text-foreground/50 text-sm font-medium">Accediendo a los contenidos...</p>
                   </div>
                 </div>
-              ) : activeTab === 'proyectos' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                  {proyectosLinea.length > 0 ? (
-                    proyectosLinea.map(p => (
-                      <div key={p.id} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                        <div className="mb-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">FINALIZADO</span>
-                            <span className="text-[10px] text-foreground/40">{new Date(p.updated_at).toLocaleDateString()}</span>
-                          </div>
-                          <h4 className="text-base font-bold text-foreground mb-4 line-clamp-2 uppercase">{p.nombre}</h4>
-                          <div className="space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-foreground/60">
-                            <p><span className="text-slate-400 font-mono text-[9px] uppercase tracking-wider mr-2">Autor:</span> {p.estudiante?.nombre} {p.estudiante?.apellido}</p>
-                            <p><span className="text-slate-400 font-mono text-[9px] uppercase tracking-wider mr-2">Asesor:</span> {p.docente?.nombre} {p.docente?.apellido}</p>
-                          </div>
-                        </div>
-                        <button 
-                          className="w-full py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-                          onClick={() => {
-                            const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
-                            if (lastVersion?.documento_url) {
-                              descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo);
-                            }
-                          }}
-                        >
-                          <Download className="w-4 h-4" /> REVISAR DOCUMENTO
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
-                      <FolderOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-foreground/40 text-sm">No hay proyectos finalizados registrados en esta línea todavía.</p>
-                    </div>
-                  )}
-                </div>
-              ) : activeTab === 'ovas' ? (
+              ) : (
                 <div className="bg-[#F4F6F9] dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8">
                   {!isAdminOrTeacherOrStudent ? (
                     <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -398,75 +357,6 @@ export default function Modulos() {
                     <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                       <Cpu className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                       <p className="text-foreground/40 text-sm">No hay objetos virtuales de aprendizaje registrados todavía.</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                  {contenidos[activeTab]?.length > 0 ? (
-                    contenidos[activeTab].map((item) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                      >
-                        {activeTab === 'video' ? (
-                          <div className="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 hover:shadow-md transition-all">
-                            <div className="aspect-video relative bg-black/40">
-                              <iframe 
-                                src={formatYoutubeUrl(item.url_recurso)} 
-                                className="w-full h-full"
-                                frameBorder="0"
-                                allowFullScreen
-                              />
-                            </div>
-                            <div className="p-5">
-                              <h4 className="text-foreground font-bold mb-2 group-hover:text-[#10346E] transition-colors uppercase tracking-tight">{item.titulo}</h4>
-                              <p className="text-foreground/60 text-xs line-clamp-2 leading-relaxed">
-                                {item.descripcion || 'Clase técnica y demostración aplicada de la línea de investigación.'}
-                              </p>
-                            </div>
-                          </div>
-                        ) : activeTab === 'subpagina' ? (
-                          <div 
-                            className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md flex flex-col items-center justify-center text-center cursor-pointer transition-all"
-                            onClick={() => setSelectedSubpage(item)}
-                          >
-                             <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-800 mb-6 group-hover:scale-105 duration-300">
-                               <BookOpen className="w-7 h-7" />
-                             </div>
-                             <h4 className="text-base font-bold text-foreground mb-2 tracking-tight group-hover:text-[#10346E] transition-colors">{item.titulo}</h4>
-                             <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Ver Contenido Especializado</p>
-                          </div>
-                        ) : (
-                          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md flex items-start gap-4 transition-all">
-                             <div className="p-3 rounded-xl bg-blue-50 text-blue-800">
-                               {activeTab === 'guia' ? <FileText className="w-5 h-5" /> : <LinkIcon className="w-5 h-5" />}
-                             </div>
-                             <div className="flex-1">
-                               <h4 className="text-foreground font-bold mb-1 group-hover:text-[#10346E] transition-colors uppercase tracking-tight text-sm">{item.titulo}</h4>
-                               <p className="text-foreground/60 text-xs leading-relaxed line-clamp-2 mb-4">
-                                 {item.descripcion || 'Documentación oficial y recursos técnicos para la investigación.'}
-                               </p>
-                               <a 
-                                 href={item.url_recurso} 
-                                 target="_blank" 
-                                 rel="noopener noreferrer"
-                                 className="inline-flex items-center gap-2 text-xs font-bold text-[#10346E] hover:underline uppercase tracking-wider"
-                               >
-                                 {activeTab === 'guia' ? 'DESCARGAR GUÍA' : 'ACCEDER AL RECURSO'} <ExternalLink className="w-3 h-3" />
-                                </a>
-                             </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-20 text-center space-y-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
-                      <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
-                        {activeTab === 'guia' ? <FileText className="w-8 h-8" /> : <Video className="w-8 h-8" />}
-                      </div>
-                      <p className="text-foreground/50 text-sm font-medium">Aún no hay {activeTab === 'material' ? 'material de apoyo' : activeTab + 's'} en esta sección.</p>
                     </div>
                   )}
                 </div>

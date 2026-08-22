@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  obtenerProyectosEstudiante, 
-  obtenerDocentes, 
-  crearProyecto, 
-  subirDocumento, 
+  obtenerMisResultadosOvas, 
   obtenerNotificaciones,
   marcarNotificacionLeida,
-  actualizarPerfil,
-  eliminarProyecto,
-  descargarArchivo
+  actualizarPerfil
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
 import { toast } from 'react-hot-toast';
@@ -19,48 +15,31 @@ import Badge from '../components/Badge';
 import Modal from '../components/Modal';
 import { 
   User, 
-  Folder, 
   CheckCircle, 
   Bell, 
-  Plus, 
-  FileText, 
-  Download, 
-  History, 
-  MessageSquare,
-  ChevronRight,
-  Loader2,
-  Upload,
-  X,
-  BookOpen,
-  Trash2
+  Edit, 
+  BookOpen, 
+  Award, 
+  Clock, 
+  TrendingUp, 
+  Loader2, 
+  ExternalLink,
+  ArrowRight,
+  Sparkles,
+  Layers,
+  GraduationCap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function StudentDashboard() {
+  const navigate = useNavigate();
   const { user, perfil, refreshPerfil } = useAuth();
-  const [activeTab, setActiveTab] = useState('perfil');
-  const [proyectos, setProyectos] = useState([]);
+  const [resultadosOvas, setResultadosOvas] = useState([]);
   const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estado de modales
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
-  const [selectedProyecto, setSelectedProyecto] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState(null);
-  
-  // Estado del formulario de registro
-  const [docentes, setDocentes] = useState([]);
-  const [newProject, setNewProject] = useState({ nombre: '', estado: 'propuesta', docenteId: '', linea_investigacion: '' });
-  const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Estado del flujo de corrección
-  const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
-  const [correctionComment, setCorrectionComment] = useState('');
-  const [correctionFile, setCorrectionFile] = useState(null);
 
   // Estado de edición de perfil
   const [editProfileData, setEditProfileData] = useState({
@@ -72,74 +51,25 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     if (user && perfil) {
-      loadInitialData();
+      loadData();
     }
   }, [user, perfil]);
 
-  async function loadInitialData() {
+  async function loadData() {
     setLoading(true);
     try {
-      const [proys, notifs, docs] = await Promise.all([
-        obtenerProyectosEstudiante(perfil.id),
-        obtenerNotificaciones(perfil.id),
-        obtenerDocentes()
+      const [evaluaciones, notifs] = await Promise.all([
+        obtenerMisResultadosOvas(perfil.id),
+        obtenerNotificaciones(perfil.id)
       ]);
-      setProyectos(proys);
-      setNotificaciones(notifs);
-      setDocentes(docs);
+      setResultadosOvas(evaluaciones || []);
+      setNotificaciones(notifs || []);
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
+      console.error("Error loading student dashboard:", error);
     } finally {
       setLoading(false);
     }
   }
-
-  const handleCreateProject = async (e) => {
-    e.preventDefault();
-    if (!selectedFile) {
-      toast.error('Debes adjuntar el documento del proyecto');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const proyecto = await crearProyecto({
-        nombre: sanitizeText(newProject.nombre),
-        estado: newProject.estado,
-        estudianteId: perfil.id,
-        docenteId: newProject.docenteId,
-        linea_investigacion: newProject.linea_investigacion
-      });
-      
-      await subirDocumento(selectedFile, proyecto.id, perfil.id);
-      
-      setIsProjectModalOpen(false);
-      setNewProject({ nombre: '', estado: 'propuesta', docenteId: '', linea_investigacion: '' });
-      setSelectedFile(null);
-      await loadInitialData();
-      toast.success('Proyecto creado con éxito.');
-    } catch (error) {
-      toast.error('Error al crear el proyecto: ' + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteProject = async () => {
-    if (!projectToDelete) return;
-    setIsSubmitting(true);
-    try {
-      await eliminarProyecto(projectToDelete.id);
-      setIsDeleteModalOpen(false);
-      setProjectToDelete(null);
-      await loadInitialData();
-      toast.success('Proyecto eliminado con éxito.');
-    } catch (error) {
-      toast.error('Error al eliminar el proyecto: ' + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const openEditProfile = () => {
     setEditProfileData({
@@ -158,708 +88,364 @@ export default function StudentDashboard() {
       await actualizarPerfil(user.id, {
         nombre: sanitizeText(editProfileData.nombre),
         apellido: sanitizeText(editProfileData.apellido),
-        semestre: parseInt(editProfileData.semestre),
-        linea_investigacion: editProfileData.linea_investigacion
+        semestre: parseInt(editProfileData.semestre) || null,
+        linea_investigacion: editProfileData.linea_investigacion || null
       });
       await refreshPerfil();
       setIsEditProfileOpen(false);
       toast.success('Perfil actualizado con éxito');
     } catch (error) {
+      console.error("Error al actualizar perfil:", error);
       toast.error('Error al actualizar perfil: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDownload = (proyecto) => {
-    const version = proyecto.versiones_proyecto?.[proyecto.versiones_proyecto.length - 1];
-    if (!version || !version.documento_url) {
-      toast.error('Este proyecto aún no tiene un documento registrado o la subida falló anteriormente.');
-      return;
-    }
-    descargarArchivo(version.documento_url, version.nombre_archivo);
-  };
+  const noLeidas = notificaciones.filter(n => !n.leida).length;
+  const ovasAprobados = resultadosOvas.filter(r => r.completado).length;
+  const totalIntentos = resultadosOvas.reduce((acc, r) => acc + (r.intentos || 1), 0);
+  const promedioPuntaje = resultadosOvas.length > 0 
+    ? Math.round(resultadosOvas.reduce((acc, r) => acc + (r.mejor_puntaje || 0), 0) / resultadosOvas.length)
+    : 0;
 
-  const handleUploadVersion = async (e) => {
-    e.preventDefault();
-    if (!correctionFile) return;
-    
-    setIsSubmitting(true);
-    try {
-      await subirDocumento(correctionFile, selectedProyecto.id, perfil.id, correctionComment);
-      await loadInitialData();
-      
-      // Actualizar el proyecto seleccionado para mostrar la nueva versión
-      const updatedProys = await obtenerProyectosEstudiante(perfil.id);
-      setSelectedProyecto(updatedProys.find(p => p.id === selectedProyecto.id));
-      
-      setIsCorrectionModalOpen(false);
-      setCorrectionComment('');
-      setCorrectionFile(null);
-      toast.success('Corrección subida con éxito');
-    } catch (error) {
-      toast.error('Error al subir corrección: ' + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getStatusBadge = (estado) => {
-    switch(estado) {
-      case 'propuesta': return <Badge variant="blue">Propuesta</Badge>;
-      case 'desarrollo': return <Badge variant="amber">En Desarrollo</Badge>;
-      case 'aplicacion': return <Badge variant="emerald">Aplicación</Badge>;
-      default: return <Badge>{estado}</Badge>;
-    }
-  };
-
-  const handleMarkNotificationsRead = async () => {
-    const unread = notificaciones.filter(n => !n.leida);
-    if (unread.length === 0) return;
-    
-    try {
-      await Promise.all(unread.map(n => marcarNotificacionLeida(n.id)));
-      setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })));
-    } catch (error) {
-      console.error('Error al marcar notificaciones como leídas:', error);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-[#10346E]" />
+        <p className="text-foreground/40 text-sm font-medium">Cargando panel de aprendizaje...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Sección de encabezado */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-card-border">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Panel de Estudiante</h1>
-          <p className="text-foreground/60 font-medium italic">
-            Hola, {perfil?.nombre} — <span className="text-[#1E3A8A]">{perfil?.carrera || 'Ingeniería Informática'}</span>
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      
+      {/* ─── Encabezado del Perfil ─── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200 dark:border-slate-800">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="px-3.5 py-1 rounded-full bg-[#10346E]/10 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-300 text-[10px] font-bold uppercase tracking-widest border border-[#10346E]/20">
+              Estudiante SISINFO
+            </span>
+            {perfil?.semestre && (
+              <span className="text-foreground/50 text-xs font-medium">
+                Semestre {perfil.semestre}°
+              </span>
+            )}
+          </div>
+          
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] dark:text-white tracking-tight uppercase">
+            {perfil?.nombre} {perfil?.apellido}
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs text-foreground/60">
+            <span>{perfil?.email}</span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span>
+              Línea de Interés: <strong className="text-[#0F172A] dark:text-slate-200">{perfil?.linea_investigacion || 'No asignada'}</strong>
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Acciones de la Cabecera */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          {/* Botón de Notificaciones */}
           <button 
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsNotificationsModalOpen(true);
-              handleMarkNotificationsRead();
-            }}
-            className="relative p-3 rounded-xl bg-card hover:bg-[#1E3A8A]/10 border border-card-border transition-colors group z-10"
+            onClick={() => setIsNotificationsModalOpen(true)}
+            className="relative p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 shadow-sm transition-all cursor-pointer"
+            title="Notificaciones"
           >
-            <Bell className="w-5 h-5 text-foreground/40 group-hover:text-[#1E3A8A] pointer-events-none" />
-            {notificaciones.filter(n => !n.leida).length > 0 && (
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background pointer-events-none" />
+            <Bell className="w-5 h-5" />
+            {noLeidas > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-bounce">
+                {noLeidas}
+              </span>
             )}
           </button>
-          <Button onClick={() => setIsProjectModalOpen(true)} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nuevo Proyecto
+
+          {/* Editar Perfil */}
+          <Button 
+            variant="outline"
+            onClick={openEditProfile}
+            className="gap-2 text-xs font-bold py-2.5 px-4 rounded-xl border-slate-200 dark:border-slate-800"
+          >
+            <Edit className="w-4 h-4" /> Editar Perfil
+          </Button>
+
+          {/* Explorar OVAs */}
+          <Button 
+            onClick={() => navigate('/modulos')}
+            className="gap-2 text-xs font-bold py-2.5 px-5 rounded-xl bg-[#10346E] hover:bg-[#18458F] text-white shadow-sm"
+          >
+            <BookOpen className="w-4 h-4" /> Aula Virtual
           </Button>
         </div>
       </div>
 
-      {/* Pestañas */}
-      <div className="flex gap-2 p-1 bg-card border border-card-border rounded-2xl w-fit">
-        <button 
-          onClick={() => setActiveTab('perfil')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'perfil' ? 'bg-[#1E3A8A] text-white shadow-lg shadow-[#1E3A8A]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
-        >
-          <User className="w-4 h-4" /> Mi Perfil
-        </button>
-        <button 
-          onClick={() => setActiveTab('proyectos')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'proyectos' ? 'bg-[#1E3A8A] text-white shadow-lg shadow-[#1E3A8A]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
-        >
-          <Folder className="w-4 h-4" /> En Desarrollo
-        </button>
-        <button 
-          onClick={() => setActiveTab('completados')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'completados' ? 'bg-[#1E3A8A] text-white shadow-lg shadow-[#1E3A8A]/20' : 'text-foreground/40 hover:text-foreground hover:bg-background'}`}
-        >
-          <CheckCircle className="w-4 h-4" /> Completados
-        </button>
+      {/* ─── Métricas de Aprendizaje ─── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider">OVAs Evaluados</span>
+            <Layers className="w-4 h-4 text-[#10346E] dark:text-blue-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
+            {resultadosOvas.length}
+          </p>
+          <p className="text-[10px] text-slate-400 font-medium">Objetos virtuales cursados</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider">OVAs Aprobados</span>
+            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+            {ovasAprobados}
+          </p>
+          <p className="text-[10px] text-slate-400 font-medium">Evaluaciones superadas</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider">Promedio General</span>
+            <Award className="w-4 h-4 text-amber-500" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
+            {promedioPuntaje}<span className="text-sm font-normal text-slate-400">/100</span>
+          </p>
+          <p className="text-[10px] text-slate-400 font-medium">Calificación media de quizzes</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider">Intentos Realizados</span>
+            <TrendingUp className="w-4 h-4 text-purple-500" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
+            {totalIntentos}
+          </p>
+          <p className="text-[10px] text-slate-400 font-medium">Total de repasos y pruebas</p>
+        </div>
       </div>
 
-      {/* Contenido de la pestaña */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'perfil' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <GlassCard className="lg:col-span-2 p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-bold flex items-center gap-2 italic">
-                    <User className="w-5 h-5 text-[#1E3A8A]" /> Información Personal
-                  </h3>
-                  <Button variant="outline" size="sm" onClick={openEditProfile}>
-                    Editar Perfil
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Nombre Completo</p>
-                    <p className="text-foreground font-medium">{perfil?.nombre} {perfil?.apellido}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Correo Electrónico</p>
-                    <p className="text-foreground font-medium">{perfil?.email}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Carrera</p>
-                    <p className="text-foreground font-medium">{perfil?.carrera || '—'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Semestre / Línea</p>
-                    <p className="text-foreground font-medium">
-                      {perfil?.semestre ? `${perfil.semestre}° Semestre` : '—'} 
-                      {perfil?.linea_investigacion ? ` / ${perfil.linea_investigacion}` : ''}
-                    </p>
-                  </div>
-                </div>
-              </GlassCard>
+      {/* ─── Historial de Evaluaciones y OVAs ─── */}
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h2 className="text-xl font-bold text-[#0F172A] dark:text-white tracking-tight uppercase">
+              Mis Evaluaciones y Quizzes
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Historial de resultados obtenidos en los Objetos Virtuales de Aprendizaje
+            </p>
+          </div>
 
-              <div className="space-y-6">
-                <GlassCard className="p-6 bg-gradient-to-br from-[#1E3A8A]/10 to-transparent border-[#1E3A8A]/20">
-                  <h4 className="text-foreground font-bold mb-4 flex items-center gap-2">
-                    <History className="w-4 h-4 text-[#1E3A8A]" /> Resumen de Actividad
-                  </h4>
+          <button
+            onClick={() => navigate('/modulos')}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#10346E] dark:text-blue-400 hover:underline uppercase tracking-wider cursor-pointer"
+          >
+            <span>Ver todas las Líneas de Aprendizaje</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {resultadosOvas.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resultadosOvas.map((res) => {
+              const ova = res.ova;
+              const moduloNombre = ova?.modulos?.nombre || 'Informática';
+              return (
+                <div
+                  key={res.id}
+                  className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                >
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-foreground/60">Proyectos registrados</span>
-                      <span className="text-foreground font-bold">{proyectos.length}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-foreground/60">Revisiones recibidas</span>
-                      <span className="text-foreground font-bold">
-                        {proyectos.reduce((acc, p) => acc + (p.numero_revisiones || 0), 0)}
+                    {/* Badge de Línea y Estado */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-100 dark:border-blue-900/50 line-clamp-1">
+                        {moduloNombre}
+                      </span>
+
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          res.completado
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60'
+                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60'
+                        }`}
+                      >
+                        {res.completado ? 'Aprobado' : 'En Progreso'}
                       </span>
                     </div>
-                  </div>
-                </GlassCard>
-                
-                <GlassCard className="p-6">
-                   <h4 className="text-foreground font-bold mb-4">🔔 Notificaciones</h4>
-                   <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                     {notificaciones.length > 0 ? (
-                       notificaciones.map(n => (
-                         <div key={n.id} className={`p-3 rounded-lg text-xs leading-relaxed ${n.leida ? 'bg-card text-foreground/40 border border-card-border' : 'bg-[#1E3A8A]/10 text-[#1E3A8A] dark:text-[#1E3A8A] border border-[#1E3A8A]/10'}`}>
-                           {n.mensaje}
-                         </div>
-                       ))
-                     ) : (
-                       <p className="text-foreground/40 text-xs italic text-center py-4">Sin notificaciones nuevas</p>
-                     )}
-                   </div>
-                </GlassCard>
-              </div>
-            </div>
-          )}
 
-          {activeTab === 'proyectos' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {proyectos.filter(p => !p.terminado).length > 0 ? (
-                proyectos.filter(p => !p.terminado).map(p => (
-                  <GlassCard key={p.id} hover className="p-0 overflow-hidden flex flex-col cursor-pointer group" onClick={() => setSelectedProyecto(p)}>
-                    <div className="p-5 flex-grow">
-                      <div className="flex justify-between items-start mb-4">
-                        {getStatusBadge(p.estado)}
-                        <div className="flex items-center gap-2">
-                          {(p.estado === 'propuesta' || p.estado === 'desarrollo') && (
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); setProjectToDelete(p); setIsDeleteModalOpen(true); }}
-                              className="p-1.5 text-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Eliminar proyecto"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          <span className="text-[10px] text-foreground/40 font-mono">{new Date(p.created_at).toLocaleDateString()}</span>
-                        </div>
+                    {/* Título del OVA */}
+                    <h3 className="text-base font-bold text-[#0F172A] dark:text-white line-clamp-2 leading-tight group-hover:text-[#10346E] dark:group-hover:text-blue-400 transition-colors">
+                      {ova?.titulo || 'Objeto Virtual de Aprendizaje'}
+                    </h3>
+
+                    {/* Barra de Puntaje */}
+                    <div className="space-y-1.5 pt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-400 font-medium">Mejor Calificación</span>
+                        <span className="font-bold text-[#0F172A] dark:text-white text-sm">
+                          {res.mejor_puntaje || 0}%
+                        </span>
                       </div>
-                      <h4 className="text-lg font-bold text-foreground mb-3 group-hover:text-[#1E3A8A] transition-colors line-clamp-2 italic uppercase tracking-tight">
-                        {p.nombre}
-                      </h4>
-                      <div className="space-y-2 mb-6">
-                        <div className="flex items-center gap-2 text-xs text-foreground/60">
-                          <User className="w-3 h-3 text-[#1E3A8A]" /> Asesor: {p.docente?.nombre} {p.docente?.apellido}
-                        </div>
-                        {p.linea_investigacion && (
-                          <div className="flex items-center gap-2 text-xs text-[#1E3A8A]/80">
-                            <BookOpen className="w-3 h-3" /> Línea: {p.linea_investigacion}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-xs text-foreground/60">
-                          <History className="w-3 h-3" /> {p.numero_revisiones} revisiones realizadas
-                        </div>
+                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            (res.mejor_puntaje || 0) >= 60 ? 'bg-emerald-500' : 'bg-amber-500'
+                          }`}
+                          style={{ width: `${Math.min(res.mejor_puntaje || 0, 100)}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="p-4 bg-card border-t border-card-border flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-tighter italic">Ver detalles del seguimiento</span>
-                      <ChevronRight className="w-4 h-4 text-[#1E3A8A]" />
-                    </div>
-                  </GlassCard>
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center space-y-4">
-                  <div className="w-20 h-20 bg-card rounded-full flex items-center justify-center mx-auto">
-                    <Folder className="w-10 h-10 text-gray-700" />
                   </div>
-                  <p className="text-gray-500 italic">No tienes proyectos en desarrollo actualmente.</p>
-                  <Button variant="outline" onClick={() => setIsProjectModalOpen(true)}>Registrar mi primer proyecto</Button>
-                </div>
-              )}
-            </div>
-          )}
 
-          {activeTab === 'completados' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {proyectos.filter(p => p.terminado).length > 0 ? (
-                proyectos.filter(p => p.terminado).map(p => (
-                  <GlassCard key={p.id} className="p-6 border-[#1E3A8A]/20 bg-[#1E3A8A]/5 hover:bg-[#1E3A8A]/10 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                      <CheckCircle className="w-6 h-6 text-[#1E3A8A]" />
-                      <h4 className="text-lg font-bold text-foreground italic uppercase tracking-tight">{p.nombre}</h4>
+                  {/* Metadatos y Botón de Repaso */}
+                  <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                      <span>Intentos: <strong className="text-slate-600 dark:text-slate-300">{res.intentos || 1}</strong></span>
+                      <span>{new Date(res.updated_at).toLocaleDateString()}</span>
                     </div>
-                    <div className="space-y-2 mb-4">
-                      {p.linea_investigacion && (
-                        <p className="text-xs text-[#1E3A8A] dark:text-[#1E3A8A]/80 font-medium flex items-center gap-1.5 mb-1.5">
-                           <BookOpen className="w-3 h-3" /> Línea: {p.linea_investigacion}
-                        </p>
-                      )}
-                      <p className="text-xs text-foreground/60">Completado bajo la tutoría de {p.docente?.nombre}</p>
-                      <p className="text-[10px] text-foreground/40 font-medium italic">Finalizado el: {new Date(p.updated_at).toLocaleDateString()}</p>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full gap-2"
-                      onClick={() => handleDownload(p)}
+
+                    <button
+                      onClick={() => navigate('/modulos')}
+                      className="w-full py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[#10346E] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
                     >
-                       <Download className="w-4 h-4" /> Descargar Acta Final
-                    </Button>
-                  </GlassCard>
-                ))
-              ) : (
-                <p className="col-span-full py-20 text-center text-gray-500 italic">No tienes proyectos finalizados aún. ¡Sigue trabajando en tus investigaciones!</p>
-              )}
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* --- MODALES --- */}
-
-      {/* Modal de nuevo proyecto */}
-      <Modal 
-        isOpen={isProjectModalOpen} 
-        onClose={() => setIsProjectModalOpen(false)}
-        title="Registro de Nuevo Proyecto"
-      >
-        <form onSubmit={handleCreateProject} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5 px-1 italic">Nombre del Proyecto</label>
-              <input 
-                type="text" 
-                required
-                value={newProject.nombre}
-                onChange={e => setNewProject({...newProject, nombre: e.target.value})}
-                placeholder="Ej: Desarrollo de un Sistema de IA..."
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Estado Inicial</label>
-                <select 
-                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all shadow-sm"
-                  value={newProject.estado}
-                  onChange={e => setNewProject({...newProject, estado: e.target.value})}
-                >
-                  <option value="propuesta" className="bg-background">Propuesta</option>
-                  <option value="desarrollo" className="bg-background">Desarrollo</option>
-                  <option value="aplicacion" className="bg-background">Aplicación</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Asesor Asignado</label>
-                <select 
-                  required
-                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all shadow-sm"
-                  value={newProject.docenteId}
-                  onChange={e => setNewProject({...newProject, docenteId: e.target.value})}
-                >
-                  <option value="" className="bg-background">Seleccionar...</option>
-                  {docentes.map(d => (
-                    <option key={d.id} value={d.id} className="bg-background">{d.nombre} {d.apellido}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Línea de Investigación</label>
-              <select 
-                required
-                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all shadow-sm"
-                value={newProject.linea_investigacion}
-                onChange={e => setNewProject({...newProject, linea_investigacion: e.target.value})}
-              >
-                <option value="" className="bg-background">Seleccione una línea...</option>
-                <option value="Ingeniería de Software" className="bg-background">Ingeniería de Software</option>
-                <option value="Robótica" className="bg-background">Robótica</option>
-                <option value="Ingeniería del Conocimiento" className="bg-background">Ingeniería del Conocimiento</option>
-                <option value="Redes y Telemática" className="bg-background">Redes y Telemática</option>
-                <option value="Gestión de la Seguridad Informática" className="bg-background">Gestión de la Seguridad Informática</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5 px-1 italic">Documento Base</label>
-              {!selectedFile ? (
-                <div 
-                  onClick={() => document.getElementById('file-input').click()}
-                  className="mt-1 border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-[#1E3A8A]/30 hover:bg-[#1E3A8A]/5 cursor-pointer transition-all"
-                >
-                  <Upload className="w-8 h-8 text-gray-600 mx-auto mb-3" />
-                  <p className="text-sm text-gray-400 italic">Haz clic para subir o arrastra el archivo</p>
-                  <p className="text-[10px] text-gray-600 mt-2">Solo archivos .doc, .docx (Máx 20MB)</p>
-                  <input id="file-input" type="file" className="hidden" accept=".doc,.docx" onChange={e => setSelectedFile(e.target.files[0])} />
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-4 bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-[#1E3A8A]" />
-                    <span className="text-sm text-foreground font-medium truncate max-w-[200px]">{selectedFile.name}</span>
+                      <BookOpen className="w-4 h-4" />
+                      <span>Repasar en Aula Virtual</span>
+                    </button>
                   </div>
-                  <button type="button" onClick={() => setSelectedFile(null)} className="p-1 hover:bg-red-500/20 rounded text-red-400 transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
                 </div>
-              )}
-            </div>
+              );
+            })}
           </div>
-          
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsProjectModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1 font-bold tracking-widest italic p-3">
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'REGISTRAR PROYECTO'}
+        ) : (
+          <div className="p-16 sm:p-20 flex flex-col items-center justify-center text-center space-y-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-[#10346E] dark:text-blue-400">
+              <GraduationCap className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground">Aún no has realizado evaluaciones</h3>
+            <p className="text-foreground/50 text-xs max-w-sm leading-relaxed">
+              Explora las líneas de aprendizaje de ingeniería informática, revisa los contenidos interactivos y presenta los quizzes para registrar tu progreso.
+            </p>
+            <Button
+              onClick={() => navigate('/modulos')}
+              className="mt-2 py-3 px-6 rounded-xl bg-[#10346E] hover:bg-[#18458F] text-white text-xs font-bold uppercase tracking-wider"
+            >
+              Comenzar a Aprender
             </Button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Modal de detalle del proyecto */}
-      <Modal 
-        isOpen={!!selectedProyecto} 
-        onClose={() => setSelectedProyecto(null)}
-        title="Seguimiento de Proyecto"
-      >
-        {selectedProyecto && (
-          <div className="space-y-6">
-            <div className="p-4 bg-card rounded-xl border border-card-border">
-              <h4 className="text-foreground font-bold italic mb-4 uppercase tracking-tight">{selectedProyecto.nombre}</h4>
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <p className="text-foreground/40 font-bold mb-1 italic">DOCENTE</p>
-                  <p className="text-foreground font-medium">{selectedProyecto.docente?.nombre} {selectedProyecto.docente?.apellido}</p>
-                </div>
-                <div>
-                  <p className="text-foreground/40 font-bold mb-1 italic">ESTADO</p>
-                  <p className="text-[#1E3A8A] font-bold uppercase">{selectedProyecto.estado.toUpperCase()}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h5 className="text-sm font-bold text-gray-400 flex items-center gap-2">
-                <History className="w-4 h-4" /> Historial de Versiones
-              </h5>
-              <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                {selectedProyecto.versiones_proyecto?.length > 0 ? (
-                  [...selectedProyecto.versiones_proyecto].reverse().map((v, idx) => (
-                    <div key={v.id} className="p-3 bg-card rounded-xl border border-card-border">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-bold text-[#1E3A8A] uppercase tracking-widest italic">Versión {v.version || (selectedProyecto.versiones_proyecto.length - idx)}</span>
-                        <span className="text-[10px] text-foreground/40 font-medium">{new Date(v.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <p className="text-xs text-foreground font-medium italic mb-2">{v.nombre_archivo}</p>
-                      {v.comentario_estudiante && (
-                        <div className="mt-2 text-[10px] text-foreground/60 bg-background/50 p-2 rounded-lg italic border border-card-border">
-                          " {v.comentario_estudiante} "
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-foreground/40 italic">No hay versiones registradas.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h5 className="text-sm font-bold text-gray-400 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" /> Observaciones del Tutor
-              </h5>
-              <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                {selectedProyecto.observaciones?.length > 0 ? (
-                  [...selectedProyecto.observaciones].reverse().map(o => (
-                    <div key={o.id} className="p-4 bg-card rounded-xl border-l-4 border-amber-500/50 border border-card-border">
-                      <p className="text-xs text-foreground/80 leading-relaxed mb-2 font-medium italic">{o.texto}</p>
-                      <p className="text-[10px] text-foreground/40 flex justify-between font-bold uppercase tracking-widest">
-                        <span>{new Date(o.created_at).toLocaleDateString()}</span>
-                        <span>Docente Asesor</span>
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-foreground/40 italic">No hay observaciones registradas aún.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Button 
-                variant="outline" 
-                className="flex-1 gap-2 py-3"
-                onClick={() => handleDownload(selectedProyecto)}
-              >
-                <Download className="w-4 h-4" /> Ver Documento
-              </Button>
-              
-              <Button 
-                variant="secondary" 
-                className="flex-1 gap-2 py-3"
-                disabled={isSubmitting}
-                onClick={() => setIsCorrectionModalOpen(true)}
-              >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                Subir Corrección
-              </Button>
-              
-              <input 
-                id="new-version-input" 
-                type="file" 
-                className="hidden" 
-                accept=".doc,.docx" 
-                onChange={e => handleUploadVersion(e.target.files[0], selectedProyecto.id)} 
-              />
-            </div>
           </div>
         )}
-      </Modal>
+      </div>
 
-       <Modal 
-        isOpen={isEditProfileOpen} 
+      {/* ─── Modal de Edición de Perfil ─── */}
+      <Modal
+        isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
-        title="Editar Perfil Académico"
+        title="Actualizar Datos de Perfil"
       >
-        <form onSubmit={handleUpdateProfile} className="space-y-6">
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Nombre</label>
-              <input 
-                type="text" 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Nombre</label>
+              <input
+                type="text"
                 required
                 value={editProfileData.nombre}
-                onChange={e => setEditProfileData({...editProfileData, nombre: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic"
+                onChange={(e) => setEditProfileData({ ...editProfileData, nombre: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:border-[#10346E]"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Apellido</label>
-              <input 
-                type="text" 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Apellido</label>
+              <input
+                type="text"
                 required
                 value={editProfileData.apellido}
-                onChange={e => setEditProfileData({...editProfileData, apellido: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic"
+                onChange={(e) => setEditProfileData({ ...editProfileData, apellido: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:border-[#10346E]"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Correo (No editable)</label>
-            <input 
-              type="text" 
-              disabled
-              value={perfil?.email}
-              className="w-full bg-card/50 border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 cursor-not-allowed font-medium italic"
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Semestre Actual</label>
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={editProfileData.semestre}
+              onChange={(e) => setEditProfileData({ ...editProfileData, semestre: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:border-[#10346E]"
+              placeholder="Ej. 6"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Carrera (No editable)</label>
-            <input 
-              type="text" 
-              disabled
-              value={perfil?.carrera}
-              className="w-full bg-card/50 border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 cursor-not-allowed font-medium italic"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Semestre</label>
-              <input 
-                type="number" 
-                min="1"
-                max="12"
-                required
-                value={editProfileData.semestre}
-                onChange={e => setEditProfileData({...editProfileData, semestre: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-1.5 px-1 italic">Línea de Investigación</label>
-              <select 
-                required
-                value={editProfileData.linea_investigacion}
-                onChange={e => setEditProfileData({...editProfileData, linea_investigacion: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic shadow-sm"
-              >
-                <option value="Ingeniería de Software" className="bg-background">Ingeniería de Software</option>
-                <option value="Robótica" className="bg-background">Robótica</option>
-                <option value="Ingeniería del Conocimiento" className="bg-background">Ingeniería del Conocimiento</option>
-                <option value="Redes y Telemática" className="bg-background">Redes y Telemática</option>
-                <option value="Gestión de la Seguridad Informática" className="bg-background">Gestión de la Seguridad Informática</option>
-                <option value="Inteligencia Artificial" className="bg-background">Inteligencia Artificial</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-4 mt-6 border-t border-card-border pt-6">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsEditProfileOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1 font-bold tracking-widest italic p-3">
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'GUARDAR CAMBIOS'}
-            </Button>
-          </div>
-
-
-        </form>
-      </Modal>
-
-      {/* Modal de corrección */}
-      <Modal
-        isOpen={isCorrectionModalOpen}
-        onClose={() => {
-          setIsCorrectionModalOpen(false);
-          setCorrectionComment('');
-          setCorrectionFile(null);
-        }}
-        title="Subir Corrección del Proyecto"
-      >
-        <form onSubmit={handleUploadVersion} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-2 px-1 italic">Documento con cambios</label>
-              {!correctionFile ? (
-                <div 
-                  onClick={() => document.getElementById('correction-file-input').click()}
-                  className="border-2 border-dashed border-card-border rounded-xl p-8 text-center hover:border-[#1E3A8A]/30 hover:bg-[#1E3A8A]/5 cursor-pointer transition-all"
-                >
-                  <Upload className="w-8 h-8 text-foreground/20 mx-auto mb-3" />
-                  <p className="text-sm text-foreground/40 italic">Adjuntar documento (.docx)</p>
-                  <input 
-                    id="correction-file-input" 
-                    type="file" 
-                    className="hidden" 
-                    accept=".doc,.docx" 
-                    onChange={e => setCorrectionFile(e.target.files[0])} 
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-4 bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#1E3A8A]" />
-                    <span className="text-sm text-foreground font-medium truncate max-w-[250px]">{correctionFile.name}</span>
-                  </div>
-                  <button type="button" onClick={() => setCorrectionFile(null)} className="text-red-500 hover:text-red-400">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-2 px-1 italic">Breve comentario / Respuesta a observaciones</label>
-              <textarea 
-                value={correctionComment}
-                onChange={e => setCorrectionComment(e.target.value)}
-                rows={4}
-                placeholder="Ej: Ya apliqué los cambios en la sección de arquitectura..."
-                className="w-full bg-card border border-card-border rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 transition-all font-medium italic resize-none"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCorrectionModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1 font-bold tracking-widest italic p-3">
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'ENVIAR CORRECCIÓN'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Modal de eliminación del proyecto */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Eliminar Proyecto"
-      >
-        <div className="space-y-6">
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            ¿Estás seguro que deseas eliminar permanentemente el proyecto <span className="text-foreground font-bold italic">"{projectToDelete?.nombre}"</span>?<br/><br/>
-            Esta acción <span className="text-red-600 dark:text-red-400 font-bold">no se puede deshacer</span> y borrará todo el historial, documentos y revisiones asociadas.
-          </p>
-          <div className="flex gap-4 pt-4 border-t border-card-border mt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
-            <button 
-              type="button" 
-              disabled={isSubmitting} 
-              onClick={handleDeleteProject} 
-              className="flex-1 bg-red-500 hover:bg-red-600 text-foreground font-bold tracking-widest italic p-3 rounded-xl transition-colors flex justify-center items-center"
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Línea de Interés Principal</label>
+            <select
+              value={editProfileData.linea_investigacion}
+              onChange={(e) => setEditProfileData({ ...editProfileData, linea_investigacion: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:border-[#10346E]"
             >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'ELIMINAR'}
-            </button>
+              <option value="">Selecciona una línea...</option>
+              <option value="Ingeniería de Software">Ingeniería de Software</option>
+              <option value="Robótica">Robótica</option>
+              <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
+              <option value="Redes y Telemática">Redes y Telemática</option>
+              <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+            </select>
           </div>
-        </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="ghost" onClick={() => setIsEditProfileOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={isSubmitting} className="bg-[#10346E] text-white">
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+            </Button>
+          </div>
+        </form>
       </Modal>
 
-      {/* Modal de notificaciones */}
+      {/* ─── Modal de Notificaciones ─── */}
       <Modal
         isOpen={isNotificationsModalOpen}
         onClose={() => setIsNotificationsModalOpen(false)}
-        title="Notificaciones"
+        title="Centro de Notificaciones"
       >
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2">
           {notificaciones.length > 0 ? (
-            notificaciones.map(n => (
-              <div key={n.id} className="p-4 rounded-xl bg-card border border-card-border text-sm leading-relaxed text-foreground/80">
-                {n.mensaje}
+            notificaciones.map((n) => (
+              <div 
+                key={n.id}
+                onClick={async () => {
+                  if (!n.leida) {
+                    await marcarNotificacionLeida(n.id);
+                    setNotificaciones(prev => prev.map(item => item.id === n.id ? { ...item, leida: true } : item));
+                  }
+                }}
+                className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                  n.leida 
+                    ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-800 text-slate-500' 
+                    : 'bg-blue-50/60 dark:bg-blue-950/30 border-blue-200/80 dark:border-blue-900/50 text-[#0F172A] dark:text-white'
+                }`}
+              >
+                <p className="text-xs font-semibold">{n.mensaje || n.texto || 'Notificación del sistema'}</p>
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  {new Date(n.created_at).toLocaleString()}
+                </span>
               </div>
             ))
           ) : (
-            <div className="py-12 text-center text-foreground/40 italic">
-              <Bell className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p>No tienes notificaciones recibidas.</p>
+            <div className="py-12 text-center text-slate-400 text-xs">
+              No tienes notificaciones pendientes.
             </div>
           )}
         </div>
       </Modal>
+
     </div>
   );
 }
-
-function estadoLabel(estado) {
-  return { propuesta: 'Propuesta', desarrollo: 'En Desarrollo', aplicacion: 'Aplicación' }[estado] || estado;
-}
-

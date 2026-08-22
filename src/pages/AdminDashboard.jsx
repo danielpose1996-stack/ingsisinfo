@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { 
   obtenerEstadisticasAdmin, 
   obtenerTodosUsuarios, 
-  obtenerTodosProyectos,
   obtenerModulos,
   obtenerNoticias,
   crearNoticia,
@@ -80,9 +79,8 @@ const normalize = (str) => {
 export default function AdminDashboard() {
   const { user, perfil } = useAuth();
   const [activeTab, setActiveTab] = useState('stats');
-  const [stats, setStats] = useState({ totalUsers: 0, totalProjects: 0, pendingProjects: 0, totalFinalized: 0 });
+  const [stats, setStats] = useState({ totalUsers: 0, totalOvas: 0, totalEvaluaciones: 0, totalModulos: 0 });
   const [usuarios, setUsuarios] = useState([]);
-  const [proyectos, setProyectos] = useState([]);
   const [modulos, setModulos] = useState([]);
   const [seguimientoOvas, setSeguimientoOvas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,15 +93,13 @@ export default function AdminDashboard() {
 
   // Estado de selección y modales públicos
   const [isPublicModalOpen, setIsPublicModalOpen] = useState(false);
-  const [publicType, setPublicType] = useState('noticia'); // 'noticia', 'evento', 'galeria'
+  const [publicType, setPublicType] = useState('noticia');
   const [editingPublicItem, setEditingPublicItem] = useState(null);
   const [publicForm, setPublicForm] = useState({});
 
   // Estado de los modales
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [isProyectoModalOpen, setIsProyectoModalOpen] = useState(false);
-  const [selectedProyecto, setSelectedProyecto] = useState(null);
 
   // Estado del Aula Virtual
   const [selectedModuloAula, setSelectedModuloAula] = useState(null);
@@ -113,18 +109,16 @@ export default function AdminDashboard() {
     apellido: '',
     password: '',
     rol: 'estudiante',
-    linea_investigacion: '' // Usaremos el campo existente en DB
+    linea_investigacion: ''
   });
 
   // Estado de los filtros
-  const [filterLinea, setFilterLinea] = useState('');
-  const [filterFase, setFilterFase] = useState('');
   const [searchUserTerm, setSearchUserTerm] = useState('');
   const [filterUserRol, setFilterUserRol] = useState('');
   const [filterLineaSeguimiento, setFilterLineaSeguimiento] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [editingProfileId, setEditingProfileId] = useState(null); // Usaremos el ID de perfil (PK) para mayor seguridad
+  const [editingProfileId, setEditingProfileId] = useState(null);
 
   useEffect(() => {
     if (user && perfil?.rol === 'admin') {
@@ -135,31 +129,21 @@ export default function AdminDashboard() {
   async function loadAdminData() {
     setLoading(true);
     try {
-      const [users, proys, mods] = await Promise.all([
+      const [users, mods, estats, segData] = await Promise.all([
         obtenerTodosUsuarios(),
-        obtenerTodosProyectos(),
-        obtenerModulos()
+        obtenerModulos(),
+        obtenerEstadisticasAdmin(),
+        obtenerSeguimientoOvas()
       ]);
-      
-      if (!proys) {
-        console.warn("obtenerTodosProyectos returned null");
-        setProyectos([]);
-      } else {
-        setProyectos(proys);
-      }
       
       setUsuarios(users || []);
       setModulos(mods || []);
-
-      // Calcular estadísticas básicas
-      const validProys = proys || [];
-      const validUsers = users || [];
-      
+      setSeguimientoOvas(segData || []);
       setStats({
-        totalUsers: validUsers.length,
-        totalProjects: validProys.length,
-        pendingProjects: validProys.filter(p => !p.terminado).length,
-        totalFinalized: validProys.filter(p => p.terminado).length
+        totalUsers: (users || []).length,
+        totalOvas: estats.totalOvas || 0,
+        totalEvaluaciones: estats.totalEvaluaciones || 0,
+        totalModulos: (mods || []).length
       });
     } catch (error) {
       console.error("Error loading admin data:", error);
@@ -242,9 +226,8 @@ export default function AdminDashboard() {
   const navItems = [
     { id: 'stats', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'users', label: 'Usuarios', icon: Users },
-    { id: 'proyectos', label: 'Proyectos', icon: FolderTree },
     { id: 'aula', label: 'Aula Virtual', icon: BookOpen },
-    { id: 'seguimiento', label: 'Seguimiento', icon: TrendingUp },
+    { id: 'seguimiento', label: 'Seguimiento OVAs', icon: TrendingUp },
     { id: 'publico', label: 'Inicio', icon: Settings },
   ];
 
@@ -488,27 +471,38 @@ export default function AdminDashboard() {
             {activeTab === 'stats' && (
               <div className="space-y-8">
                 {/* Cuadrícula de estadísticas */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <GlassCard className="p-8 border-card-border hover:border-[#1E3A8A]/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
                       <div className="p-3 rounded-2xl bg-[#1E3A8A]/10 border border-[#1E3A8A]/20">
                         <Users className="w-6 h-6 text-[#1E3A8A]" />
                       </div>
-                      <Badge variant="emerald">+12%</Badge>
+                      <Badge variant="emerald">Comunidad</Badge>
                     </div>
-                    <p className="text-5xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalUsers}</p>
-                    <p className="text-foreground/40 text-sm font-bold uppercase tracking-widest italic">Usuarios Activos</p>
+                    <p className="text-4xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalUsers}</p>
+                    <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest italic">Usuarios Registrados</p>
                   </GlassCard>
 
                   <GlassCard className="p-8 border-card-border hover:border-blue-500/30 transition-all group">
                     <div className="flex justify-between items-start mb-4">
                       <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                        <FolderTree className="w-6 h-6 text-blue-500" />
+                        <BookOpen className="w-6 h-6 text-blue-500" />
                       </div>
-                      <Badge variant="blue">+5 este mes</Badge>
+                      <Badge variant="blue">Líneas</Badge>
                     </div>
-                    <p className="text-5xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalProjects}</p>
-                    <p className="text-foreground/40 text-sm font-bold uppercase tracking-widest italic">Proyectos Totales</p>
+                    <p className="text-4xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalModulos}</p>
+                    <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest italic">Líneas de Investigación</p>
+                  </GlassCard>
+
+                  <GlassCard className="p-8 border-card-border hover:border-indigo-500/30 transition-all group">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                        <Layers className="w-6 h-6 text-indigo-500" />
+                      </div>
+                      <Badge variant="indigo">Contenido</Badge>
+                    </div>
+                    <p className="text-4xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalOvas}</p>
+                    <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest italic">OVAs Publicados</p>
                   </GlassCard>
 
                   <GlassCard className="p-8 border-card-border hover:border-amber-500/30 transition-all group">
@@ -516,40 +510,36 @@ export default function AdminDashboard() {
                       <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                         <TrendingUp className="w-6 h-6 text-amber-500" />
                       </div>
-                      <Badge variant="amber">Crítico</Badge>
+                      <Badge variant="amber">Quizzes</Badge>
                     </div>
-                    <p className="text-5xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.pendingProjects}</p>
-                    <p className="text-foreground/40 text-sm font-bold uppercase tracking-widest italic">En Revisión</p>
-                  </GlassCard>
-
-                  <GlassCard className="p-8 border-card-border hover:border-indigo-500/30 transition-all group">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                        <FileCheck className="w-6 h-6 text-indigo-500" />
-                      </div>
-                      <Badge variant="indigo">Completados</Badge>
-                    </div>
-                    <p className="text-5xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalFinalized}</p>
-                    <p className="text-foreground/40 text-sm font-bold uppercase tracking-widest italic">Proyectos Finalizados</p>
+                    <p className="text-4xl font-black text-foreground italic mb-1 uppercase tracking-tighter">{stats.totalEvaluaciones}</p>
+                    <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest italic">Evaluaciones Realizadas</p>
                   </GlassCard>
                 </div>
 
-                {/* Actividad y proyectos recientes */}
+                {/* Actividad reciente y estudiantes */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                    <GlassCard className="p-6">
                      <h3 className="text-xl font-bold text-foreground mb-6 italic flex items-center gap-2">
-                       <FileCheck className="w-5 h-5 text-[#1E3A8A]" /> Últimos Proyectos
+                       <TrendingUp className="w-5 h-5 text-[#1E3A8A]" /> Últimas Evaluaciones en OVAs
                      </h3>
                      <div className="space-y-4">
-                       {proyectos.slice(0, 5).map(p => (
-                         <div key={p.id} className="flex items-center justify-between p-4 bg-card rounded-xl border border-transparent hover:border-card-border transition-all group">
+                       {seguimientoOvas.slice(0, 5).map(s => (
+                         <div key={s.id} className="flex items-center justify-between p-4 bg-card rounded-xl border border-transparent hover:border-card-border transition-all group">
                            <div>
-                             <h4 className="text-sm font-bold text-foreground italic mb-1">{p.nombre}</h4>
-                             <p className="text-[10px] text-foreground/40 font-medium">Estudiante: {p.estudiante?.nombre} · {new Date(p.created_at).toLocaleDateString()}</p>
+                             <h4 className="text-sm font-bold text-foreground italic mb-1">{s.ova?.titulo || 'Evaluación'}</h4>
+                             <p className="text-[10px] text-foreground/40 font-medium">
+                               Estudiante: {s.perfil?.nombre} {s.perfil?.apellido} · Puntaje: <strong className="text-[#1E3A8A]">{s.mejor_puntaje}%</strong>
+                             </p>
                            </div>
-                           <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#1E3A8A] transition-colors" />
+                           <Badge variant={s.completado ? 'emerald' : 'amber'} size="sm">
+                             {s.completado ? 'APROBADO' : 'EN CURSO'}
+                           </Badge>
                          </div>
                        ))}
+                       {seguimientoOvas.length === 0 && (
+                         <p className="text-foreground/30 text-xs italic py-8 text-center">Aún no se registran evaluaciones.</p>
+                       )}
                      </div>
                    </GlassCard>
 
@@ -561,11 +551,11 @@ export default function AdminDashboard() {
                        {usuarios.filter(u => u.rol === 'estudiante').slice(0, 5).map(u => (
                          <div key={u.id} className="flex items-center gap-4 p-3 hover:bg-card rounded-xl transition-colors">
                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold border border-blue-500/10 text-xs italic">
-                             {u.nombre[0]}
+                             {u.nombre?.[0] || 'E'}
                            </div>
                            <div className="flex-1">
                              <h4 className="text-sm font-bold text-foreground italic">{u.nombre} {u.apellido}</h4>
-                             <p className="text-[10px] text-foreground/40 font-medium">{u.carrera || 'Ing. Informática'}</p>
+                             <p className="text-[10px] text-foreground/40 font-medium">{u.linea_investigacion || 'Ing. Informática'}</p>
                            </div>
                            <Badge size="sm">{u.semestre || '1'}° Sem</Badge>
                          </div>
@@ -690,137 +680,6 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               </GlassCard>
-            )}
-
-            {activeTab === 'proyectos' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row gap-4 items-end justify-between">
-                  <div className="flex flex-wrap gap-4 flex-1">
-                    <div className="flex-1 min-w-[200px]">
-                      <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Línea</label>
-                      <select
-                        value={filterLinea}
-                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 italic shadow-sm transition-all"
-                        onChange={(e) => setFilterLinea(e.target.value)}
-                      >
-                        <option value="">Todas las Líneas</option>
-                        <option value="Ingeniería de Software">Ingeniería de Software</option>
-                        <option value="Robótica">Robótica</option>
-                        <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
-                        <option value="Redes y Telemática">Redes y Telemática</option>
-                        <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
-                        <option value="Ingeniería Informática">Ingeniería Informática</option>
-                      </select>
-                    </div>
-
-                    <div className="flex-1 min-w-[200px]">
-                      <label className="block text-[10px] text-foreground/40 font-bold uppercase mb-1.5 ml-1 italic">Filtrar por Fase</label>
-                      <select
-                        value={filterFase}
-                        className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-[#1E3A8A]/50 italic shadow-sm transition-all"
-                        onChange={(e) => setFilterFase(e.target.value)}
-                      >
-                        <option value="">Todas las Fases</option>
-                        <option value="propuesta">Propuesta</option>
-                        <option value="desarrollo">Desarrollo</option>
-                        <option value="aplicacion">Aplicación</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <Button 
-                    variant="outline" 
-                    onClick={() => loadAdminData()} 
-                    className="gap-2 italic py-3 px-6 h-[46px] border-[#1E3A8A]/10 hover:bg-[#1E3A8A]/5"
-                    disabled={loading}
-                  >
-                    <TrendingUp className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    ACTUALIZAR
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {(() => {
-                    const filteredProyectos = proyectos
-                      .filter(p => !filterLinea || normalize(p.linea_investigacion) === normalize(filterLinea))
-                      .filter(p => !filterFase || normalize(p.estado) === normalize(filterFase));
-
-                    if (filteredProyectos.length === 0) {
-                      return (
-                        <div className="col-span-full py-20 flex flex-col items-center justify-center space-y-6 bg-card/50 border border-dashed border-card-border rounded-3xl animate-in fade-in duration-700">
-                          <div className="p-4 rounded-2xl bg-background/50 border border-card-border">
-                             <FolderTree className="w-10 h-10 text-foreground/20" />
-                          </div>
-                          <div className="space-y-2 text-center">
-                            <h3 className="text-lg font-bold text-foreground italic">No se encontraron proyectos</h3>
-                            <p className="text-sm text-foreground/40 italic max-w-xs mx-auto">
-                              Intenta cambiar los filtros o verifica los permisos en Supabase si crees que deberían aparecer más registros.
-                            </p>
-                          </div>
-                          <Button variant="secondary" onClick={() => { setFilterFase(''); setFilterLinea(''); }} className="text-[10px] py-2 px-6">
-                            LIMPIAR FILTROS
-                          </Button>
-                        </div>
-                      );
-                    }
-
-                    return filteredProyectos.map(p => (
-                    <GlassCard key={p.id} className="p-6 space-y-4">
-                      <div className="flex flex-wrap gap-2 justify-between items-start">
-                        <div className="flex gap-2">
-                          <Badge variant={p.terminado ? 'emerald' : 'blue'}>{p.terminado ? 'Terminado' : 'En Proceso'}</Badge>
-                          <Badge variant={p.estado === 'aplicacion' ? 'indigo' : p.estado === 'desarrollo' ? 'amber' : 'blue'}>
-                            {p.estado?.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <span className="text-[10px] text-foreground/40 font-mono italic">{new Date(p.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <h4 className="text-lg font-bold text-foreground italic line-clamp-2">{p.nombre}</h4>
-                      <div className="pt-4 border-t border-card-border space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-foreground/40 font-bold uppercase tracking-tighter italic">Línea</span>
-                          <span className="text-foreground font-medium italic">{p.linea_investigacion || 'No asignada'}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-foreground/40 font-bold uppercase tracking-tighter italic">Estudiante</span>
-                          <span className="text-foreground font-medium">{p.estudiante?.nombre} {p.estudiante?.apellido}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-foreground/40 font-bold uppercase tracking-tighter italic">Asesor</span>
-                          <span className="text-foreground font-medium">{p.docente ? `${p.docente.nombre} ${p.docente.apellido}` : 'Pendiente'}</span>
-                        </div>
-                      </div>
-                      <div className="pt-4 border-t border-card-border flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 text-[10px] italic py-2"
-                          onClick={() => {
-                            const lastVersion = p.versiones_proyecto?.[p.versiones_proyecto.length - 1];
-                            if (lastVersion?.documento_url) {
-                              descargarArchivo(lastVersion.documento_url, lastVersion.nombre_archivo);
-                            }
-                          }}
-                        >
-                          DOC <Download className="w-3 h-3 ml-1" />
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="flex-1 text-[10px] italic py-2"
-                          onClick={() => {
-                            setSelectedProyecto(p);
-                            setIsProyectoModalOpen(true);
-                          }}
-                        >
-                          EXPEDIENTE <ChevronRight className="w-3 h-3 ml-1" />
-                        </Button>
-                      </div>
-                    </GlassCard>
-                    ));
-                  })()}
-                </div>
-              </div>
             )}
 
             {activeTab === 'aula' && (
