@@ -62,7 +62,8 @@ import {
   X,
   ShieldCheck,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ArrowRight,
   ExternalLink,
+  FileDown,
   Terminal
 } from 'lucide-react';
 
