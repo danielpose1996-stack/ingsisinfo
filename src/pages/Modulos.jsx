@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { obtenerModulos, obtenerContenidosModulo, obtenerOvasModulo, registrarResultadoOva, descargarArchivo } from '../lib/supabase';
+import { obtenerModulos, obtenerOvasModulo, registrarResultadoOva } from '../lib/supabase';
 import { sanitizeHTML } from '../lib/security';
 import GlassCard from '../components/GlassCard';
 import Button from '../components/Button';
@@ -34,7 +34,6 @@ export default function Modulos() {
   const navigate = useNavigate();
   const [modulos, setModulos] = useState([]);
   const [selectedModule, setSelectedModule] = useState(null);
-  const [contenidos, setContenidos] = useState({ guia: [], video: [], material: [], subpagina: [] });
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   
@@ -65,20 +64,8 @@ export default function Modulos() {
   const fetchContenidos = async (moduloId) => {
     setContentLoading(true);
     try {
-      const [dataContenido, dataOvas] = await Promise.all([
-        obtenerContenidosModulo(moduloId),
-        obtenerOvasModulo(moduloId)
-      ]);
-      
-      const grouped = {
-        guia: (dataContenido || []).filter(c => c.tipo === 'guia'),
-        video: (dataContenido || []).filter(c => c.tipo === 'video'),
-        material: (dataContenido || []).filter(c => c.tipo === 'material'),
-        subpagina: (dataContenido || []).filter(c => c.tipo === 'subpagina'),
-        ovas: (dataOvas || []).filter(o => o.estado === 'publicado')
-      };
-      setContenidos(grouped);
-      setOvas(grouped.ovas);
+      const dataOvas = await obtenerOvasModulo(moduloId);
+      setOvas((dataOvas || []).filter(o => o.estado === 'publicado'));
     } catch (error) {
       console.error("Error al cargar contenidos:", error);
     } finally {

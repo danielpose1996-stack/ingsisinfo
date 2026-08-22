@@ -11,13 +11,13 @@ export default function AdminLogin() {
   const { user, perfil, loading, iniciarSesionConGoogle, cerrarSesion } = useAuth();
   const navigate = useNavigate();
 
+  const notAdminError = (user && perfil && perfil.rol !== 'admin')
+    ? 'Tu cuenta de correo institucional está activa, pero no cuenta con rol de Administrador.'
+    : '';
+
   useEffect(() => {
-    if (user && perfil) {
-      if (perfil.rol === 'admin') {
-        navigate('/dashboard/admin', { replace: true });
-      } else {
-        setError('Tu cuenta de correo institucional está activa, pero no cuenta con rol de Administrador.');
-      }
+    if (user && perfil?.rol === 'admin') {
+      navigate('/dashboard/admin', { replace: true });
     }
   }, [user, perfil, navigate]);
 
@@ -88,13 +88,13 @@ export default function AdminLogin() {
               )}
             </button>
 
-            {error && (
+            {(error || notAdminError) && (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs space-y-2">
                 <div className="flex items-center gap-2 font-bold">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>Permiso denegado</span>
                 </div>
-                <p className="leading-relaxed opacity-90">{error}</p>
+                <p className="leading-relaxed opacity-90">{error || notAdminError}</p>
                 {user && (
                   <button
                     type="button"

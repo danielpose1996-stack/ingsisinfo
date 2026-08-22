@@ -10,26 +10,15 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Detectar errores en los parámetros de la URL (retorno de OAuth fallido)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const hash = window.location.hash;
-    const errorDesc = params.get('error_description');
+  const params = new URLSearchParams(location.search);
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  const urlError = params.get('error_description')
+    ? decodeURIComponent(params.get('error_description'))
+    : hash.includes('error=')
+    ? 'Hubo un problema al autenticar con Google. Por favor, intenta de nuevo.'
+    : '';
 
-    if (errorDesc) {
-      setErrorMessage(decodeURIComponent(errorDesc));
-    } else if (hash.includes('error=')) {
-      setErrorMessage('Hubo un problema al autenticar con Google. Por favor, intenta de nuevo.');
-    }
-  }, [location]);
-
-  // Si hay error en el AuthContext (por ejemplo, dominio no institucional)
-  useEffect(() => {
-    if (authError) {
-      setErrorMessage(authError);
-      setIsSubmitting(false);
-    }
-  }, [authError]);
+  const activeError = errorMessage || authError || urlError;
 
   // Redirección inteligente y automática según el rol del perfil
   useEffect(() => {
@@ -170,12 +159,12 @@ export default function Login() {
               </button>
 
               {/* Mensajes de error en caso de fallo */}
-              {errorMessage && (
+              {activeError && (
                 <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 text-xs animate-in zoom-in duration-200">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <p className="font-bold">Error de acceso</p>
-                    <p className="opacity-90">{errorMessage}</p>
+                    <p className="opacity-90">{activeError}</p>
                   </div>
                 </div>
               )}

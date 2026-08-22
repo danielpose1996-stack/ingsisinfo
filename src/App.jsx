@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 
 // Carga diferida de páginas
@@ -21,10 +21,12 @@ import { Toaster } from 'react-hot-toast';
 
 function AdminGatekeeper({ children }) {
   const { isAdmin } = useAuth();
-  const hasGateKey = sessionStorage.getItem('admin_access_gate') === 'true';
+  const location = useLocation();
+  const hasGateKey = typeof window !== 'undefined' && sessionStorage.getItem('admin_access_gate') === 'true';
+  const isRedirectedFromAdmin = location.state?.from?.pathname?.includes('/admin');
 
-  // Si ya inició sesión como administrador o viene del pie de página con la "llave"
-  if (isAdmin || hasGateKey) {
+  // Si ya inició sesión como administrador, viene del pie de página con la "llave" o fue redirigido
+  if (isAdmin || hasGateKey || isRedirectedFromAdmin) {
     return children;
   }
 

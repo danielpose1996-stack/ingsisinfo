@@ -18,7 +18,7 @@ import {
   eliminarGaleria,
   eliminarUsuario,
   actualizarPerfil,
-  descargarArchivo,
+  subirArchivoOva,
   obtenerSeguimientoOvas,
   eliminarResultadoOva,
   eliminarTodoSeguimiento
@@ -1102,93 +1102,6 @@ export default function AdminDashboard() {
         </form>
       </Modal>
 
-      {/* Modal del historial de proyectos del administrador */}
-      <Modal
-        isOpen={isProyectoModalOpen}
-        onClose={() => {
-          setIsProyectoModalOpen(false);
-          setSelectedProyecto(null);
-        }}
-        title="Expediente del Proyecto"
-      >
-        {selectedProyecto && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-bold text-foreground italic mb-1">{selectedProyecto.nombre}</h3>
-              <p className="text-sm text-foreground/60">Creado el: {new Date(selectedProyecto.created_at).toLocaleDateString()}</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-card border border-card-border">
-                <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic mb-1">Fase Actual</p>
-                <div className="flex items-center gap-2">
-                   <Badge variant={
-                     selectedProyecto.fase === 'Aplicación' ? 'emerald' :
-                     selectedProyecto.fase === 'Desarrollo' ? 'blue' : 'amber'
-                   }>{selectedProyecto.fase || 'Propuesta'}</Badge>
-                </div>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-card-border">
-                <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic mb-1">Estado</p>
-                <div className="flex items-center gap-2">
-                   <Badge variant={selectedProyecto.terminado ? 'emerald' : 'blue'}>
-                     {selectedProyecto.terminado ? 'Finalizado' : 'En Proceso'}
-                   </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic">Participantes</p>
-              <div className="p-4 rounded-xl bg-card border border-card-border space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-foreground/60">Estudiante:</span>
-                  <span className="text-foreground font-bold">{selectedProyecto.estudiante?.nombre || 'Desconocido'} {selectedProyecto.estudiante?.apellido || ''}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-foreground/60">Docente Asesor:</span>
-                  <span className="text-foreground font-bold">{selectedProyecto.docente?.nombre || 'Pendiente'} {selectedProyecto.docente?.apellido || ''}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-bold text-foreground italic flex items-center gap-2">
-                <FolderTree className="w-4 h-4 text-[#1E3A8A]" />
-                Historial de Versiones
-              </h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                {selectedProyecto.versiones_proyecto && selectedProyecto.versiones_proyecto.length > 0 ? (
-                  selectedProyecto.versiones_proyecto.map((ver, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 rounded-xl bg-card border border-card-border hover:border-[#1E3A8A]/20 transition-colors">
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center border border-[#1E3A8A]/20">
-                           <span className="text-[#1E3A8A] text-xs font-bold">V{idx + 1}</span>
-                         </div>
-                         <div>
-                           <p className="text-sm text-foreground font-medium">Entrega #{idx + 1}</p>
-                           {ver.created_at && (
-                             <p className="text-[10px] text-foreground/40">{new Date(ver.created_at).toLocaleDateString()}</p>
-                           )}
-                         </div>
-                      </div>
-                      {ver.documento_url ? (
-                        <Button size="sm" variant="outline" onClick={() => descargarArchivo(ver.documento_url, ver.nombre_archivo)} className="text-[10px] py-1 px-3">
-                          <Download className="w-3 h-3 mr-1" /> VER
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-foreground/40 italic">Sin documento</span>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-foreground/40 italic py-4 text-center border border-dashed border-card-border rounded-xl">No hay historial de versiones.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       {/* Modal de contenido público del administrador (noticias, eventos y galería) */}
       <Modal
