@@ -12,6 +12,7 @@ import {
   Award,
   CheckCircle2,
   FileText,
+  FileDown,
   Youtube,
   Globe,
   Download,
@@ -45,14 +46,19 @@ export default function OvaViewer({
     if (!ova) return [];
 
     let evaluacion = null;
-    if (ova.actividad_final) {
-      try {
-        const parsed = JSON.parse(ova.actividad_final);
-        if (parsed && parsed.preguntas && parsed.preguntas.length > 0) {
-          evaluacion = parsed;
+    const rawEval = ova.evaluacion || ova.actividad_final;
+    if (rawEval) {
+      if (typeof rawEval === 'object' && Array.isArray(rawEval.preguntas) && rawEval.preguntas.length > 0) {
+        evaluacion = rawEval;
+      } else if (typeof rawEval === 'string') {
+        try {
+          const parsed = JSON.parse(rawEval);
+          if (parsed && Array.isArray(parsed.preguntas) && parsed.preguntas.length > 0) {
+            evaluacion = parsed;
+          }
+        } catch {
+          // Formato heredado o texto plano
         }
-      } catch {
-        // Formato heredado
       }
     }
 

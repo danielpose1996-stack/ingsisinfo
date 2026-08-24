@@ -82,12 +82,12 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
     }));
     const finalScore = finalResults.filter(r => r.isCorrect).reduce((sum, r) => sum + r.puntos, 0);
     const finalPercentage = totalPuntos > 0 ? Math.round((finalScore / totalPuntos) * 100) : 0;
-    const finalPassed = finalPercentage >= (evaluacion.nota_minima || 60);
+    const finalPassed = finalPercentage >= (evaluacion?.nota_minima ?? 60);
 
     if (onComplete) {
       onComplete(finalScore, finalPercentage, finalPassed);
     }
-  }, [preguntas, answers, totalPuntos, evaluacion.nota_minima, onComplete]);
+  }, [preguntas, answers, totalPuntos, evaluacion?.nota_minima, onComplete]);
 
   useEffect(() => {
     if (timeLeft === null || isSubmitted) return;
@@ -128,22 +128,23 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
   }));
   const score = results.filter(r => r.isCorrect).reduce((sum, r) => sum + r.puntos, 0);
   const percentage = totalPuntos > 0 ? Math.round((score / totalPuntos) * 100) : 0;
-  const passed = percentage >= (evaluacion.nota_minima || 60);
+  const passed = percentage >= (evaluacion?.nota_minima ?? 60);
 
   // ─── Pantalla inicial ───
   if (!quizStarted) {
     return (
-      <div className="h-full flex flex-col justify-center max-w-2xl mx-auto text-center space-y-10">
+      <div className="h-full flex flex-col justify-center max-w-2xl mx-auto text-center space-y-8">
         <div className="relative">
-          <div className="absolute inset-0 bg-[#1E3A8A]/20 blur-[100px] rounded-full scale-150" />
-          <div className="relative space-y-6">
-            <Award className="w-20 h-20 text-[#1E3A8A] mx-auto drop-shadow-[0_0_15px_rgba(5,150,105,0.5)]" />
-            <h2 className="text-4xl lg:text-5xl font-black text-foreground italic uppercase tracking-tighter">
-              Evaluación Final
+          <div className="space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto">
+              <Award className="w-8 h-8" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+              Evaluación Final del OVA
             </h2>
-            {evaluacion.instrucciones && (
+            {evaluacion?.instrucciones && (
               <div
-                className="text-foreground/60 italic text-base max-w-xl mx-auto leading-relaxed"
+                className="text-foreground/70 text-sm max-w-xl mx-auto leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(evaluacion.instrucciones) }}
               />
             )}
@@ -151,35 +152,36 @@ export default function QuizPlayer({ evaluacion, _recursos, onComplete }) {
         </div>
 
         <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-          <GlassCard className="p-5 border-card-border text-center">
-            <CircleDot className="w-5 h-5 text-[#1E3A8A] mx-auto mb-2" />
-            <p className="text-2xl font-black text-foreground italic">{preguntas.length}</p>
-            <p className="text-[9px] text-foreground/30 font-bold uppercase tracking-widest italic">Preguntas</p>
+          <GlassCard className="p-4 border-card-border text-center">
+            <CircleDot className="w-5 h-5 text-[#15326C] dark:text-blue-400 mx-auto mb-1.5" />
+            <p className="text-xl font-bold text-foreground font-mono">{preguntas.length}</p>
+            <p className="text-[10px] text-foreground/50 font-semibold uppercase tracking-wider">Preguntas</p>
           </GlassCard>
-          <GlassCard className="p-5 border-card-border text-center">
-            <Target className="w-5 h-5 text-amber-400 mx-auto mb-2" />
-            <p className="text-2xl font-black text-foreground italic">{evaluacion.nota_minima || 60}%</p>
-            <p className="text-[9px] text-foreground/30 font-bold uppercase tracking-widest italic">Para Aprobar</p>
+          <GlassCard className="p-4 border-card-border text-center">
+            <Target className="w-5 h-5 text-amber-500 mx-auto mb-1.5" />
+            <p className="text-xl font-bold text-foreground font-mono">{evaluacion?.nota_minima ?? 60}%</p>
+            <p className="text-[10px] text-foreground/50 font-semibold uppercase tracking-wider">Para Aprobar</p>
           </GlassCard>
-          <GlassCard className="p-5 border-card-border text-center">
-            <Clock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-            <p className="text-2xl font-black text-foreground italic">
-              {evaluacion.tiempo_limite > 0 ? `${evaluacion.tiempo_limite}'` : '∞'}
+          <GlassCard className="p-4 border-card-border text-center">
+            <Clock className="w-5 h-5 text-blue-500 mx-auto mb-1.5" />
+            <p className="text-xl font-bold text-foreground font-mono">
+              {evaluacion?.tiempo_limite > 0 ? `${evaluacion.tiempo_limite}'` : 'Libre'}
             </p>
-            <p className="text-[9px] text-foreground/30 font-bold uppercase tracking-widest italic">Minutos</p>
+            <p className="text-[10px] text-foreground/50 font-semibold uppercase tracking-wider">Tiempo</p>
           </GlassCard>
         </div>
 
         <Button
           onClick={() => {
             setQuizStarted(true);
-            if (evaluacion.tiempo_limite > 0) {
+            if (evaluacion?.tiempo_limite > 0) {
               setTimeLeft(evaluacion.tiempo_limite * 60);
             }
           }}
-          className="mx-auto gap-3 italic uppercase tracking-widest py-4 px-12 text-sm font-black"
+          className="mx-auto gap-2 py-3 px-8 text-xs font-bold bg-[#15326C] hover:bg-[#1E40AF] text-white rounded-xl shadow-sm cursor-pointer"
         >
-          Comenzar Evaluación <ChevronRight className="w-4 h-4" />
+          <span>Comenzar Evaluación</span>
+          <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
     );
