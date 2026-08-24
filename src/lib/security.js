@@ -13,7 +13,7 @@ export function sanitizeHTML(html) {
       'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
       'u', 's', 'pre', 'code', 'hr'
     ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'class', 'style', 'rel']
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'class', 'style', 'rel', 'width', 'height', 'data-width', 'data-align']
   });
 }
 
