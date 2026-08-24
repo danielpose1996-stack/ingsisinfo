@@ -65,7 +65,11 @@ import {
   ChevronRight,
   ExternalLink,
   Layers,
-  FlaskConical
+  GraduationCap,
+  UserCheck,
+  Info,
+  ArrowRight,
+  ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -467,10 +471,13 @@ export default function AdminDashboard() {
             <Button
               variant="outline"
               onClick={() => setIsSimulationModalOpen(true)}
-              className="gap-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-indigo-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 border-amber-500/30 text-foreground font-bold italic shadow-sm transition-all active:scale-95 cursor-pointer"
+              className="gap-2 px-3.5 py-2 rounded-xl border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-foreground font-semibold text-xs transition-all shadow-sm active:scale-95 cursor-pointer flex items-center"
             >
-              <FlaskConical className="w-4 h-4 text-amber-500 animate-bounce" />
-              <span>Modo Pruebas de Roles</span>
+              <UserCheck className="w-4 h-4 text-[#15326C] dark:text-blue-400" />
+              <span>Simular Rol</span>
+              <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 text-[#15326C] dark:text-blue-300 rounded border border-blue-200/50 dark:border-blue-800/50">
+                Vista Previa
+              </span>
             </Button>
           </div>
         </header>
@@ -1322,68 +1329,96 @@ export default function AdminDashboard() {
         </form>
       </Modal>
 
-      {/* Modal de Modo Simulación / Pruebas de Roles */}
+      {/* Modal de Simulación de Entorno y Roles */}
       <Modal
         isOpen={isSimulationModalOpen}
         onClose={() => setIsSimulationModalOpen(false)}
-        title="🧪 Modo Pruebas / Vista Previa de Roles"
+        title="Simulación de Roles de Usuario"
       >
-        <div className="space-y-6">
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 leading-relaxed font-medium">
-            <p className="font-bold mb-1">💡 Navegación y pruebas interactivas</p>
-            Esta función te permite probar el sistema desde la perspectiva exacta de un <strong>Estudiante</strong> o un <strong>Docente</strong>. Podrás responder cuestionarios, ver el panel de seguimiento o gestionar contenidos de una línea de investigación sin alterar tu rol real de Administrador.
+        <div className="space-y-5">
+          {/* Tarjeta de Información Institucional */}
+          <div className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs leading-relaxed">
+            <div className="p-2 rounded-lg bg-blue-100/70 dark:bg-blue-900/40 text-[#15326C] dark:text-blue-400 shrink-0 mt-0.5">
+              <Info className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="font-bold text-foreground text-xs mb-0.5">Entorno de evaluación de experiencia</p>
+              <p className="text-[11px] text-foreground/70">
+                Prueba las funcionalidades de la plataforma bajo la perspectiva de cada rol sin alterar los permisos ni los datos de tu cuenta administrativa.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Opción Estudiante */}
+          <div className="space-y-3.5">
+            {/* Opción 1: Vista Estudiante */}
             <div 
               onClick={() => {
                 setIsSimulationModalOpen(false);
                 startSimulation('estudiante');
                 navigate('/dashboard/estudiante');
               }}
-              className="p-5 rounded-2xl border border-card-border hover:border-[#1E3A8A] bg-card hover:bg-[#1E3A8A]/5 cursor-pointer transition-all flex items-center justify-between group shadow-sm"
+              className="group p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#15326C] dark:hover:border-blue-500/60 bg-card hover:bg-slate-50/80 dark:hover:bg-slate-800/40 cursor-pointer transition-all duration-200 shadow-sm flex items-center justify-between gap-4"
             >
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/40 text-[#15326C] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-foreground italic">Probar como Estudiante</h4>
-                  <p className="text-xs text-foreground/50">Visualizar módulos, realizar evaluaciones, ver historial de notas y perfil.</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-sm font-bold text-foreground">Vista Estudiante</h4>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50">
+                      Aprendizaje
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/60 leading-relaxed">
+                    Evaluaciones interactivas, catálogo de módulos, avance y notas.
+                  </p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-foreground/30 group-hover:text-[#1E3A8A] transition-colors" />
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-[#15326C] dark:group-hover:bg-blue-600 group-hover:text-white text-slate-400 flex items-center justify-center shrink-0 transition-colors">
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </div>
 
-            {/* Opción Docente con selector de línea */}
-            <div className="p-5 rounded-2xl border border-card-border bg-card space-y-4 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+            {/* Opción 2: Vista Docente */}
+            <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card space-y-4 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center shrink-0">
                   <Users className="w-6 h-6" />
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground italic">Probar como Docente</h4>
-                  <p className="text-xs text-foreground/50">Selecciona la línea de investigación para probar la gestión de sus OVAs:</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-sm font-bold text-foreground">Vista Docente</h4>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50">
+                      Línea Asignada
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/60 leading-relaxed">
+                    Carga y administración de Objetos Virtuales de Aprendizaje (OVAs) y actividades.
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2">
-                <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">
+              {/* Selector de Línea */}
+              <div className="space-y-1.5 pt-1">
+                <label className="block text-[10px] font-bold text-foreground/50 uppercase tracking-wider">
                   Línea de Conocimiento Asignada
                 </label>
-                <select
-                  value={simLinea}
-                  onChange={(e) => setSimLinea(e.target.value)}
-                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none italic font-semibold cursor-pointer"
-                >
-                  <option value="Robótica">Robótica</option>
-                  <option value="Ingeniería de Software">Ingeniería de Software</option>
-                  <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
-                  <option value="Redes y Telemática">Redes y Telemática</option>
-                  <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
-                  <option value="Ingeniería Informática">Ingeniería Informática</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={simLinea}
+                    onChange={(e) => setSimLinea(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 pl-3.5 pr-9 text-xs font-semibold text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none cursor-pointer appearance-none transition-colors"
+                  >
+                    <option value="Robótica">Robótica</option>
+                    <option value="Ingeniería de Software">Ingeniería de Software</option>
+                    <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
+                    <option value="Redes y Telemática">Redes y Telemática</option>
+                    <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+                    <option value="Ingeniería Informática">Ingeniería Informática</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-foreground/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
 
               <Button
@@ -1392,10 +1427,10 @@ export default function AdminDashboard() {
                   startSimulation('docente', simLinea);
                   navigate('/dashboard/docente');
                 }}
-                className="w-full gap-2 italic uppercase font-black text-xs py-3 bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none cursor-pointer"
+                className="w-full gap-2 font-semibold text-xs py-2.5 bg-[#15326C] hover:bg-[#1E40AF] text-white border-none rounded-xl cursor-pointer transition-all shadow-sm active:scale-98 flex items-center justify-center"
               >
-                <span>Ingresar como Docente ({simLinea})</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>Acceder como Docente ({simLinea})</span>
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
