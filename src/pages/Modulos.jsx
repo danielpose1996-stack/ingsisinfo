@@ -17,19 +17,25 @@ import {
   FileText, 
   Link as LinkIcon, 
   ArrowLeft, 
-  ArrowRight,
+  ArrowRight, 
   ExternalLink, 
-  Play,
-  Download,
-  Terminal,
-  Cpu,
-  Share2,
-  Database,
-  Lock,
-  ChevronRight,
-  FolderOpen,
-  X,
-  Globe
+  Play, 
+  Download, 
+  Terminal, 
+  Cpu, 
+  Share2, 
+  Database, 
+  Lock, 
+  ChevronRight, 
+  FolderOpen, 
+  X, 
+  Globe,
+  Code2,
+  BrainCircuit,
+  Network,
+  ShieldCheck,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 
 export default function Modulos() {
@@ -80,26 +86,54 @@ export default function Modulos() {
     fetchContenidos(module.id);
   };
 
-  const getModuleIcon = (slug) => {
-    const icons = {
-      'ingenieria-de-software': <Terminal className="w-10 h-10" />,
-      'robotica': <Cpu className="w-10 h-10" />,
-      'ingenieria-del-conocimiento': <Database className="w-10 h-10" />,
-      'redes-y-telematica': <Share2 className="w-10 h-10" />,
-      'gestion-de-la-seguridad-informatica': <Lock className="w-10 h-10" />
-    };
-    return icons[slug] || <BookOpen className="w-10 h-10" />;
-  };
+  const getModuleVisuals = (modulo) => {
+    const key = (modulo?.slug || modulo?.nombre || '')
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, '-');
 
-  const formatYoutubeUrl = (url) => {
-    if (!url) return '';
-    let embedUrl = url;
-    if (embedUrl.includes('youtube.com/watch?v=')) {
-      embedUrl = embedUrl.replace('watch?v=', 'embed/');
-    } else if (embedUrl.includes('youtu.be/')) {
-      embedUrl = embedUrl.replace('youtu.be/', 'youtube.com/embed/');
+    if (key.includes('software') || key.includes('programacion') || key.includes('codigo')) {
+      return {
+        icon: <Code2 className="w-8 h-8" />,
+        badgeText: 'Software & Cloud',
+        bgLight: 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-900/40'
+      };
     }
-    return embedUrl;
+    if (key.includes('robotica') || key.includes('hardware') || key.includes('sensores')) {
+      return {
+        icon: <Cpu className="w-8 h-8" />,
+        badgeText: 'Robótica & IoT',
+        bgLight: 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-900/40'
+      };
+    }
+    if (key.includes('conocimiento') || key.includes('ia') || key.includes('datos') || key.includes('inteligencia')) {
+      return {
+        icon: <BrainCircuit className="w-8 h-8" />,
+        badgeText: 'IA & Big Data',
+        bgLight: 'bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border-purple-200/60 dark:border-purple-900/40'
+      };
+    }
+    if (key.includes('redes') || key.includes('telematica') || key.includes('comunicacion')) {
+      return {
+        icon: <Network className="w-8 h-8" />,
+        badgeText: 'Redes & Protocolos',
+        bgLight: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-900/40'
+      };
+    }
+    if (key.includes('seguridad') || key.includes('ciberseguridad') || key.includes('auditoria')) {
+      return {
+        icon: <ShieldCheck className="w-8 h-8" />,
+        badgeText: 'Ciberseguridad',
+        bgLight: 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-900/40'
+      };
+    }
+
+    return {
+      icon: <BookOpen className="w-8 h-8" />,
+      badgeText: 'Especialidad',
+      bgLight: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+    };
   };
 
   const handleQuizComplete = async (score, percentage, passed) => {
@@ -152,7 +186,7 @@ export default function Modulos() {
               <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">
                 Líneas de <span className="text-[#10346E]">Aprendizaje</span>
               </h1>
-              <p className="text-foreground/60 text-lg leading-relaxed">
+              <p className="text-foreground/60 text-base sm:text-lg leading-relaxed">
                 Explora los módulos de profundización y Objetos Virtuales de Aprendizaje desarrollados por el semillero.
               </p>
             </div>
@@ -161,43 +195,46 @@ export default function Modulos() {
               {loading ? (
                 [1,2,3,4,5].map(i => <div key={i} className="h-64 rounded-3xl bg-card animate-pulse" />)
               ) : (
-                modulos.map((modulo, index) => (
-                  <GlassCard 
-                    key={modulo.id}
-                    hover
-                    className="flex flex-col justify-between p-8 border-card-border/60 hover:border-[#10346E]/30 transition-all duration-300 group cursor-pointer"
-                    onClick={() => handleModuleClick(modulo)}
-                  >
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-400 group-hover:scale-110 group-hover:bg-[#10346E] group-hover:text-white transition-all duration-300">
-                          {getModuleIcon(modulo.slug)}
+                modulos.map((modulo, index) => {
+                  const visuals = getModuleVisuals(modulo);
+                  return (
+                    <GlassCard 
+                      key={modulo.id}
+                      hover
+                      className="flex flex-col justify-between p-8 border-card-border/60 hover:border-[#10346E]/40 transition-all duration-300 group cursor-pointer"
+                      onClick={() => handleModuleClick(modulo)}
+                    >
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div className={`p-4 rounded-2xl border transition-all duration-300 group-hover:scale-105 ${visuals.bgLight}`}>
+                            {visuals.icon}
+                          </div>
+                          <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground/70 border border-card-border">
+                            {visuals.badgeText}
+                          </span>
                         </div>
-                        <Badge variant="blue" size="sm" className="font-mono">
-                          MOD-0{index + 1}
-                        </Badge>
+
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-black text-foreground group-hover:text-[#10346E] dark:group-hover:text-blue-400 transition-colors">
+                            {modulo.nombre}
+                          </h3>
+                          <p className="text-foreground/60 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                            {modulo.descripcion || 'Módulo especializado de formación técnica y proyectos de investigación.'}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-foreground group-hover:text-[#10346E] dark:group-hover:text-blue-400 transition-colors">
-                          {modulo.nombre}
-                        </h3>
-                        <p className="text-foreground/60 text-sm line-clamp-3 leading-relaxed">
-                          {modulo.descripcion || 'Módulo especializado de formación técnica y proyectos de investigación.'}
-                        </p>
+                      <div className="pt-6 mt-6 border-t border-card-border/40 flex items-center justify-between">
+                        <span className="text-xs font-bold text-foreground/50 group-hover:text-foreground/80 transition-colors">
+                          Explorar contenidos
+                        </span>
+                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-foreground/40 group-hover:bg-[#10346E] group-hover:text-white transition-all">
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="pt-6 mt-6 border-t border-card-border/40 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-foreground/40 group-hover:text-foreground/70 transition-colors">
-                        Explorar contenidos
-                      </span>
-                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-foreground/40 group-hover:bg-[#10346E] group-hover:text-white transition-all">
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))
+                    </GlassCard>
+                  );
+                })
               )}
             </div>
           </motion.div>
@@ -216,18 +253,28 @@ export default function Modulos() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => setSelectedModule(null)}
-                  className="rounded-xl border-card-border hover:bg-card text-foreground"
+                  className="rounded-xl border-card-border hover:bg-card text-foreground cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Volver a líneas
                 </Button>
-                <div>
-                  <h2 className="text-2xl font-black text-foreground">
-                    {selectedModule.nombre}
-                  </h2>
-                  <p className="text-xs text-foreground/50">
-                    Objetos Virtuales de Aprendizaje y Cursos de la Línea
-                  </p>
+                <div className="flex items-center gap-3.5">
+                  <div className={`p-2.5 rounded-2xl border ${getModuleVisuals(selectedModule).bgLight}`}>
+                    {React.cloneElement(getModuleVisuals(selectedModule).icon, { className: 'w-6 h-6' })}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-2xl font-black text-foreground">
+                        {selectedModule.nombre}
+                      </h2>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-foreground/60 border border-card-border">
+                        {getModuleVisuals(selectedModule).badgeText}
+                      </span>
+                    </div>
+                    <p className="text-xs text-foreground/50">
+                      Objetos Virtuales de Aprendizaje y Cursos de la Línea
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

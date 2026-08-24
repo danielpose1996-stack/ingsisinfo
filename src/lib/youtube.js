@@ -1,58 +1,76 @@
 /**
- * Utilidades para procesamiento, validación y embebido seguro de videos de YouTube.
+ * Utilidades para procesamiento, validación y embebido seguro y compatible de videos de YouTube.
  */
 
 /**
- * Extrae el ID del video de YouTube a partir de una URL estándar, corta, shorts o código <iframe>.
+ * Extrae el ID del video de YouTube a partir de cualquier enlace estándar, corto, shorts, live o código <iframe>.
  * @param {string} input - Enlace o código iframe de YouTube.
- * @returns {string|null} - ID del video (11 caracteres) o null si no es válido.
+ * @returns {string|null} - ID limpio del video (11 caracteres) o null si no es válido.
  */
 export function extractYouTubeId(input) {
   if (!input || typeof input !== 'string') return null;
 
-  const trimmed = input.trim();
+  let text = input.trim();
 
-  // 1. Si es un <iframe>, extraer el atributo src
-  if (trimmed.startsWith('<iframe') || trimmed.includes('<iframe')) {
-    const srcMatch = trimmed.match(/src=["']([^"']+)["']/i);
+  // 1. Si es un <iframe>, extraer el valor del atributo src
+  if (text.includes('<iframe') || text.includes('src=')) {
+    const srcMatch = text.match(/src=["']([^"']+)["']/i);
     if (srcMatch && srcMatch[1]) {
-      return extractYouTubeId(srcMatch[1]);
+      text = srcMatch[1].trim();
     }
   }
 
-  // 2. Patrones comunes de URL de YouTube
-  // - https://www.youtube.com/watch?v=VIDEO_ID
-  // - https://youtu.be/VIDEO_ID
-  // - https://www.youtube.com/embed/VIDEO_ID
-  // - https://www.youtube.com/v/VIDEO_ID
-  // - https://www.youtube.com/shorts/VIDEO_ID
-  // - https://m.youtube.com/watch?v=VIDEO_ID
+  // 2. Si es una URL o ID directa, decodificar entidades HTML si existen
+  text = text.replace(/&amp;/g, '&');
+
+  // Si el usuario ingresó directamente el ID de 11 caracteres alfanumérico
+  if (/^[a-zA-Z0-9_-]{11}$/.test(text)) {
+    return text;
+  }
+
+  // 3. Patrones de extracción robustos
   const patterns = [
-    /(?:https?:\/\/)?(?:www\.|m\.)?youtube\.com\/watch\?(?:.*&)?v=([a-zA-Z0-9_-]{11})/i,
-    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/i,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/i,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/i,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/i,
-    /^[a-zA-Z0-9_-]{11}$/ // Si el usuario ingresó directamente el ID
+    /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/|youtube-nocookie\.com\/embed\/)([a-zA-Z0-9_-]{11})/i,
+    /^[a-zA-Z0-9_-]{11}$/
   ];
 
   for (const pattern of patterns) {
-    const match = trimmed.match(pattern);
+    const match = text.match(pattern);
     if (match && match[1]) {
       return match[1];
     }
-    if (pattern.test(trimmed) && trimmed.length === 11) {
-      return trimmed;
+  }
+
+  // Fallback con URL parser estándar si es una URL válida
+  try {
+    const urlObj = new URL(text.startsWith('http') ? text : `https://${text}`);
+    if (urlObj.hostname.includes('youtube.com')) {
+      const v = urlObj.searchParams.get('v');
+      if (v && v.length === 11) return v;
+      
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart.length === 11) return lastPart;
+      }
+    } else if (urlObj.hostname.includes('youtu.be')) {
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0 && pathParts[0].length === 11) {
+        return pathParts[0];
+      }
     }
+  } catch {
+    // Si no es URL válida, ignorar
   }
 
   return null;
 }
 
 /**
- * Genera la URL segura para el iframe embebido de YouTube.
+ * Genera la URL segura y 100% compatible para el iframe embebido de YouTube.
+ * Evita parámetros como 'origin' o 'enablejsapi' que causan bloqueos de seguridad en navegadores y YouTube CSP.
  * @param {string} videoIdOrUrl - ID o URL del video.
- * @param {object} options - Opciones de reproducción (autoplay, rel, etc.).
+ * @param {object} options - Opciones de reproducción (autoplay, rel, start).
  * @returns {string} - URL lista para el atributo src del iframe.
  */
 export function getYouTubeEmbedUrl(videoIdOrUrl, options = {}) {
@@ -62,19 +80,16 @@ export function getYouTubeEmbedUrl(videoIdOrUrl, options = {}) {
   const {
     autoplay = 0,
     rel = 0,
-    modestbranding = 1,
-    enablejsapi = 1
+    start = 0
   } = options;
 
-  const params = new URLSearchParams({
-    autoplay: autoplay.toString(),
-    rel: rel.toString(),
-    modestbranding: modestbranding.toString(),
-    enablejsapi: enablejsapi.toString(),
-    origin: typeof window !== 'undefined' ? window.location.origin : ''
-  });
+  const params = new URLSearchParams();
+  if (autoplay) params.set('autoplay', '1');
+  if (rel === 0) params.set('rel', '0');
+  if (start > 0) params.set('start', start.toString());
 
-  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+  const queryString = params.toString();
+  return `https://www.youtube.com/embed/${videoId}${queryString ? `?${queryString}` : ''}`;
 }
 
 /**

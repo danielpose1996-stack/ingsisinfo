@@ -385,20 +385,75 @@ export default function OvaEditor({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Selector de Modalidad */}
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="block text-xs font-semibold text-foreground/70">
-                  Modalidad de Contenido *
+              {/* Selector de Modalidad Profesional */}
+              <div className="space-y-2.5 md:col-span-2">
+                <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
+                  Modalidad de Contenido Académico *
                 </label>
-                <select
-                  value={ovaForm.tipo || 'manual'}
-                  onChange={(e) => handleTypeChange(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-3 px-4 text-xs font-semibold text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors cursor-pointer"
-                >
-                  <option value="manual">📘 Constructor Interactivo (Texto, Multimedia y Quizzes)</option>
-                  <option value="curso">🎓 Curso Estructurado (Secciones, Lecciones en Video de YouTube y Quizzes)</option>
-                  <option value="html">🌐 Paquete Web HTML5 (Archivo interactivo .html empaquetado)</option>
-                </select>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  {[
+                    {
+                      id: 'manual',
+                      title: 'Constructor Interactivo',
+                      badge: 'Manual',
+                      subtitle: 'Lectura estructurada, multimedia y quiz integrador',
+                      icon: BookOpen,
+                      color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border-blue-200/50 dark:border-blue-900/40'
+                    },
+                    {
+                      id: 'curso',
+                      title: 'Curso en Video',
+                      badge: 'YouTube',
+                      subtitle: 'Secciones temáticas, lecciones en video y autoevaluación',
+                      icon: Video,
+                      color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200/50 dark:border-indigo-900/40'
+                    },
+                    {
+                      id: 'html',
+                      title: 'Paquete Web HTML5',
+                      badge: 'ZIP / HTML',
+                      subtitle: 'Contenido interactivo empaquetado (.html)',
+                      icon: Globe,
+                      color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200/50 dark:border-emerald-900/40'
+                    }
+                  ].map((opt) => {
+                    const isSelected = (ovaForm.tipo || 'manual') === opt.id;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleTypeChange(opt.id)}
+                        className={`p-4 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between gap-3 cursor-pointer group relative ${
+                          isSelected
+                            ? 'bg-card border-[#10346E] dark:border-blue-500 shadow-md ring-2 ring-[#10346E]/20 dark:ring-blue-500/20'
+                            : 'bg-slate-50/60 dark:bg-slate-900/40 border-card-border hover:border-slate-300 dark:hover:border-slate-700 hover:bg-card'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className={`p-2.5 rounded-xl border ${opt.color} group-hover:scale-105 transition-transform`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                            isSelected
+                              ? 'bg-[#10346E] text-white border-[#10346E]'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-card-border'
+                          }`}>
+                            {opt.badge}
+                          </span>
+                        </div>
+                        <div>
+                          <h5 className={`text-xs font-black tracking-tight ${isSelected ? 'text-foreground font-black' : 'text-foreground/80 font-bold'}`}>
+                            {opt.title}
+                          </h5>
+                          <p className="text-[11px] text-foreground/50 leading-snug mt-1">
+                            {opt.subtitle}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Título */}

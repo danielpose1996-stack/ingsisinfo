@@ -296,10 +296,11 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
                     {currentItem.data?.video_url ? (
                       <iframe
-                        src={getYouTubeEmbedUrl(currentItem.data.video_url, { autoplay: 0 })}
+                        src={getYouTubeEmbedUrl(currentItem.data?.video_url, { autoplay: 0 })}
                         title={currentItem.title}
                         className="w-full h-full border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                       />
                     ) : (
