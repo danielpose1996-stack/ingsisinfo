@@ -11,7 +11,8 @@ import {
   Layers,
   FileCode,
   Calendar,
-  Sparkles
+  Sparkles,
+  Video
 } from 'lucide-react';
 
 export default function OvaManagerView({ modulo }) {
@@ -120,7 +121,17 @@ export default function OvaManagerView({ modulo }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {ovas.map((ova) => {
             const isHtml = ova.tipo === 'html';
+            const isCurso = ova.tipo === 'curso';
             const isPublished = ova.estado === 'publicado';
+
+            let lessonCount = 0;
+            let sectionCount = 0;
+            if (isCurso && ova.contenido) {
+              const data = typeof ova.contenido === 'object' ? ova.contenido : {};
+              const secs = data.secciones || (Array.isArray(ova.contenido) ? ova.contenido : []);
+              sectionCount = secs.length;
+              lessonCount = secs.reduce((acc, s) => acc + (s.lecciones?.length || 0), 0);
+            }
 
             return (
               <div
@@ -143,8 +154,22 @@ export default function OvaManagerView({ modulo }) {
                       </span>
 
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 dark:bg-slate-900 text-slate-500 border border-card-border">
-                        {isHtml ? <FileCode className="w-3 h-3 text-blue-500" /> : <Layers className="w-3 h-3 text-indigo-500" />}
-                        <span>{isHtml ? 'HTML5' : 'Manual'}</span>
+                        {isCurso ? (
+                          <>
+                            <Video className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                            <span className="text-blue-600 dark:text-blue-400 font-semibold">Curso</span>
+                          </>
+                        ) : isHtml ? (
+                          <>
+                            <FileCode className="w-3 h-3 text-blue-500" />
+                            <span>HTML5</span>
+                          </>
+                        ) : (
+                          <>
+                            <Layers className="w-3 h-3 text-indigo-500" />
+                            <span>Manual</span>
+                          </>
+                        )}
                       </span>
                     </div>
 
@@ -197,7 +222,11 @@ export default function OvaManagerView({ modulo }) {
                     <span>{new Date(ova.updated_at || Date.now()).toLocaleDateString()}</span>
                   </span>
                   <span className="font-medium">
-                    {isHtml ? 'Paquete Web' : `${ova.contenido?.length || 0} secciones`}
+                    {isCurso
+                      ? `${lessonCount} ${lessonCount === 1 ? 'lección' : 'lecciones'}`
+                      : isHtml
+                      ? 'Paquete Web'
+                      : `${ova.contenido?.length || 0} secciones`}
                   </span>
                 </div>
               </div>

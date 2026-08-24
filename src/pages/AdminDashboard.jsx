@@ -984,7 +984,14 @@ export default function AdminDashboard() {
                                 </div>
                               </td>
                               <td className="px-6 py-5">
-                                <p className="text-sm font-bold text-foreground italic leading-tight">{s.ova?.titulo}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="text-sm font-bold text-foreground italic leading-tight">{s.ova?.titulo}</p>
+                                  {s.ova?.tipo === 'curso' && (
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                      Curso
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-[10px] text-[#1E3A8A]/50 font-black uppercase tracking-widest italic">{s.ova?.modulos?.nombre}</p>
                               </td>
                               <td className="px-6 py-5 text-center">

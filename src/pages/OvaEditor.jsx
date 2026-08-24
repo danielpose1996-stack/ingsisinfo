@@ -16,8 +16,8 @@ import {
 import ContentBlock from '../components/ContentBlock';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizBuilder from '../components/QuizBuilder';
+import CourseStructureEditor from '../components/CourseStructureEditor';
 import Button from '../components/Button';
-import GlassCard from '../components/GlassCard';
 import { toast } from 'react-hot-toast';
 import {
   ArrowLeft,
@@ -35,13 +35,10 @@ import {
   EyeOff,
   Layers,
   FileText,
-  Target,
   Award,
   Loader2,
   FileCode,
-  CheckCircle2,
-  Sparkles,
-  HelpCircle
+  Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -62,17 +59,19 @@ export default function OvaEditor({
   const sectionRefs = useRef({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Generar IDs únicos para las secciones si no cuentan con uno
+  // Generar IDs únicos para las secciones si no cuentan con uno en modo manual
   useEffect(() => {
-    const needsIds = ovaForm.contenido?.some((s, i) => !s._id);
-    if (needsIds) {
-      setOvaForm({
-        ...ovaForm,
-        contenido: ovaForm.contenido.map((s, i) => ({
-          ...s,
-          _id: s._id || `section-${Date.now()}-${i}`,
-        })),
-      });
+    if (ovaForm.tipo === 'manual' && Array.isArray(ovaForm.contenido)) {
+      const needsIds = ovaForm.contenido?.some((s, i) => !s._id);
+      if (needsIds) {
+        setOvaForm({
+          ...ovaForm,
+          contenido: ovaForm.contenido.map((s, i) => ({
+            ...s,
+            _id: s._id || `section-${Date.now()}-${i}`,
+          })),
+        });
+      }
     }
   }, []);
 
@@ -83,7 +82,7 @@ export default function OvaEditor({
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
+    if (active.id !== over?.id && Array.isArray(ovaForm.contenido)) {
       const oldIndex = ovaForm.contenido.findIndex(s => s._id === active.id);
       const newIndex = ovaForm.contenido.findIndex(s => s._id === over.id);
       const newContenido = arrayMove(ovaForm.contenido, oldIndex, newIndex);
@@ -101,7 +100,7 @@ export default function OvaEditor({
     };
     setOvaForm({
       ...ovaForm,
-      contenido: [...(ovaForm.contenido || []), newSection],
+      contenido: [...(Array.isArray(ovaForm.contenido) ? ovaForm.contenido : []), newSection],
     });
     setTimeout(() => {
       const el = document.getElementById(`section-${ovaForm.contenido?.length || 0}`);
@@ -110,13 +109,13 @@ export default function OvaEditor({
   };
 
   const handleUpdateSection = (index, updatedSection) => {
-    const newContenido = [...ovaForm.contenido];
+    const newContenido = [...(Array.isArray(ovaForm.contenido) ? ovaForm.contenido : [])];
     newContenido[index] = updatedSection;
     setOvaForm({ ...ovaForm, contenido: newContenido });
   };
 
   const handleRemoveSection = (index) => {
-    if (ovaForm.contenido.length <= 1) {
+    if (!Array.isArray(ovaForm.contenido) || ovaForm.contenido.length <= 1) {
       toast.error('El OVA debe tener al menos una sección de contenido.');
       return;
     }
@@ -143,19 +142,66 @@ export default function OvaEditor({
   };
 
   const isHtml = ovaForm.tipo === 'html';
+  const isCurso = ovaForm.tipo === 'curso';
+
+  const courseSections = isCurso
+    ? (ovaForm.contenido?.secciones || (Array.isArray(ovaForm.contenido) ? ovaForm.contenido : []))
+    : [];
 
   const sidebarSections = isHtml
     ? [
         { id: 'datos-generales', label: 'Datos Generales', icon: FileText },
         { id: 'paquete-html', label: 'Paquete Web HTML5', icon: FileCode },
       ]
+    : isCurso
+    ? [
+        { id: 'datos-generales', label: 'Datos Generales', icon: FileText },
+        { id: 'estructura-curso', label: `Estructura (${courseSections.length} secciones)`, icon: Video },
+      ]
     : [
         { id: 'datos-generales', label: 'Datos Generales', icon: FileText },
         { id: 'introduccion', label: 'Introducción', icon: BookOpen },
-        { id: 'secciones', label: `Secciones (${ovaForm.contenido?.length || 0})`, icon: Layers },
+        { id: 'secciones', label: `Secciones (${Array.isArray(ovaForm.contenido) ? ovaForm.contenido.length : 0})`, icon: Layers },
         { id: 'recursos', label: 'Material de Apoyo', icon: FileDown },
         { id: 'evaluacion', label: 'Evaluación Quiz', icon: Award },
       ];
+
+  const handleTypeChange = (newType) => {
+    let newContenido = ovaForm.contenido;
+    if (newType === 'curso') {
+      if (!newContenido?.secciones && (!Array.isArray(newContenido) || newContenido.length === 0 || !newContenido[0]?.lecciones)) {
+        newContenido = {
+          secciones: [
+            {
+              id: `sec-${Date.now()}-1`,
+              titulo: 'Sección 1: Introducción y Fundamentos',
+              descripcion: 'Módulo inicial del curso',
+              orden: 0,
+              lecciones: [
+                {
+                  id: `lec-${Date.now()}-1`,
+                  titulo: 'Lección 1: Bienvenida al Curso',
+                  descripcion: '',
+                  video_url: '',
+                  duracion: '10 min',
+                  notas: '',
+                  recursos: [],
+                  quiz: { activo: false, preguntas: [] }
+                }
+              ],
+              quiz: { activo: false, preguntas: [] }
+            }
+          ],
+          quiz_final: { activo: false, preguntas: [] }
+        };
+      }
+    } else if (newType === 'manual') {
+      if (!Array.isArray(newContenido) || newContenido[0]?.lecciones) {
+        newContenido = [{ _id: `section-${Date.now()}-0`, titulo: '', contenido: '', recurso_url: '', tipo: 'texto' }];
+      }
+    }
+    setOvaForm({ ...ovaForm, tipo: newType, contenido: newContenido });
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 min-h-[80vh]">
@@ -177,7 +223,7 @@ export default function OvaEditor({
               </button>
               <div>
                 <h3 className="text-sm font-bold text-foreground">
-                  {editingOva ? 'Editar OVA' : 'Nuevo OVA'}
+                  {editingOva ? (isCurso ? 'Editar Curso' : 'Editar OVA') : (isCurso ? 'Nuevo Curso' : 'Nuevo OVA')}
                 </h3>
                 <p className="text-[11px] text-foreground/50">Constructor de Contenido</p>
               </div>
@@ -244,12 +290,12 @@ export default function OvaEditor({
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Guardando OVA...</span>
+                <span>Guardando...</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>Guardar OVA</span>
+                <span>{isCurso ? 'Guardar Curso' : 'Guardar OVA'}</span>
               </>
             )}
           </Button>
@@ -314,7 +360,7 @@ export default function OvaEditor({
               <ArrowLeft className="w-4 h-4" />
             </button>
             <h3 className="text-sm font-bold text-foreground">
-              {editingOva ? 'Editar OVA' : 'Nuevo OVA'}
+              {editingOva ? (isCurso ? 'Editar Curso' : 'Editar OVA') : (isCurso ? 'Nuevo Curso' : 'Nuevo OVA')}
             </h3>
           </div>
           <Button onClick={handleSave} disabled={isSaving} size="sm" className="gap-1.5 text-xs bg-[#15326C] text-white">
@@ -333,35 +379,36 @@ export default function OvaEditor({
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">Datos Generales</h4>
-                  <p className="text-[11px] text-foreground/50">Configuración básica e información del curso</p>
+                  <p className="text-[11px] text-foreground/50">Configuración básica e información del contenido</p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Tipo de OVA */}
+              {/* Selector de Modalidad */}
               <div className="space-y-1.5 md:col-span-2">
                 <label className="block text-xs font-semibold text-foreground/70">
                   Modalidad de Contenido *
                 </label>
                 <select
                   value={ovaForm.tipo || 'manual'}
-                  onChange={(e) => setOvaForm({ ...ovaForm, tipo: e.target.value })}
+                  onChange={(e) => handleTypeChange(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-3 px-4 text-xs font-semibold text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors cursor-pointer"
                 >
-                  <option value="manual">Constructor Interactivo (Texto, Multimedia y Quizzes)</option>
-                  <option value="html">Paquete Web HTML5 (Archivo interactivo .html empaquetado)</option>
+                  <option value="manual">📘 Constructor Interactivo (Texto, Multimedia y Quizzes)</option>
+                  <option value="curso">🎓 Curso Estructurado (Secciones, Lecciones en Video de YouTube y Quizzes)</option>
+                  <option value="html">🌐 Paquete Web HTML5 (Archivo interactivo .html empaquetado)</option>
                 </select>
               </div>
 
               {/* Título */}
               <div className="space-y-1.5 md:col-span-2">
                 <label className="block text-xs font-semibold text-foreground/70">
-                  Título del OVA *
+                  {isCurso ? 'Título del Curso *' : 'Título del OVA *'}
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej: Fundamentos de Robótica Móvil y Sensores"
+                  placeholder={isCurso ? "Ej: Curso Completo de Redes de Computadoras y Enrutamiento" : "Ej: Fundamentos de Robótica Móvil y Sensores"}
                   value={ovaForm.titulo || ''}
                   onChange={(e) => setOvaForm({ ...ovaForm, titulo: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-3 px-4 text-sm font-bold text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors"
@@ -372,13 +419,13 @@ export default function OvaEditor({
               {!isHtml && (
                 <div className="space-y-1.5 md:col-span-2">
                   <label className="block text-xs font-semibold text-foreground/70">
-                    Objetivo Pedagógico *
+                    Objetivo Pedagógico {isCurso ? '(Opcional)' : '*'}
                   </label>
                   <textarea
-                    placeholder="Describe las competencias y aprendizajes que el estudiante adquirirá..."
+                    placeholder="Describe las competencias y aprendizajes que el estudiante adquirirá al finalizar..."
                     value={ovaForm.objetivo || ''}
                     onChange={(e) => setOvaForm({ ...ovaForm, objetivo: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-3 px-4 text-xs text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors h-24 resize-none leading-relaxed"
+                    className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-3 px-4 text-xs text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors h-20 resize-none leading-relaxed"
                   />
                 </div>
               )}
@@ -432,7 +479,7 @@ export default function OvaEditor({
                 </label>
                 <input
                   type="text"
-                  placeholder="Resumen ejecutivo del contenido y alcance del OVA..."
+                  placeholder="Resumen ejecutivo del contenido y alcance pedagógico..."
                   value={ovaForm.descripcion || ''}
                   onChange={(e) => setOvaForm({ ...ovaForm, descripcion: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs text-foreground focus:border-[#15326C] dark:focus:border-blue-500 outline-none transition-colors"
@@ -442,7 +489,23 @@ export default function OvaEditor({
           </div>
         </section>
 
-        {/* ─── 2. PAQUETE HTML (SI EL TIPO ES HTML) ─── */}
+        {/* ─── 2. MODALIDAD CURSO: GESTOR DE SECCIONES Y VIDEOS ─── */}
+        {isCurso && (
+          <section id="estructura-curso" className="scroll-mt-24">
+            <CourseStructureEditor
+              courseData={
+                typeof ovaForm.contenido === 'object' && !Array.isArray(ovaForm.contenido)
+                  ? ovaForm.contenido
+                  : { secciones: Array.isArray(ovaForm.contenido) ? ovaForm.contenido : [], quiz_final: { activo: false, preguntas: [] } }
+              }
+              onChange={(newCourseData) => setOvaForm({ ...ovaForm, contenido: newCourseData })}
+              onFileUpload={onFileUpload}
+              uploadingFiles={uploadingFiles}
+            />
+          </section>
+        )}
+
+        {/* ─── 3. MODALIDAD HTML: PAQUETE WEB ─── */}
         {isHtml && (
           <section id="paquete-html" className="scroll-mt-24">
             <div className="bg-card border border-card-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
@@ -499,12 +562,6 @@ export default function OvaEditor({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {ovaForm.archivo_html_url && ovaForm.archivo_html_url.includes('documentos-proyectos') && (
-                    <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 text-xs flex items-center gap-3">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>El archivo HTML previo no está disponible. Por favor adjunta el archivo <strong>.html</strong> a continuación.</span>
-                    </div>
-                  )}
                   <label className="flex flex-col items-center justify-center gap-3 w-full h-40 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-[#15326C] dark:hover:border-blue-500/50 bg-slate-50/40 dark:bg-slate-900/20 cursor-pointer transition-all group">
                     <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-[#15326C] dark:group-hover:text-blue-400 group-hover:scale-105 transition-all">
                       <FileDown className="w-6 h-6" />
@@ -523,8 +580,8 @@ export default function OvaEditor({
           </section>
         )}
 
-        {/* ─── 3. INTRODUCCIÓN (SI ES MANUAL) ─── */}
-        {!isHtml && (
+        {/* ─── 4. INTRODUCCIÓN (SOLO SI ES MANUAL) ─── */}
+        {!isHtml && !isCurso && (
           <section id="introduccion" className="scroll-mt-24">
             <div className="bg-card border border-card-border rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
               <div className="flex items-center gap-2.5 pb-3 border-b border-card-border">
@@ -546,8 +603,8 @@ export default function OvaEditor({
           </section>
         )}
 
-        {/* ─── 4. ESTRUCTURA DE CONTENIDO DINÁMICO (SI ES MANUAL) ─── */}
-        {!isHtml && (
+        {/* ─── 5. ESTRUCTURA DE CONTENIDO DINÁMICO (SOLO SI ES MANUAL) ─── */}
+        {!isHtml && !isCurso && (
           <section id="secciones" className="scroll-mt-24 space-y-4">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
@@ -555,7 +612,7 @@ export default function OvaEditor({
                   <Layers className="w-4 h-4" />
                 </div>
                 <h4 className="text-sm font-bold text-foreground">
-                  Secciones de Contenido ({ovaForm.contenido?.length || 0})
+                  Secciones de Contenido ({Array.isArray(ovaForm.contenido) ? ovaForm.contenido.length : 0})
                 </h4>
               </div>
               <button
@@ -574,12 +631,12 @@ export default function OvaEditor({
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={(ovaForm.contenido || []).map(s => s._id)}
+                items={(Array.isArray(ovaForm.contenido) ? ovaForm.contenido : []).map(s => s._id)}
                 verticalListSortingStrategy={verticalListSortingStrategy}
               >
                 <div className="space-y-4">
                   <AnimatePresence>
-                    {(ovaForm.contenido || []).map((section, idx) => (
+                    {(Array.isArray(ovaForm.contenido) ? ovaForm.contenido : []).map((section, idx) => (
                       <motion.div
                         key={section._id}
                         id={`section-${idx}`}
@@ -616,8 +673,8 @@ export default function OvaEditor({
           </section>
         )}
 
-        {/* ─── 5. MATERIAL COMPLEMENTARIO (SI ES MANUAL) ─── */}
-        {!isHtml && (
+        {/* ─── 6. MATERIAL COMPLEMENTARIO (SOLO SI ES MANUAL) ─── */}
+        {!isHtml && !isCurso && (
           <section id="recursos" className="scroll-mt-24">
             <div className="bg-card border border-card-border rounded-2xl p-6 sm:p-8 space-y-5 shadow-sm">
               <div className="flex items-center gap-2.5 pb-3 border-b border-card-border">
@@ -697,8 +754,8 @@ export default function OvaEditor({
           </section>
         )}
 
-        {/* ─── 6. EVALUACIÓN FINAL QUIZ (SI ES MANUAL) ─── */}
-        {!isHtml && (
+        {/* ─── 7. EVALUACIÓN FINAL QUIZ (SOLO SI ES MANUAL) ─── */}
+        {!isHtml && !isCurso && (
           <section id="evaluacion" className="scroll-mt-24">
             <div className="bg-card border border-card-border rounded-2xl p-6 sm:p-8 space-y-5 shadow-sm">
               <div className="flex items-center justify-between pb-3 border-b border-card-border">
@@ -735,7 +792,7 @@ export default function OvaEditor({
             className="flex-1 py-3 text-xs font-bold bg-[#15326C] text-white"
           >
             <Save className="w-4 h-4" />
-            <span>{isSaving ? 'Guardando...' : 'Guardar OVA'}</span>
+            <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
           </Button>
         </div>
       </main>

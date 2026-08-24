@@ -264,18 +264,25 @@ export default function StudentDashboard() {
                   <div className="space-y-4">
                     {/* Badge de Línea y Estado */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-100 dark:border-blue-900/50 line-clamp-1">
-                        {moduloNombre}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-100 dark:border-blue-900/50 truncate">
+                          {moduloNombre}
+                        </span>
+                        {ova?.tipo === 'curso' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+                            Curso
+                          </span>
+                        )}
+                      </div>
 
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                           res.completado
                             ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60'
                             : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60'
                         }`}
                       >
-                        {res.completado ? 'Aprobado' : 'En Progreso'}
+                        {res.completado ? (ova?.tipo === 'curso' ? 'Curso Completado' : 'Aprobado') : 'En Progreso'}
                       </span>
                     </div>
 

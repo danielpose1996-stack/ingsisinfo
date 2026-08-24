@@ -150,15 +150,37 @@ export function useOvaManager(moduloId) {
         evaluacion.instrucciones = ova.actividad_final;
       }
     }
+
+    let parsedContenido = ova.contenido;
+    if (ova.tipo === 'curso') {
+      if (typeof parsedContenido === 'string') {
+        try {
+          parsedContenido = JSON.parse(parsedContenido);
+        } catch {
+          parsedContenido = { secciones: [], quiz_final: { activo: false, preguntas: [] } };
+        }
+      }
+      if (Array.isArray(parsedContenido)) {
+        parsedContenido = { secciones: parsedContenido, quiz_final: { activo: false, preguntas: [] } };
+      }
+      if (!parsedContenido?.secciones) {
+        parsedContenido = { secciones: [], quiz_final: { activo: false, preguntas: [] } };
+      }
+    } else if (Array.isArray(parsedContenido)) {
+      parsedContenido = parsedContenido.map((s, i) => ({
+        ...s,
+        _id: s._id || `section-${Date.now()}-${i}`,
+        tipo: s.tipo || 'texto'
+      }));
+    } else {
+      parsedContenido = [{ _id: `section-${Date.now()}-0`, titulo: '', contenido: '', recurso_url: '', tipo: 'texto' }];
+    }
+
     setOvaForm({
       ...ova,
       tipo: ova.tipo || 'manual',
       archivo_html_url: ova.archivo_html_url || '',
-      contenido: (ova.contenido || []).map((s, i) => ({
-        ...s,
-        _id: s._id || `section-${Date.now()}-${i}`,
-        tipo: s.tipo || 'texto'
-      })),
+      contenido: parsedContenido,
       recursos: ova.recursos || { pdf_url: '', youtube_url: '', link_externo: '' },
       evaluacion
     });
@@ -171,22 +193,64 @@ export function useOvaManager(moduloId) {
       toast.error('El título es obligatorio.');
       return;
     }
+
     if (ovaForm.tipo === 'html') {
       if (!ovaForm.archivo_html_url || ovaForm.archivo_html_url.includes('documentos-proyectos')) {
         toast.error('Debe subir un archivo HTML (.html) válido para este OVA.');
         return;
       }
-    }
-    if (ovaForm.tipo !== 'html' && (!ovaForm.objetivo || ovaForm.contenido?.length === 0)) {
+    } else if (ovaForm.tipo === 'curso') {
+      const courseSections = ovaForm.contenido?.secciones || (Array.isArray(ovaForm.contenido) ? ovaForm.contenido : []);
+      if (!courseSections || courseSections.length === 0) {
+        toast.error('El curso debe tener al menos una sección configurada.');
+        return;
+      }
+      const hasLessons = courseSections.some(s => s.lecciones && s.lecciones.length > 0);
+      if (!hasLessons) {
+        toast.error('Cada sección del curso debe tener al menos una lección en video.');
+        return;
+      }
+    } else if (!ovaForm.objetivo || ovaForm.contenido?.length === 0) {
       toast.error('Por favor completa los campos obligatorios (Título, Objetivo y al menos una sección).');
       return;
     }
 
     try {
-      const cleanedContenido = (ovaForm.contenido || []).map(({ _id, ...c }) => ({
-        ...c,
-        titulo: sanitizeText(c.titulo || '')
-      }));
+      let finalContenido;
+      if (ovaForm.tipo === 'curso') {
+        const courseData = typeof ovaForm.contenido === 'object' && !Array.isArray(ovaForm.contenido)
+          ? ovaForm.contenido
+          : { secciones: Array.isArray(ovaForm.contenido) ? ovaForm.contenido : [], quiz_final: { activo: false, preguntas: [] } };
+        
+        finalContenido = {
+          secciones: (courseData.secciones || []).map((s, sIdx) => ({
+            ...s,
+            orden: s.orden ?? sIdx,
+            titulo: sanitizeText(s.titulo || `Sección ${sIdx + 1}`),
+            descripcion: sanitizeText(s.descripcion || ''),
+            lecciones: (s.lecciones || []).map((l, lIdx) => ({
+              ...l,
+              orden: l.orden ?? lIdx,
+              titulo: sanitizeText(l.titulo || `Lección ${lIdx + 1}`),
+              descripcion: sanitizeText(l.descripcion || ''),
+              video_url: l.video_url || '',
+              duracion: l.duracion || '10 min',
+              notas: l.notas || '',
+              recursos: l.recursos || [],
+              quiz: l.quiz || { activo: false, preguntas: [] }
+            })),
+            quiz: s.quiz || { activo: false, preguntas: [] }
+          })),
+          quiz_final: courseData.quiz_final || { activo: false, preguntas: [] }
+        };
+      } else if (Array.isArray(ovaForm.contenido)) {
+        finalContenido = (ovaForm.contenido || []).map(({ _id, ...c }) => ({
+          ...c,
+          titulo: sanitizeText(c.titulo || '')
+        }));
+      } else {
+        finalContenido = [];
+      }
 
       const evaluacionData = ovaForm.evaluacion || { instrucciones: '', preguntas: [], nota_minima: 60, tiempo_limite: 0 };
       const cleanedEvaluacion = {
@@ -204,7 +268,7 @@ export function useOvaManager(moduloId) {
         objetivo: sanitizeText(ovaForm.objetivo || ''),
         introduccion: ovaForm.introduccion || '',
         actividad_final: JSON.stringify(cleanedEvaluacion),
-        contenido: cleanedContenido,
+        contenido: finalContenido,
         recursos: ovaForm.recursos || {},
         estado: ovaForm.estado || 'borrador',
         modulo_id: moduloId,
