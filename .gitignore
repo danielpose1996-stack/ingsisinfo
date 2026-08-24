@@ -32,6 +32,10 @@ create-new-test-accounts.cjs
 create-admin.cjs
 build_error.txt
 lint_report.txt
+output/
+tmp/
+*.pdf
+*.rar
 
 # Agentes de IA y habilidades locales
 .agents/

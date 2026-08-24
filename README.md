@@ -1,31 +1,44 @@
-# Semillero SISINFO - Plataforma de Gestión de Investigación y Aula Virtual
+# Semillero SISINFO — Plataforma Institucional & Aula Virtual
 
-Sistema web integral de alta fidelidad diseñado para la administración, seguimiento y desarrollo de proyectos de investigación del **Semillero de Investigación SISINFO**, incorporando un módulo de **Aula Virtual** con Objetos Virtuales de Aprendizaje (OVAs) interactivos y evaluaciones automatizadas.
+Plataforma web académica integral desarrollada para el **Semillero de Investigación SISINFO** de la **Facultad de Ingeniería de Sistemas e Informática — UNIPAZ**. El sistema centraliza la difusión institucional, convocatorias de investigación, eventos, noticias y un moderno ecosistema de **Aula Virtual** con Objetos Virtuales de Aprendizaje (OVAs) interactivos.
 
 ---
 
 ## 🌟 Características Principales
 
-- **Gestión por Roles Diferenciados**:
-  - **Administrador**: Control maestro del sistema, gestión de usuarios y roles, configuración de convocatorias y módulos educativos, visualización de métricas y auditoría de logs.
-  - **Docente / Investigador / Director**: Panel de revisión de proyectos asignados, retroalimentación técnica con control de versiones, creación y publicación de OVAs y Quizzes interactivos.
-  - **Estudiante / Semillerista**: Registro de proyectos, envío de avances documentales (.docx), gestión de observaciones, acceso a lecciones interactivas y presentación de evaluaciones.
-  - **Usuario Público / Visitante**: Portal institucional, repositorio público de proyectos finalizados, noticias y eventos del semillero.
-- **Aula Virtual & Constructor de OVAs**:
-  - Editor interactivo TipTap con soporte para texto enriquecido, código formateado, imágenes redimensionables y tablas.
-  - Generador de quizzes multimodales (opción múltiple, verdadero/falso, completar código).
-  - Reproductor HTML sandbox seguro para recursos didácticos interactivos subidos en formato Zip/HTML.
-- **Seguridad Robusta (Supabase RLS & Autenticación)**:
-  - Políticas RLS (*Row Level Security*) en PostgreSQL para aislar los accesos por rol y evitar manipulación no autorizada.
-  - Triggers SQL y Edge Functions con `service_role` para la provisión segura de credenciales.
+### 🎓 1. Aula Virtual & Ecosistema de OVAs
+* **Visor Académico Inmersivo:** Entorno de aprendizaje a pantalla completa con navegación lateral estructurada por capítulos/bloques, modo de lectura y barra de progreso.
+* **Editor de Lecciones Interactivas (TipTap):** Soporte para texto enriquecido, tablas, bloques de código formateados y control fluido de imágenes (arrastre interactivo desde las esquinas, presets del `25%`, `50%`, `75%`, `100%` y alineación).
+* **Evaluaciones Automatizadas (Quizzes):** Constructor y reproductor de cuestionarios con temporizador, ponderación de puntajes, preguntas de opción múltiple, verdadero/falso, completar código y respuestas cortas.
+* **Reproductor Sandbox HTML/Zip:** Alojamiento y renderizado aislado para lecciones didácticas interactivas empaquetadas en HTML/SCORM/Web.
+
+### 📢 2. Convocatorias & Vinculación de Semilleristas
+* Publicación dinámica de convocatorias con fechas límite, requisitos y cupos.
+* Formulario de postulación en línea para estudiantes con carga de hoja de vida y datos académicos.
+* Panel administrativo para revisión, filtrado y aprobación/rechazo de postulaciones.
+
+### 📰 3. Noticias & Eventos Institucionales
+* Gestor de publicaciones, logros de investigación, ponencias y talleres.
+* Calendario y agenda de eventos académicos con control de publicación (`Borrador` / `Publicado`).
+
+### 🎭 4. Simulación de Roles en Tiempo Real (Administrador)
+* Barra ejecutiva flotante que permite a los Administradores simular y auditar la experiencia de usuario exacta de un **Docente** o **Estudiante** de manera instantánea y segura.
+
+### 🔒 5. Seguridad & Control de Acceso
+* Autenticación granular mediante **Supabase Auth** y **Row Level Security (RLS)** en PostgreSQL.
+* Sanitización contra vulnerabilidades XSS mediante **DOMPurify** en todo el contenido HTML renderizado.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Tailwind CSS v4](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/), [TipTap Editor](https://tiptap.dev/), [Lucide React Icons](https://lucide.dev/).
-- **Backend & Base de Datos**: [Supabase](https://supabase.com/) (PostgreSQL, Realtime, Storage Buckets, Edge Functions).
-- **Seguridad**: JWT, OWASP Sanitization (DOMPurify), Políticas de Seguridad por Filas (RLS).
+| Capa | Tecnología |
+| :--- | :--- |
+| **Frontend** | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Tailwind CSS v4](https://tailwindcss.com/) |
+| **Animaciones & UI** | [Framer Motion](https://www.framer.com/motion/), [Lucide React](https://lucide.dev/), [SweetAlert2](https://sweetalert2.github.io/) |
+| **Editor de Contenido** | [TipTap Editor](https://tiptap.dev/) con extensiones personalizadas |
+| **Backend & Base de Datos** | [Supabase](https://supabase.com/) (PostgreSQL, Storage Buckets, Auth, RLS) |
+| **Despliegue** | [Vercel](https://vercel.com/) (CI/CD continuo conectado a GitHub) |
 
 ---
 
@@ -33,42 +46,40 @@ Sistema web integral de alta fidelidad diseñado para la administración, seguim
 
 ```text
 paginasemillero/
-├── public/                 # Recursos estáticos (imágenes institucionales, favicon)
+├── public/                 # Recursos públicos y estáticos (logos, favicon)
 ├── src/
-│   ├── assets/             # Estilos y activos gráficos del cliente
-│   ├── components/         # Componentes UI reutilizables (QuizBuilder, RichTextEditor, Navbar, Footer, etc.)
-│   ├── context/            # Contextos globales de React (AuthContext, ThemeContext)
-│   ├── hooks/              # Hooks personalizados (useEmailValidation, etc.)
-│   ├── layouts/            # Estructuras principales de maquetación (MainLayout)
-│   ├── lib/                # Servicios API y seguridad (supabase.js, security.js)
-│   ├── pages/              # Páginas del sistema (AdminDashboard, StudentDashboard, TeacherDashboard, OvaEditor, etc.)
-│   ├── App.jsx             # Enrutador principal de la aplicación
-│   ├── index.css           # Sistema de diseño global y tokens Tailwind
-│   └── main.jsx            # Punto de entrada de React
+│   ├── assets/             # Recursos visuales y gráficos
+│   ├── components/         # Componentes UI (OvaViewer, RichTextEditor, QuizPlayer, Navbar, etc.)
+│   ├── context/            # Contextos de React (AuthContext, ThemeContext)
+│   ├── hooks/              # Hooks personalizados
+│   ├── layouts/            # Plantillas de diseño estructural (MainLayout)
+│   ├── lib/                # Configuración de clientes y utilidades (supabase.js, security.js)
+│   ├── pages/              # Vistas principales (Home, Modulos, AdminDashboard, OvaEditor, etc.)
+│   ├── App.jsx             # Enrutamiento principal y protección de rutas
+│   ├── index.css           # Tokens de diseño global y estilos del editor
+│   └── main.jsx            # Punto de entrada de la aplicación
 ├── supabase/
-│   └── migrations/         # Esquema SQL y políticas de seguridad RLS
-├── scripts/                # Scripts de generación de documentación en PDF
-├── .env.example            # Plantilla de variables de entorno sanitizada
-└── package.json            # Dependencias del proyecto
+│   └── migrations/         # Esquemas SQL, tablas y políticas RLS
+├── .env.example            # Plantilla de variables de entorno requeridas
+├── package.json            # Dependencias del proyecto
+└── vite.config.js          # Configuración del empaquetador Vite
 ```
 
 ---
 
-## ⚙️ Configuración del Entorno de Desarrollo
+## ⚙️ Configuración del Entorno Local
 
 ### 1. Requisitos Previos
-- **Node.js**: Versión `>= 20.0.0`
-- **npm**: Versión `>= 10.0.0`
+* **Node.js**: Versión `>= 20.0.0`
+* **npm**: Versión `>= 10.0.0`
 
 ### 2. Variables de Entorno
-Cree un archivo `.env` en la raíz del proyecto basándose en `.env.example`:
+Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
 
 ```env
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=tu-clave-anonima-publica
 ```
-
-> ⚠️ **Nota de Seguridad**: Nunca publique claves secretas como `SUPABASE_SERVICE_ROLE_KEY` en el repositorio ni en el paquete de producción.
 
 ### 3. Instalación de Dependencias
 
@@ -76,13 +87,13 @@ VITE_SUPABASE_ANON_KEY=tu-clave-anonima-publica
 npm install
 ```
 
-### 4. Ejecución en Modo Desarrollo
+### 4. Servidor de Desarrollo
 
 ```bash
 npm run dev
 ```
 
-Acceda a `http://localhost:5173` en su navegador.
+La aplicación estará disponible en `http://localhost:5173`.
 
 ### 5. Compilación para Producción
 
@@ -92,15 +103,14 @@ npm run build
 
 ---
 
-## 🚀 Despliegue en Vercel
+## 🚀 Despliegue en Producción (Vercel)
 
-1. Suba el código a su repositorio de GitHub.
-2. Conecte el repositorio a su proyecto en [Vercel](https://vercel.com).
-3. Configure las variables de entorno `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en la consola de Vercel.
-4. El comando de compilación por defecto es `npm run build` y el directorio de salida es `dist`.
+1. Conecta el repositorio de GitHub a tu cuenta en [Vercel](https://vercel.com).
+2. Configura las variables de entorno `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en la configuración del proyecto en Vercel.
+3. El comando de compilación es `npm run build` y el directorio de salida es `dist`.
 
 ---
 
-## 📜 Licencia y Propiedad
+## 📜 Propiedad Académica
 
-Desarrollado para el **Semillero de Investigación SISINFO**. Todos los derechos reservados.
+Desarrollado para el **Semillero de Investigación SISINFO** — **Instituto Universitario de la Paz (UNIPAZ)**.
