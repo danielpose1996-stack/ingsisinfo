@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
+  ArrowLeft,
   X,
   Play,
   CheckCircle2,
@@ -13,19 +14,15 @@ import {
   BookOpen,
   FileDown,
   ExternalLink,
-  RotateCcw,
-  Sparkles,
-  Trophy,
   Layers,
   Video,
   FileText,
-  AlertCircle,
   Menu,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { extractYouTubeId, getYouTubeEmbedUrl } from '../lib/youtube';
+import { getYouTubeEmbedUrl } from '../lib/youtube';
 import { sanitizeHTML } from '../lib/security';
 import QuizPlayer from './QuizPlayer';
 import Button from './Button';
@@ -56,7 +53,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
   const secciones = courseData.secciones || [];
   const quizFinal = courseData.quiz_final || { activo: false, preguntas: [] };
 
-  // Construir lista secuencial de elementos del curso (Lecciones, Quizzes de sección y Examen final)
+  // Construir lista secuencial de contenidos (Lecciones, Quizzes de sección y Examen final)
   const flatItems = useMemo(() => {
     const items = [];
     secciones.forEach((sec, sIdx) => {
@@ -112,7 +109,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
     return items;
   }, [secciones, quizFinal]);
 
-  // Estado de navegación
+  // Estado de navegación y UI
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('notas'); // 'notas' | 'recursos' | 'quiz'
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -120,14 +117,14 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
   const [expandedSections, setExpandedSections] = useState({ 0: true });
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
-  // Estado de progreso guardado (Lecciones completadas y puntajes de quizzes)
+  // Estado de progreso guardado
   const storageKey = `sisinfo_course_${ova?.id}_${user?.id || 'guest'}`;
   const [progressState, setProgressState] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
     } catch {
-      // Ignorar error de parseo
+      // Ignorar error de lectura
     }
     return {
       completedItems: {},
@@ -144,12 +141,11 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
       courseCompleted: progressState.courseCompleted
     };
 
-    // Verificar si todos los elementos requeridos están completados
     const allRequiredFinished = flatItems.length > 0 && flatItems.every(it => updatedState.completedItems[it.id]);
     if (allRequiredFinished && !updatedState.courseCompleted) {
       updatedState.courseCompleted = true;
       setShowCelebrationModal(true);
-      toast.success('🎓 ¡Felicitaciones! Has completado el curso con éxito.');
+      toast.success('Has completado todos los contenidos del curso con éxito.');
     }
 
     setProgressState(updatedState);
@@ -159,7 +155,6 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
       // Ignorar error de storage
     }
 
-    // Registrar en base de datos si el usuario está autenticado
     if (user?.id && ova?.id) {
       try {
         const scores = Object.values(updatedState.quizScores);
@@ -174,14 +169,12 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
 
   const currentItem = flatItems[currentIndex] || flatItems[0];
 
-  // Auto-expandir la sección correspondiente al elemento activo
   useEffect(() => {
     if (currentItem?.sectionIndex !== undefined) {
       setExpandedSections(prev => ({ ...prev, [currentItem.sectionIndex]: true }));
     }
   }, [currentItem]);
 
-  // Manejador para marcar lección actual como completada y avanzar
   const handleMarkAsCompletedAndNext = () => {
     if (!currentItem) return;
     const newCompleted = { [currentItem.id]: true };
@@ -192,7 +185,6 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
     }
   };
 
-  // Manejador de culminación de Quiz
   const handleQuizFinished = (result) => {
     if (!currentItem) return;
     const score = result.percentage || 0;
@@ -202,70 +194,77 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
     const newScores = { [currentItem.id]: score };
     updateProgress(newCompleted, newScores);
 
-    toast.success(`Evaluación completada: ${score}%`, { icon: isApproved ? '🏆' : '📝' });
+    toast.success(`Evaluación finalizada con ${score}% de calificación`);
   };
 
-  // Métricas de progreso
   const totalItemsCount = flatItems.length;
   const completedItemsCount = flatItems.filter(it => progressState.completedItems[it.id]).length;
   const progressPercent = totalItemsCount > 0 ? Math.round((completedItemsCount / totalItemsCount) * 100) : 0;
   const isCourseCompleted = progressState.courseCompleted || (totalItemsCount > 0 && completedItemsCount === totalItemsCount);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0E17] text-white flex flex-col overflow-hidden font-sans select-none animate-in fade-in duration-200">
-      {/* ═══════════════════════════════════════ */}
-      {/* 1. BARRA SUPERIOR INSTITUCIONAL (TOPBAR) */}
-      {/* ═══════════════════════════════════════ */}
-      <header className="h-16 bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-30">
-        <div className="flex items-center gap-3 min-w-0">
+    <div className="fixed inset-0 z-50 bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col overflow-hidden font-sans select-none animate-in fade-in duration-200">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 1. BARRA SUPERIOR INSTITUCIONAL Y ACADÉMICA (CLARA/LIMPIA)  */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-30 shadow-xs">
+        <div className="flex items-center gap-3.5 min-w-0">
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="Cerrar curso"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+            title="Volver a la línea de aprendizaje"
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Volver</span>
           </button>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold uppercase tracking-wider">
-                {modulo?.nombre || 'Curso en Video'}
-              </span>
-              {isCourseCompleted && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-black uppercase tracking-wider animate-pulse">
-                  <Sparkles className="w-3 h-3" />
-                  <span>Curso completado</span>
-                </span>
-              )}
+          <div className="min-w-0 flex items-center gap-3">
+            <span className="hidden md:inline-flex px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#10346E] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50 text-[10px] font-bold uppercase tracking-wider shrink-0">
+              {modulo?.nombre || 'Línea de Formación'}
+            </span>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-sm sm:max-w-lg">
+                  {ova?.titulo}
+                </h1>
+                {isCourseCompleted && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Completado</span>
+                  </span>
+                )}
+              </div>
             </div>
-            <h1 className="text-xs sm:text-sm font-bold text-white truncate max-w-md sm:max-w-xl">
-              {ova?.titulo}
-            </h1>
           </div>
         </div>
 
-        {/* Indicador de Progreso Global y Botones */}
+        {/* Indicador de Avance y Controles */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2 text-xs font-bold font-mono">
-              <span className="text-slate-400">{completedItemsCount}/{totalItemsCount}</span>
-              <span className="text-blue-400">{progressPercent}%</span>
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-mono">
+                {completedItemsCount} de {totalItemsCount} completadas
+              </span>
+              <span className="text-[#10346E] dark:text-blue-400 font-bold font-mono">
+                {progressPercent}%
+              </span>
             </div>
-            <div className="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-36 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-500"
+                className="h-full bg-[#10346E] dark:bg-blue-500 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+          <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-800 pl-3">
             <button
               type="button"
               onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer hidden md:flex"
-              title={isTheaterMode ? 'Salir de modo cine' : 'Modo cine ampliado'}
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer hidden md:flex"
+              title={isTheaterMode ? 'Vista normal' : 'Modo ampliado'}
             >
               {isTheaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
@@ -273,7 +272,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer flex lg:hidden"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer flex lg:hidden"
               title="Temario del curso"
             >
               <Menu className="w-4 h-4" />
@@ -282,18 +281,18 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════ */}
-      {/* 2. ÁREA DE APRENDIZAJE Y TEMARIO        */}
-      {/* ═══════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 2. CONTENEDOR PRINCIPAL: ESCENARIO DE CLASE Y TEMARIO       */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* ─── ESCENARIO PRINCIPAL (VIDEO / QUIZ) ─── */}
-        <main className={`flex-1 overflow-y-auto flex flex-col bg-[#070A11] transition-all duration-300 ${isTheaterMode ? 'p-0' : ''}`}>
+        {/* ─── ESCENARIO DE CONTENIDO (VIDEO / APUNTES / QUIZ) ─── */}
+        <main className="flex-1 overflow-y-auto flex flex-col bg-[#F8FAFC] dark:bg-slate-950 transition-all duration-300">
           {currentItem?.type === 'lesson' ? (
             <div className="flex-1 flex flex-col">
-              {/* Contenedor del Reproductor de Video de YouTube */}
-              <div className="w-full bg-black flex justify-center items-center shadow-2xl relative">
+              {/* Contenedor del Reproductor de Video */}
+              <div className="w-full bg-slate-900 dark:bg-black py-4 sm:py-6 px-4 flex justify-center items-center shadow-inner">
                 <div className={`w-full ${isTheaterMode ? 'max-w-7xl' : 'max-w-5xl'} transition-all duration-300`}>
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+                  <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-lg border border-slate-800">
                     {currentItem.data?.video_url ? (
                       <iframe
                         src={getYouTubeEmbedUrl(currentItem.data?.video_url, { autoplay: 0 })}
@@ -304,82 +303,85 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                         allowFullScreen
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 p-6 text-center">
-                        <Video className="w-12 h-12 mb-2 opacity-30" />
-                        <p className="text-sm font-bold">Video en preparación</p>
-                        <p className="text-xs text-slate-600 mt-1">El docente no ha vinculado el enlace de YouTube todavía.</p>
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-6 text-center">
+                        <Video className="w-10 h-10 mb-2 opacity-40 text-slate-500" />
+                        <p className="text-xs font-bold text-slate-300">Video no configurado</p>
+                        <p className="text-[11px] text-slate-500 mt-1">El docente no ha vinculado el enlace de YouTube para esta lección.</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Barra de Acciones y Navegación de la Lección */}
-              <div className="bg-[#0F172A] border-b border-slate-800/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">
-                      {currentItem.sectionTitle}
-                    </span>
-                    {progressState.completedItems[currentItem.id] && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Completada
+              {/* Barra de Título y Navegación de la Lección */}
+              <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 sm:px-10 py-5">
+                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-[#10346E] dark:text-blue-400 uppercase tracking-wider font-mono">
+                        {currentItem.sectionTitle}
                       </span>
-                    )}
+                      {progressState.completedItems[currentItem.id] && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>Completada</span>
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {currentItem.title}
+                    </h2>
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
-                    {currentItem.title}
-                  </h2>
-                </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    disabled={currentIndex === 0}
-                    onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-xs font-bold"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">Anterior</span>
-                  </button>
+                  {/* Botones de Navegación */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <button
+                      type="button"
+                      disabled={currentIndex === 0}
+                      onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+                      className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-xs font-bold"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span className="hidden sm:inline">Anterior</span>
+                    </button>
 
-                  <Button
-                    onClick={handleMarkAsCompletedAndNext}
-                    className={`gap-1.5 text-xs font-bold py-2.5 px-4 rounded-xl cursor-pointer shadow-sm ${
-                      progressState.completedItems[currentItem.id]
-                        ? 'bg-slate-800 hover:bg-slate-700 text-white'
-                        : 'bg-[#10346E] hover:bg-[#1E40AF] text-white'
-                    }`}
-                  >
-                    {progressState.completedItems[currentItem.id] ? (
-                      <>
-                        <span>Continuar</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        <span>Marcar como completada</span>
-                      </>
-                    )}
-                  </Button>
+                    <Button
+                      onClick={handleMarkAsCompletedAndNext}
+                      className={`gap-1.5 text-xs font-bold py-2.5 px-4 rounded-xl cursor-pointer shadow-xs ${
+                        progressState.completedItems[currentItem.id]
+                          ? 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200'
+                          : 'bg-[#10346E] hover:bg-[#18458F] text-white'
+                      }`}
+                    >
+                      {progressState.completedItems[currentItem.id] ? (
+                        <>
+                          <span>Continuar</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <span>Marcar como completada</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Pestañas de Contenido Inferior (Apuntes, Recursos, Quizzes) */}
-              <div className="max-w-5xl w-full mx-auto p-6 sm:p-8 space-y-6">
-                <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+              {/* Contenido Inferior (Apuntes y Materiales) */}
+              <div className="max-w-5xl w-full mx-auto p-6 sm:p-10 space-y-6">
+                <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <button
                     type="button"
                     onClick={() => setActiveTab('notas')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                       activeTab === 'notas'
-                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-[#10346E] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50'
+                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5" />
+                    <BookOpen className="w-3.5 h-3.5" />
                     <span>Apuntes de la Lección</span>
                   </button>
 
@@ -387,10 +389,10 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                     <button
                       type="button"
                       onClick={() => setActiveTab('recursos')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                         activeTab === 'recursos'
-                          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'bg-blue-50 dark:bg-blue-950/60 text-[#10346E] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50'
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
                       <FileDown className="w-3.5 h-3.5" />
@@ -399,25 +401,30 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                   )}
                 </div>
 
-                {/* Contenido de la pestaña activa */}
+                {/* Tab: Apuntes */}
                 {activeTab === 'notas' && (
                   <div className="space-y-4">
                     {currentItem.data?.descripcion && (
-                      <p className="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         {currentItem.data.descripcion}
-                      </p>
+                      </div>
                     )}
                     {currentItem.data?.notas ? (
-                      <div
-                        className="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed font-sans"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentItem.data.notas) }}
-                      />
+                      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                        <div
+                          className="prose prose-slate dark:prose-invert prose-sm max-w-none text-slate-700 dark:text-slate-300 leading-relaxed font-sans"
+                          dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentItem.data.notas) }}
+                        />
+                      </div>
                     ) : (
-                      <p className="text-xs text-slate-500 italic">No hay notas complementarias adjuntas para esta lección.</p>
+                      <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400 text-xs">
+                        No hay apuntes adicionales registrados para esta lección.
+                      </div>
                     )}
                   </div>
                 )}
 
+                {/* Tab: Recursos Descargables */}
                 {activeTab === 'recursos' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(currentItem.data?.recursos || []).map((rec, rIdx) => (
@@ -426,20 +433,20 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                         href={rec.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-blue-500/40 transition-all flex items-center justify-between gap-3 group"
+                        className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#10346E]/40 transition-all flex items-center justify-between gap-3 group shadow-xs"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#10346E] dark:text-blue-400">
                             <FileDown className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">
-                              {rec.nombre || 'Recurso Descargable'}
+                            <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#10346E] dark:group-hover:text-blue-400 transition-colors">
+                              {rec.nombre || 'Material Descargable'}
                             </p>
-                            <span className="text-[10px] text-slate-500 font-mono truncate block max-w-xs">{rec.url}</span>
+                            <span className="text-[10px] text-slate-400 font-mono truncate block max-w-xs">{rec.url}</span>
                           </div>
                         </div>
-                        <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-[#10346E] transition-colors" />
                       </a>
                     ))}
                   </div>
@@ -448,23 +455,22 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
             </div>
           ) : (
             /* Vista de Quiz (Sección, Lección o Final) */
-            <div className="max-w-4xl w-full mx-auto p-6 sm:p-8 space-y-6">
-              <div className="bg-[#0F172A] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
-                <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
-                  <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-400">
+            <div className="max-w-4xl w-full mx-auto p-6 sm:p-10 space-y-6">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 space-y-6 shadow-sm">
+                <div className="flex items-center gap-3.5 pb-5 border-b border-slate-100 dark:border-slate-800">
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/50">
                     <Award className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-[#10346E] dark:text-blue-400 uppercase tracking-wider font-mono">
                       {currentItem?.sectionTitle}
                     </span>
-                    <h2 className="text-lg sm:text-xl font-black text-white">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                       {currentItem?.title}
                     </h2>
                   </div>
                 </div>
 
-                {/* Reproductor interactivo de Quiz */}
                 <QuizPlayer
                   evaluacion={currentItem?.data || {}}
                   onComplete={handleQuizFinished}
@@ -474,49 +480,53 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
           )}
         </main>
 
-        {/* ─── BARRA LATERAL DEL TEMARIO (SYLLABUS SIDEBAR) ─── */}
+        {/* ─── BARRA LATERAL DEL TEMARIO (CLARA Y ESTRUCTURADA) ─── */}
         <aside
-          className={`w-80 sm:w-96 bg-[#0B111E] border-l border-slate-800/80 flex flex-col shrink-0 transition-all duration-300 z-20 ${
+          className={`w-80 sm:w-96 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20 ${
             isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 hidden lg:flex'
           }`}
         >
           {/* Encabezado del Temario */}
-          <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+          <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/60 dark:bg-slate-900">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-[#10346E] text-white">
                 <Layers className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Temario del Curso</h3>
-                <p className="text-[11px] text-slate-400">{secciones.length} secciones · {flatItems.length} contenidos</p>
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  Temario del Curso
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {secciones.length} secciones · {flatItems.length} contenidos
+                </p>
               </div>
             </div>
           </div>
 
           {/* Lista de Secciones y Lecciones */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-white dark:bg-slate-900">
             {secciones.map((sec, sIdx) => {
               const isSecExpanded = expandedSections[sIdx] !== false;
               const secLessons = sec.lecciones || [];
               const completedCountInSec = secLessons.filter(l => progressState.completedItems[l.id]).length;
 
               return (
-                <div key={sec.id || sIdx} className="rounded-2xl border border-slate-800/80 bg-slate-900/40 overflow-hidden">
+                <div key={sec.id || sIdx} className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50/40 dark:bg-slate-900/60">
                   {/* Título de la Sección */}
                   <button
                     type="button"
                     onClick={() => setExpandedSections(prev => ({ ...prev, [sIdx]: !prev[sIdx] }))}
-                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
+                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
                   >
                     <div className="space-y-0.5 pr-2">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                      <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                         Sección {sIdx + 1}
                       </span>
-                      <h4 className="text-xs font-bold text-white leading-tight">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
                         {sec.titulo}
                       </h4>
-                      <span className="text-[10px] text-slate-400">
-                        {completedCountInSec}/{secLessons.length} lecciones
+                      <span className="text-[10px] text-slate-500 font-medium block">
+                        {completedCountInSec} de {secLessons.length} lecciones
                       </span>
                     </div>
                     {isSecExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -529,7 +539,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-slate-800/80 divide-y divide-slate-800/40"
+                        className="border-t border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900"
                       >
                         {secLessons.map((lec, lIdx) => {
                           const flatIdx = flatItems.findIndex(it => it.type === 'lesson' && it.id === (lec.id || `s${sIdx}-l${lIdx}`));
@@ -545,18 +555,18 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                               }}
                               className={`w-full p-3.5 pl-5 flex items-center justify-between gap-3 text-left transition-all cursor-pointer ${
                                 isActive
-                                  ? 'bg-[#10346E] text-white'
-                                  : 'hover:bg-slate-800/60 text-slate-300'
+                                  ? 'bg-blue-50/90 dark:bg-blue-950/60 border-l-4 border-[#10346E] text-[#10346E] dark:text-blue-300 font-bold'
+                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 {isDone ? (
-                                  <CheckCircle2 className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-300' : 'text-emerald-400'}`} />
+                                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                 ) : (
-                                  <Circle className="w-4 h-4 text-slate-600 shrink-0" />
+                                  <Circle className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
                                 )}
                                 <div className="min-w-0">
-                                  <p className={`text-xs font-semibold truncate ${isActive ? 'text-white font-bold' : 'text-slate-300'}`}>
+                                  <p className="text-xs font-semibold truncate leading-tight">
                                     {lec.titulo}
                                   </p>
                                   <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
@@ -566,7 +576,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                                 </div>
                               </div>
 
-                              <Play className={`w-3 h-3 shrink-0 ${isActive ? 'text-white' : 'text-slate-600'}`} />
+                              <Play className={`w-3 h-3 shrink-0 ${isActive ? 'text-[#10346E] dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`} />
                             </button>
                           );
                         })}
@@ -586,20 +596,22 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                               }}
                               className={`w-full p-3.5 pl-5 flex items-center justify-between gap-3 text-left transition-all cursor-pointer ${
                                 isQuizActive
-                                  ? 'bg-amber-600 text-white'
-                                  : 'hover:bg-slate-800/60 text-amber-300/90'
+                                  ? 'bg-amber-50 dark:bg-amber-950/60 border-l-4 border-amber-600 text-amber-900 dark:text-amber-200 font-bold'
+                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <Award className="w-4 h-4 shrink-0 text-amber-400" />
+                                <Award className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
                                 <div className="min-w-0">
                                   <p className="text-xs font-bold truncate">Quiz: {sec.titulo}</p>
                                   {score !== undefined && (
-                                    <span className="text-[10px] font-mono text-emerald-300">Puntaje: {score}%</span>
+                                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                                      Nota: {score}%
+                                    </span>
                                   )}
                                 </div>
                               </div>
-                              {isQuizDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                              {isQuizDone && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
                             </button>
                           );
                         })()}
@@ -610,7 +622,7 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
               );
             })}
 
-            {/* Examen Final al final de la barra lateral si existe */}
+            {/* Examen Final */}
             {quizFinal.activo && (quizFinal.preguntas?.length || 0) > 0 && (() => {
               const finalIdx = flatItems.findIndex(it => it.type === 'final_quiz');
               const isFinalActive = currentIndex === finalIdx;
@@ -625,21 +637,21 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
                   }}
                   className={`w-full p-4 rounded-2xl border flex items-center justify-between gap-3 text-left transition-all cursor-pointer ${
                     isFinalActive
-                      ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold'
-                      : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                      ? 'bg-amber-500 text-white border-amber-600 font-bold shadow-xs'
+                      : 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200/80 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 hover:bg-amber-100/60'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Trophy className="w-5 h-5 shrink-0 text-amber-400" />
+                    <Award className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <div>
                       <p className="text-xs font-black uppercase tracking-wider">Examen Final</p>
-                      <p className="text-[10px] opacity-80">Evaluación certificatoria del curso</p>
+                      <p className="text-[10px] opacity-80">Evaluación integral del curso</p>
                       {finalScore !== undefined && (
                         <span className="text-[10px] font-mono font-bold block mt-0.5">Nota: {finalScore}%</span>
                       )}
                     </div>
                   </div>
-                  {isFinalDone && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                  {isFinalDone && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
                 </button>
               );
             })()}
@@ -647,44 +659,44 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
         </aside>
       </div>
 
-      {/* ═══════════════════════════════════════ */}
-      {/* 3. MODAL CELEBRATORIO DE CURSO COMPLETADO */}
-      {/* ═══════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 3. MODAL INSTITUCIONAL DE CURSO COMPLETADO                  */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {showCelebrationModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#0F172A] border border-slate-700 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl relative"
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full text-center space-y-5 shadow-xl relative"
             >
-              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-emerald-400 mx-auto flex items-center justify-center shadow-lg animate-bounce">
-                <Trophy className="w-10 h-10 text-slate-950" />
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 mx-auto flex items-center justify-center text-[#10346E] dark:text-blue-400">
+                <CheckCircle2 className="w-8 h-8 text-emerald-600" />
               </div>
 
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                  ¡Meta Cumplida!
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#10346E] dark:text-blue-400 block">
+                  Acreditación de Aprendizaje
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  Has completado el curso
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Curso Completado
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Has recorrido exitosamente todas las secciones y lecciones de <strong className="text-white">{ova?.titulo}</strong>.
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Has finalizado todas las secciones y lecciones de <strong className="text-slate-900 dark:text-white">{ova?.titulo}</strong>.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-400 space-y-1">
-                <p className="font-semibold text-slate-200">Acceso permanente de repaso:</p>
-                <p>Tu estado de <strong className="text-emerald-400">"Curso completado"</strong> se mantendrá guardado. Puedes volver a ingresar cuando quieras para repasar videos o realizar quizzes.</p>
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-left text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                <p className="font-bold text-slate-800 dark:text-slate-200">Acceso permanente:</p>
+                <p>El estado de curso completado se ha registrado en tu historial. Puedes volver a ingresar en cualquier momento para repasar contenidos y evaluaciones.</p>
               </div>
 
               <Button
                 onClick={() => setShowCelebrationModal(false)}
                 className="w-full py-3 bg-[#10346E] hover:bg-[#18458F] text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer"
               >
-                Continuar Repasando
+                Continuar
               </Button>
             </motion.div>
           </div>
