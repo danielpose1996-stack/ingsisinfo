@@ -17,17 +17,22 @@ export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user && perfil) {
+    if (user?.id && perfil?.linea_investigacion) {
       loadTeacherModule();
+    } else if (perfil && !perfil.linea_investigacion) {
+      setLoading(false);
     }
-  }, [user, perfil]);
+  }, [user?.id, perfil?.linea_investigacion]);
 
   async function loadTeacherModule() {
-    setLoading(true);
+    // Solo mostrar spinner a pantalla completa si es la carga inicial
+    if (!docenteModulo) {
+      setLoading(true);
+    }
     try {
       const modulos = await obtenerModulos();
       const match = (modulos || []).find(
-        m => m.nombre?.toLowerCase().trim() === perfil.linea_investigacion?.toLowerCase().trim()
+        m => m.nombre?.toLowerCase().trim() === perfil?.linea_investigacion?.toLowerCase().trim()
       );
       if (match) {
         setDocenteModulo(match);
@@ -39,7 +44,7 @@ export default function TeacherDashboard() {
     }
   }
 
-  if (loading) {
+  if (loading && !docenteModulo) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <Loader2 className="w-9 h-9 animate-spin text-[#15326C] dark:text-blue-400" />

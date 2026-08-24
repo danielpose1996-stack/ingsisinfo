@@ -90,8 +90,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({ totalUsers: 0, totalOvas: 0, totalEvaluaciones: 0, totalModulos: 0 });
   const [usuarios, setUsuarios] = useState([]);
   const [modulos, setModulos] = useState([]);
-  const [seguimientoOvas, setSeguimientoOvas] = useState([]);
+  const [seguimientoOvas, setSeguimientoOvas] = useState([]);  
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loadingPublic, setLoadingPublic] = useState(false);
 
   // Estado del Modo Simulación / Pruebas de Roles
@@ -125,21 +126,24 @@ export default function AdminDashboard() {
   });
 
   // Estado de los filtros
-  const [searchUserTerm, setSearchUserTerm] = useState('');
-  const [filterUserRol, setFilterUserRol] = useState('');
+  const [searchUser, setSearchUser] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [searchSeguimiento, setSearchSeguimiento] = useState('');
   const [filterLineaSeguimiento, setFilterLineaSeguimiento] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null);
 
   useEffect(() => {
-    if (user && perfil?.rol === 'admin') {
+    if (user?.id && perfil?.rol === 'admin') {
       loadAdminData();
     }
-  }, [user, perfil]);
+  }, [user?.id, perfil?.rol]);
 
   async function loadAdminData() {
-    setLoading(true);
+    if (initialLoading) {
+      setLoading(true);
+    }
     try {
       const [users, mods, estats, segData] = await Promise.all([
         obtenerTodosUsuarios(),
@@ -162,6 +166,7 @@ export default function AdminDashboard() {
       toast.error("Error al cargar datos del servidor: " + error.message);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   }
 

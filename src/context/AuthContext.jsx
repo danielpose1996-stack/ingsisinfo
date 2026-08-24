@@ -87,6 +87,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const userRef = React.useRef(user);
+    useEffect(() => { userRef.current = user; }, [user]);
+
     const perfilRef = React.useRef(realPerfil);
     useEffect(() => { perfilRef.current = realPerfil; }, [realPerfil]);
 
@@ -108,17 +111,25 @@ export const AuthProvider = ({ children }) => {
                 }
 
                 setAuthError(null);
-                setUser(session.user);
-                if (!perfilRef.current) {
-                    setLoading(true);
+
+                // Si es el mismo usuario ya cargado, no mutar la referencia del estado `user`
+                if (!userRef.current || userRef.current.id !== session.user.id) {
+                    setUser(session.user);
+                    if (!perfilRef.current) {
+                        setLoading(true);
+                    }
                 }
             } else {
-                setUser(null);
-                setRealPerfil(null);
-                setLoading(false);
-                sessionStorage.removeItem('isAdminLoggedIn');
-                sessionStorage.removeItem('simulated_role');
-                sessionStorage.removeItem('simulated_linea');
+                if (userRef.current) {
+                    setUser(null);
+                    setRealPerfil(null);
+                    setLoading(false);
+                    sessionStorage.removeItem('isAdminLoggedIn');
+                    sessionStorage.removeItem('simulated_role');
+                    sessionStorage.removeItem('simulated_linea');
+                } else {
+                    setLoading(false);
+                }
             }
         });
 

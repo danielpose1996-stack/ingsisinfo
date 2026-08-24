@@ -28,9 +28,30 @@ const DEFAULT_OVA_FORM = {
 export function useOvaManager(moduloId) {
   const [ovas, setOvas] = useState([]);
   const [loadingOvas, setLoadingOvas] = useState(false);
-  const [ovaForm, setOvaForm] = useState(null);
-  const [editingOva, setEditingOva] = useState(null);
-  const [isOvaFormOpen, setIsOvaFormOpen] = useState(false);
+  const [isOvaFormOpen, setIsOvaFormOpen] = useState(() => {
+    if (typeof window !== 'undefined' && moduloId) {
+      return sessionStorage.getItem(`ova_editor_open_${moduloId}`) === 'true';
+    }
+    return false;
+  });
+  const [editingOva, setEditingOva] = useState(() => {
+    if (typeof window !== 'undefined' && moduloId) {
+      const saved = sessionStorage.getItem(`ova_editing_item_${moduloId}`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch {}
+      }
+    }
+    return null;
+  });
+  const [ovaForm, setOvaForm] = useState(() => {
+    if (typeof window !== 'undefined' && moduloId) {
+      const savedForm = sessionStorage.getItem(`ova_form_state_${moduloId}`);
+      if (savedForm) {
+        try { return JSON.parse(savedForm); } catch {}
+      }
+    }
+    return null;
+  });
   const [hasDraft, setHasDraft] = useState(false);
   const [draftData, setDraftData] = useState(null);
   const [uploadingFiles, setUploadingFiles] = useState({});
@@ -60,6 +81,26 @@ export function useOvaManager(moduloId) {
       setOvas([]);
     }
   }, [moduloId, loadOvas]);
+
+  // Sincronizar estado de sesión activa de edición
+  useEffect(() => {
+    if (typeof window === 'undefined' || !moduloId) return;
+    if (isOvaFormOpen) {
+      sessionStorage.setItem(`ova_editor_open_${moduloId}`, 'true');
+      if (editingOva) {
+        sessionStorage.setItem(`ova_editing_item_${moduloId}`, JSON.stringify(editingOva));
+      } else {
+        sessionStorage.removeItem(`ova_editing_item_${moduloId}`);
+      }
+      if (ovaForm) {
+        sessionStorage.setItem(`ova_form_state_${moduloId}`, JSON.stringify(ovaForm));
+      }
+    } else {
+      sessionStorage.removeItem(`ova_editor_open_${moduloId}`);
+      sessionStorage.removeItem(`ova_editing_item_${moduloId}`);
+      sessionStorage.removeItem(`ova_form_state_${moduloId}`);
+    }
+  }, [isOvaFormOpen, editingOva, ovaForm, moduloId]);
 
   // Detección de borradores en localStorage al abrir el modal/formulario
   useEffect(() => {
