@@ -6,9 +6,8 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
-
 export default function Navbar() {
-  const { user, perfil, isAdmin, cerrarSesion } = useAuth();
+  const { user, perfil, isAdmin, realIsAdmin, isSimulating, cerrarSesion } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,13 +38,13 @@ export default function Navbar() {
   ];
 
   const getInitial = () => {
-    if (isAdmin) return 'A';
+    if (isAdmin && !isSimulating) return 'A';
     if (perfil?.nombre) return perfil.nombre.charAt(0).toUpperCase();
     return 'U';
   };
 
   const getPanelLink = () => {
-    if (isAdmin) return '/dashboard/admin';
+    if (isAdmin && !isSimulating) return '/dashboard/admin';
     if (perfil?.rol === 'docente') return '/dashboard/docente';
     return '/dashboard/estudiante';
   };
@@ -126,10 +125,10 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-2 w-56 rounded-xl bg-card border border-card-border shadow-2xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-3 border-b border-card-border bg-slate-50">
                       <p className="text-sm font-semibold text-foreground truncate">
-                        {isAdmin ? 'Administrador' : (perfil?.nombre ? `${perfil.nombre} ${perfil.apellido || ''}`.trim() : 'Usuario')}
+                        {isSimulating ? `${perfil?.nombre || 'Admin'} (Simulación)` : (isAdmin ? 'Administrador' : (perfil?.nombre ? `${perfil.nombre} ${perfil.apellido || ''}`.trim() : 'Usuario'))}
                       </p>
                       <p className="text-xs text-slate-500 capitalize">
-                        {isAdmin ? 'Sistema' : perfil?.rol || 'Usuario'}
+                        {isSimulating ? `Modo: ${perfil?.rol}` : (isAdmin ? 'Sistema' : perfil?.rol || 'Usuario')}
                       </p>
                     </div>
                     

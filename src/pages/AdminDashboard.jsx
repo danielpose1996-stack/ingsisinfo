@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import OvaManagerView from '../components/OvaManagerView';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -63,7 +64,8 @@ import {
   ShieldCheck,
   ChevronRight,
   ExternalLink,
-  Layers
+  Layers,
+  FlaskConical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -78,7 +80,8 @@ const normalize = (str) => {
 };
 
 export default function AdminDashboard() {
-  const { user, perfil } = useAuth();
+  const navigate = useNavigate();
+  const { user, perfil, startSimulation } = useAuth();
   const [activeTab, setActiveTab] = useState('stats');
   const [stats, setStats] = useState({ totalUsers: 0, totalOvas: 0, totalEvaluaciones: 0, totalModulos: 0 });
   const [usuarios, setUsuarios] = useState([]);
@@ -86,6 +89,10 @@ export default function AdminDashboard() {
   const [seguimientoOvas, setSeguimientoOvas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingPublic, setLoadingPublic] = useState(false);
+
+  // Estado del Modo Simulación / Pruebas de Roles
+  const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
+  const [simLinea, setSimLinea] = useState('Robótica');
 
   // Estado del contenido público (Inicio)
   const [noticiasAdmin, setNoticiasAdmin] = useState([]);
@@ -457,7 +464,14 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Elementos eliminados por solicitud del usuario */}
+            <Button
+              variant="outline"
+              onClick={() => setIsSimulationModalOpen(true)}
+              className="gap-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-indigo-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 border-amber-500/30 text-foreground font-bold italic shadow-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <FlaskConical className="w-4 h-4 text-amber-500 animate-bounce" />
+              <span>Modo Pruebas de Roles</span>
+            </Button>
           </div>
         </header>
 
@@ -1232,7 +1246,7 @@ export default function AdminDashboard() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
                   <div className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 flex items-center justify-between">
@@ -1307,9 +1321,86 @@ export default function AdminDashboard() {
           </div>
         </form>
       </Modal>
+
+      {/* Modal de Modo Simulación / Pruebas de Roles */}
+      <Modal
+        isOpen={isSimulationModalOpen}
+        onClose={() => setIsSimulationModalOpen(false)}
+        title="🧪 Modo Pruebas / Vista Previa de Roles"
+      >
+        <div className="space-y-6">
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 leading-relaxed font-medium">
+            <p className="font-bold mb-1">💡 Navegación y pruebas interactivas</p>
+            Esta función te permite probar el sistema desde la perspectiva exacta de un <strong>Estudiante</strong> o un <strong>Docente</strong>. Podrás responder cuestionarios, ver el panel de seguimiento o gestionar contenidos de una línea de investigación sin alterar tu rol real de Administrador.
+          </div>
+
+          <div className="space-y-4">
+            {/* Opción Estudiante */}
+            <div 
+              onClick={() => {
+                setIsSimulationModalOpen(false);
+                startSimulation('estudiante');
+                navigate('/dashboard/estudiante');
+              }}
+              className="p-5 rounded-2xl border border-card-border hover:border-[#1E3A8A] bg-card hover:bg-[#1E3A8A]/5 cursor-pointer transition-all flex items-center justify-between group shadow-sm"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground italic">Probar como Estudiante</h4>
+                  <p className="text-xs text-foreground/50">Visualizar módulos, realizar evaluaciones, ver historial de notas y perfil.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-foreground/30 group-hover:text-[#1E3A8A] transition-colors" />
+            </div>
+
+            {/* Opción Docente con selector de línea */}
+            <div className="p-5 rounded-2xl border border-card-border bg-card space-y-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground italic">Probar como Docente</h4>
+                  <p className="text-xs text-foreground/50">Selecciona la línea de investigación para probar la gestión de sus OVAs:</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <label className="block text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">
+                  Línea de Conocimiento Asignada
+                </label>
+                <select
+                  value={simLinea}
+                  onChange={(e) => setSimLinea(e.target.value)}
+                  className="w-full bg-background border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none italic font-semibold cursor-pointer"
+                >
+                  <option value="Robótica">Robótica</option>
+                  <option value="Ingeniería de Software">Ingeniería de Software</option>
+                  <option value="Ingeniería del Conocimiento">Ingeniería del Conocimiento</option>
+                  <option value="Redes y Telemática">Redes y Telemática</option>
+                  <option value="Gestión de la Seguridad Informática">Gestión de la Seguridad Informática</option>
+                  <option value="Ingeniería Informática">Ingeniería Informática</option>
+                </select>
+              </div>
+
+              <Button
+                onClick={() => {
+                  setIsSimulationModalOpen(false);
+                  startSimulation('docente', simLinea);
+                  navigate('/dashboard/docente');
+                }}
+                className="w-full gap-2 italic uppercase font-black text-xs py-3 bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none cursor-pointer"
+              >
+                <span>Ingresar como Docente ({simLinea})</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
-
-
-

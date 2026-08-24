@@ -11,10 +11,65 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [perfil, setPerfil] = useState(null);
+    const [realPerfil, setRealPerfil] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [authError, setAuthError] = useState(null);
+
+    // Estado de simulación de rol para pruebas administrativas
+    const [simulatedRole, setSimulatedRole] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return sessionStorage.getItem('simulated_role') || null;
+        }
+        return null;
+    });
+    const [simulatedLinea, setSimulatedLinea] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return sessionStorage.getItem('simulated_linea') || '';
+        }
+        return '';
+    });
+
+    const realIsAdmin = realPerfil?.rol === 'admin';
+    const isSimulating = Boolean(simulatedRole && realIsAdmin);
+
+    // Perfil derivado: si la simulación está activa, refleja el rol y línea simulados
+    const perfil = React.useMemo(() => {
+        if (!realPerfil) return null;
+        if (isSimulating) {
+            return {
+                ...realPerfil,
+                rol: simulatedRole,
+                linea_investigacion: simulatedRole === 'docente' ? (simulatedLinea || 'Robótica') : realPerfil.linea_investigacion
+            };
+        }
+        return realPerfil;
+    }, [realPerfil, isSimulating, simulatedRole, simulatedLinea]);
+
+    // isAdmin para la UI activa (si está simulando, se comporta como el rol simulado)
+    const isAdmin = isSimulating ? false : realIsAdmin;
+
+    const startSimulation = (role, linea = '') => {
+        if (!realIsAdmin) {
+            console.error("Solo los administradores pueden iniciar el modo simulación.");
+            return;
+        }
+        if (role !== 'docente' && role !== 'estudiante') {
+            console.error("Rol de simulación no válido.");
+            return;
+        }
+        setSimulatedRole(role);
+        setSimulatedLinea(linea || 'Robótica');
+        sessionStorage.setItem('simulated_role', role);
+        if (linea) sessionStorage.setItem('simulated_linea', linea);
+        else sessionStorage.removeItem('simulated_linea');
+    };
+
+    const stopSimulation = () => {
+        setSimulatedRole(null);
+        setSimulatedLinea('');
+        sessionStorage.removeItem('simulated_role');
+        sessionStorage.removeItem('simulated_linea');
+    };
 
     const refreshPerfil = async () => {
         if (!user) return;
@@ -25,16 +80,15 @@ export const AuthProvider = ({ children }) => {
                 .eq('user_id', user.id)
                 .single();
             if (p) {
-                setPerfil(p);
-                setIsAdmin(p.rol === 'admin');
+                setRealPerfil(p);
             }
         } catch (err) {
             console.error("Error al refrescar perfil:", err);
         }
     };
 
-    const perfilRef = React.useRef(perfil);
-    useEffect(() => { perfilRef.current = perfil; }, [perfil]);
+    const perfilRef = React.useRef(realPerfil);
+    useEffect(() => { perfilRef.current = realPerfil; }, [realPerfil]);
 
     // 1. Escuchar cambios de Auth de manera estable
     useEffect(() => {
@@ -48,8 +102,7 @@ export const AuthProvider = ({ children }) => {
                     setAuthError('Solo se permiten cuentas de correo institucional @unipaz.edu.co');
                     supabaseLogout().catch(() => {});
                     setUser(null);
-                    setPerfil(null);
-                    setIsAdmin(false);
+                    setRealPerfil(null);
                     setLoading(false);
                     return;
                 }
@@ -61,10 +114,11 @@ export const AuthProvider = ({ children }) => {
                 }
             } else {
                 setUser(null);
-                setPerfil(null);
-                setIsAdmin(false);
+                setRealPerfil(null);
                 setLoading(false);
                 sessionStorage.removeItem('isAdminLoggedIn');
+                sessionStorage.removeItem('simulated_role');
+                sessionStorage.removeItem('simulated_linea');
             }
         });
 
@@ -99,8 +153,7 @@ export const AuthProvider = ({ children }) => {
                             .single();
                         
                         if (retryProfile && isMounted) {
-                            setPerfil(retryProfile);
-                            setIsAdmin(retryProfile.rol === 'admin');
+                            setRealPerfil(retryProfile);
                             if (retryProfile.rol === 'admin') {
                                 sessionStorage.setItem('isAdminLoggedIn', 'true');
                             }
@@ -108,12 +161,10 @@ export const AuthProvider = ({ children }) => {
                         if (isMounted) setLoading(false);
                     }, 1200);
                 } else if (p) {
-                    setPerfil(p);
+                    setRealPerfil(p);
                     if (p.rol === 'admin') {
-                        setIsAdmin(true);
                         sessionStorage.setItem('isAdminLoggedIn', 'true');
                     } else {
-                        setIsAdmin(false);
                         sessionStorage.removeItem('isAdminLoggedIn');
                     }
                     setLoading(false);
@@ -139,11 +190,12 @@ export const AuthProvider = ({ children }) => {
     const cerrarSesion = async () => {
         try {
             setUser(null);
-            setPerfil(null);
-            setIsAdmin(false);
+            setRealPerfil(null);
             setAuthError(null);
             sessionStorage.removeItem('isAdminLoggedIn');
             sessionStorage.removeItem('admin_access_gate');
+            sessionStorage.removeItem('simulated_role');
+            sessionStorage.removeItem('simulated_linea');
             
             Object.keys(localStorage).forEach(key => {
                 if (key.startsWith('sb-')) localStorage.removeItem(key);
@@ -161,8 +213,15 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider value={{
             user,
             perfil,
+            realPerfil,
             loading,
             isAdmin,
+            realIsAdmin,
+            simulatedRole,
+            simulatedLinea,
+            isSimulating,
+            startSimulation,
+            stopSimulation,
             authError,
             iniciarSesion,
             iniciarSesionConGoogle,
