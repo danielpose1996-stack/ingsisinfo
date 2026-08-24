@@ -9,6 +9,7 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 import Badge from '../components/Badge';
 import QuizPlayer from '../components/QuizPlayer';
+import OvaViewer from '../components/OvaViewer';
 import { 
   BookOpen, 
   Video, 
@@ -100,77 +101,8 @@ export default function Modulos() {
     return embedUrl;
   };
 
-  // Estado del visualizador de OVA
-  const [activeOvaStep, setActiveOvaStep] = useState(0);
-
-  // Pasos derivados para el OVA seleccionado
-  const getOvaSteps = (ova) => {
-    if (!ova) return [];
-    
-    let evaluacion = null;
-    if (ova.actividad_final) {
-      try {
-        const parsed = JSON.parse(ova.actividad_final);
-        if (parsed && parsed.preguntas && parsed.preguntas.length > 0) {
-          evaluacion = parsed;
-        }
-      } catch {
-        // Formato de texto heredado
-      }
-    }
-
-    const steps = [
-      { 
-        id: 'intro', 
-        titulo: 'Introducción', 
-        tipo: 'intro',
-        label: 'CONCEPTOS CLAVE',
-        content: {
-          titulo: ova.titulo,
-          objetivo: ova.objetivo,
-          introduccion: ova.introduccion,
-          imagen: ova.imagen_portada
-        }
-      },
-      ...(ova.contenido || []).map((section, idx) => ({
-        id: `section-${idx}`,
-        titulo: section.titulo,
-        tipo: 'section',
-        label: `MÓDULO 0${idx + 1}`,
-        content: section
-      })),
-      {
-        id: 'final',
-        titulo: 'Evaluación',
-        tipo: 'final',
-        label: 'DESAFÍO FINAL',
-        content: {
-          actividad: ova.actividad_final,
-          recursos: ova.recursos,
-          evaluacion: evaluacion
-        }
-      }
-    ];
-    return steps;
-  };
-
-  const ovaSteps = getOvaSteps(selectedOva);
-  const currentStep = ovaSteps[activeOvaStep];
-
-  const handleNextStep = () => {
-    if (activeOvaStep < ovaSteps.length - 1) {
-      setActiveOvaStep(prev => prev + 1);
-    }
-  };
-
-  const handlePrevStep = () => {
-    if (activeOvaStep > 0) {
-      setActiveOvaStep(prev => prev - 1);
-    }
-  };
-
   const handleQuizComplete = async (score, percentage, passed) => {
-    if (!user || !perfil) return;
+    if (!user || !perfil || !selectedOva) return;
     
     try {
       await registrarResultadoOva(perfil.id, selectedOva.id, percentage, passed);
@@ -179,6 +111,18 @@ export default function Modulos() {
       console.error("Error al registrar resultado OVA:", error);
     }
   };
+
+  // Si hay un OVA interactivo seleccionado, renderizar la experiencia inmersiva completa
+  if (selectedOva) {
+    return (
+      <OvaViewer
+        ova={selectedOva}
+        modulo={selectedModule}
+        onClose={() => setSelectedOva(null)}
+        onQuizComplete={handleQuizComplete}
+      />
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -366,266 +310,6 @@ export default function Modulos() {
           />
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button onClick={() => setSelectedSubpage(null)} className="w-full font-bold">CERRAR PÁGINA</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Modal del visor de OVA, rediseñado como reproductor interactivo */}
-      <Modal
-        isOpen={!!selectedOva}
-        onClose={() => setSelectedOva(null)}
-        title={selectedOva?.titulo || 'Objeto Virtual de Aprendizaje'}
-        maxWidth="max-w-6xl"
-      >
-        <div className="flex flex-col lg:flex-row h-[75vh] -m-6 overflow-hidden">
-          {/* Navegación lateral */}
-          <div className="w-full lg:w-72 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-bold text-[#10346E] dark:text-blue-400 uppercase tracking-widest">Progreso</span>
-                <span className="text-[10px] font-bold text-slate-500 font-mono">
-                  {Math.round(((activeOvaStep + 1) / ovaSteps.length) * 100)}%
-                </span>
-              </div>
-              <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <motion.div 
-                  className="h-full bg-[#10346E] dark:bg-blue-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${((activeOvaStep + 1) / ovaSteps.length) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-1.5">
-              {ovaSteps.map((step, idx) => (
-                <button
-                  key={step.id}
-                  onClick={() => setActiveOvaStep(idx)}
-                  className={`w-full text-left p-3.5 rounded-xl transition-all flex items-center gap-3.5 group cursor-pointer ${activeOvaStep === idx ? 'bg-[#10346E] text-white shadow-sm' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'}`}
-                >
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${activeOvaStep === idx ? 'bg-white text-[#10346E]' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:text-foreground'}`}>
-                    0{idx + 1}
-                  </div>
-                  <div className="flex-grow min-w-0">
-                    <p className={`text-[9px] font-bold uppercase tracking-wider mb-0.5 ${activeOvaStep === idx ? 'text-blue-200' : 'text-slate-400'}`}>{step.label}</p>
-                    <p className={`text-xs font-bold truncate ${activeOvaStep === idx ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>{step.titulo}</p>
-                  </div>
-                  {activeOvaStep > idx && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-                </button>
-              ))}
-            </div>
-            
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-              <Button 
-                variant="outline" 
-                className="w-full text-xs justify-center font-bold tracking-wider"
-                onClick={() => setSelectedOva(null)}
-              >
-                SALIR DEL CURSO
-              </Button>
-            </div>
-          </div>
-
-          {/* Área de interacción */}
-          <div className="flex-grow flex flex-col h-full overflow-hidden bg-background">
-            <div className="flex-grow overflow-y-auto custom-scrollbar p-8 lg:p-12">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep?.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="max-w-4xl mx-auto h-full"
-                >
-                  {currentStep?.tipo === 'intro' && (
-                    <div className="space-y-8">
-                      <div className="aspect-[21/9] rounded-2xl overflow-hidden relative group">
-                        <img src={currentStep.content.imagen} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                        <div className="absolute bottom-6 left-6 right-6">
-                          <span className="inline-block px-3 py-1 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider mb-2">MÓDULO DE INICIO</span>
-                          <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight">{currentStep.content.titulo}</h1>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                         <div className="space-y-3">
-                           <h4 className="text-xs font-bold text-[#10346E] dark:text-blue-400 uppercase tracking-wider">
-                             Objetivo Central
-                           </h4>
-                           <p className="text-lg text-foreground font-bold leading-relaxed">{currentStep.content.objetivo}</p>
-                         </div>
-                         <div className="space-y-3">
-                           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                             Contextualización
-                           </h4>
-                           <p className="text-foreground/70 leading-relaxed text-sm">{currentStep.content.introduccion}</p>
-                         </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {currentStep?.tipo === 'section' && (
-                    <div className="space-y-6 pb-10">
-                       <div className="flex items-end justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
-                         <div className="space-y-1">
-                           <h4 className="text-[10px] font-bold text-[#10346E] dark:text-blue-400 uppercase tracking-widest">{currentStep.label}</h4>
-                           <h2 className="text-3xl font-black text-foreground uppercase tracking-tight">{currentStep.titulo}</h2>
-                         </div>
-                         <div className="text-4xl font-black text-slate-200 dark:text-slate-800 select-none">0{activeOvaStep + 1}</div>
-                       </div>
-
-                       {/* Bloque de video */}
-                       {currentStep.content.video_url && (
-                         <div className="aspect-video rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black/40">
-                           <iframe
-                             src={formatYoutubeUrl(currentStep.content.video_url)}
-                             className="w-full h-full"
-                             frameBorder="0"
-                             allowFullScreen
-                             title="Video"
-                           />
-                         </div>
-                       )}
-
-                       {/* Bloque de imagen */}
-                       {currentStep.content.imagen_url && (
-                         <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                           <img
-                             src={currentStep.content.imagen_url}
-                             alt={currentStep.titulo}
-                             className="w-full max-h-[500px] object-cover"
-                           />
-                         </div>
-                       )}
-
-                       {/* Bloque de nota */}
-                       {currentStep.content.tipo === 'nota' && (
-                         <div className="p-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
-                           <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-2 block">Nota Importante</span>
-                           {currentStep.content.contenido && (
-                             <div
-                               className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-sm leading-relaxed"
-                               dangerouslySetInnerHTML={{ __html: sanitizeHTML(currentStep.content.contenido) }}
-                             />
-                           )}
-                         </div>
-                       )}
-
-                       {/* Bloque de código */}
-                       {currentStep.content.tipo === 'codigo' && currentStep.content.codigo && (
-                         <div className="rounded-2xl bg-[#0d1117] border border-[#30363d] overflow-hidden">
-                           <div className="flex items-center gap-2 px-5 py-2.5 bg-[#161b22] border-b border-[#30363d]">
-                             <span className="text-xs text-[#8b949e] font-mono">{currentStep.content.lenguaje || 'code'}</span>
-                           </div>
-                           <pre className="px-5 py-4 text-xs text-[#c9d1d9] font-mono overflow-x-auto leading-relaxed">
-                             <code>{currentStep.content.codigo}</code>
-                           </pre>
-                         </div>
-                       )}
-
-                       {/* Contenido textual */}
-                       {currentStep.content.contenido && currentStep.content.tipo !== 'nota' && (
-                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                           <div
-                             className="prose dark:prose-invert max-w-none text-foreground/80 text-base leading-relaxed"
-                             dangerouslySetInnerHTML={{ __html: sanitizeHTML(
-                               currentStep.content.contenido.includes('<') 
-                                 ? currentStep.content.contenido 
-                                 : currentStep.content.contenido.replace(/\n/g, '<br/>')
-                             ) }}
-                           />
-                         </div>
-                       )}
-                    </div>
-                  )}
-
-                  {currentStep?.tipo === 'final' && (
-                    <div className="h-full flex flex-col justify-center">
-                      {currentStep.content.evaluacion ? (
-                        <QuizPlayer
-                          evaluacion={currentStep.content.evaluacion}
-                          recursos={currentStep.content.recursos}
-                          onComplete={handleQuizComplete}
-                        />
-                      ) : (
-                        <div className="max-w-2xl mx-auto text-center space-y-8">
-                          <div>
-                            <Terminal className="w-16 h-16 text-[#10346E] mx-auto mb-4" />
-                            <h2 className="text-3xl font-black text-foreground uppercase tracking-tight mb-2">Evaluación de Conocimiento</h2>
-                            <p className="text-foreground/70 text-base leading-relaxed">{currentStep.content.actividad}</p>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                             {currentStep.content.recursos?.pdf_url && (
-                                <div 
-                                  className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 cursor-pointer hover:shadow-sm"
-                                  onClick={() => window.open(currentStep.content.recursos.pdf_url, '_blank')}
-                                >
-                                   <div className="flex items-center gap-3">
-                                     <div className="p-2.5 rounded-xl bg-red-50 text-red-600"><FileText className="w-5 h-5" /></div>
-                                     <div>
-                                       <h5 className="text-foreground font-bold text-sm">Documentación PDF</h5>
-                                       <p className="text-[10px] text-slate-400 uppercase font-bold">Guía Técnica Detallada</p>
-                                     </div>
-                                   </div>
-                                </div>
-                             )}
-                             {currentStep.content.recursos?.youtube_url && (
-                                <div 
-                                  className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 cursor-pointer hover:shadow-sm"
-                                  onClick={() => window.open(currentStep.content.recursos.youtube_url, '_blank')}
-                                >
-                                   <div className="flex items-center gap-3">
-                                     <div className="p-2.5 rounded-xl bg-blue-50 text-blue-800"><Video className="w-5 h-5" /></div>
-                                     <div>
-                                       <h5 className="text-foreground font-bold text-sm">Material Audiovisual</h5>
-                                       <p className="text-[10px] text-slate-400 uppercase font-bold">Video Explicativo</p>
-                                     </div>
-                                   </div>
-                                </div>
-                             )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Controles de navegación */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
-               <div className="flex items-center gap-4">
-                 <Button 
-                   variant="outline" 
-                   className="gap-2 font-bold text-xs disabled:opacity-30"
-                   onClick={handlePrevStep}
-                   disabled={activeOvaStep === 0}
-                 >
-                   <ArrowLeft className="w-4 h-4" /> ANTERIOR
-                 </Button>
-               </div>
-
-               <div className="hidden lg:flex items-center gap-2">
-                 {ovaSteps.map((_, i) => (
-                   <div 
-                     key={i} 
-                     className={`h-1.5 transition-all rounded-full ${i === activeOvaStep ? 'w-8 bg-[#10346E]' : 'w-2 bg-slate-200 dark:bg-slate-700'}`} 
-                   />
-                 ))}
-               </div>
-
-               <Button 
-                 variant={activeOvaStep === ovaSteps.length - 1 ? 'outline' : 'emerald'}
-                 className="gap-2 font-bold text-xs"
-                 onClick={activeOvaStep === ovaSteps.length - 1 ? () => setSelectedOva(null) : handleNextStep}
-               >
-                 {activeOvaStep === ovaSteps.length - 1 ? 'TERMINAR CURSO' : 'SIGUIENTE PASO'} 
-                 <ChevronRight className="w-4 h-4" />
-               </Button>
-            </div>
           </div>
         </div>
       </Modal>
