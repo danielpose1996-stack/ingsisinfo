@@ -1,6 +1,6 @@
 # Semillero SISINFO — Plataforma Institucional & Aula Virtual
 
-Plataforma web académica integral desarrollada para el **Semillero de Investigación SISINFO** de la **Facultad de Ingeniería de Sistemas e Informática — UNIPAZ**. El sistema centraliza la difusión institucional, convocatorias de investigación, eventos, noticias y un moderno ecosistema de **Aula Virtual** con Objetos Virtuales de Aprendizaje (OVAs) interactivos.
+Plataforma web académica integral desarrollada para el **Semillero de Investigación SISINFO** **de Ingeniería  Informática — UNIPAZ**. El sistema centraliza la difusión institucional, convocatorias de investigación, eventos, noticias y un moderno ecosistema de **Aula Virtual** con Objetos Virtuales de Aprendizaje (OVAs) interactivos.
 
 ---
 
