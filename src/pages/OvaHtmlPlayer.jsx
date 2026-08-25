@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { obtenerOvaPorId, registrarResultadoOva } from '../lib/supabase';
-import { ArrowLeft, ExternalLink, Loader2, Award, X, AlertTriangle, BookOpen, Settings } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, Award, X, AlertTriangle, BookOpen, Settings, Globe, Maximize2 } from 'lucide-react';
 import Button from '../components/Button';
 import GlassCard from '../components/GlassCard';
 import QuizPlayer from '../components/QuizPlayer';
@@ -114,9 +114,9 @@ export default function OvaHtmlPlayer() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-12 h-12 text-[#1E3A8A] animate-spin mb-4" />
-        <p className="text-foreground/40 italic font-bold">Cargando visualizador e interpretando HTML...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F8FAFC] dark:bg-slate-950">
+        <Loader2 className="w-10 h-10 text-[#10346E] dark:text-blue-400 animate-spin mb-4" />
+        <p className="text-slate-500 dark:text-slate-400 font-semibold text-xs">Cargando visualizador e interpretando paquete HTML...</p>
       </div>
     );
   }
@@ -124,36 +124,36 @@ export default function OvaHtmlPlayer() {
   if (error || !ova) {
     const isStaff = perfil?.rol === 'admin' || perfil?.rol === 'docente';
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
-        <GlassCard className="max-w-md w-full p-8 text-center border-card-border space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-500">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F8FAFC] dark:bg-slate-950 p-6">
+        <GlassCard className="max-w-md w-full p-8 text-center border-card-border space-y-6 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/50 flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
             <AlertTriangle className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground italic mb-2">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white mb-2">
               Contenido HTML No Disponible
             </h2>
-            <p className="text-xs text-foreground/60 leading-relaxed">
-              {error || 'El archivo .html asociado a este curso no se encuentra cargado en el servidor.'}
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              {error || 'El archivo .html asociado a este objeto de aprendizaje no se encuentra cargado en el servidor.'}
             </p>
             {ova?.titulo && (
-              <p className="mt-3 text-xs font-bold text-[#1E3A8A] dark:text-blue-400 italic">
+              <p className="mt-3 text-xs font-bold text-[#10346E] dark:text-blue-400">
                 OVA: {ova.titulo}
               </p>
             )}
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button onClick={() => navigate('/modulos')} variant="outline" className="w-full sm:w-auto gap-2 italic text-xs">
+            <Button onClick={() => navigate('/modulos')} variant="outline" className="w-full sm:w-auto gap-2 text-xs font-bold rounded-xl cursor-pointer">
               <BookOpen className="w-4 h-4" /> Ver Líneas
             </Button>
             {isStaff && (
               <Button 
                 onClick={() => navigate(perfil?.rol === 'admin' ? '/dashboard/admin' : '/dashboard/teacher')} 
                 variant="primary" 
-                className="w-full sm:w-auto gap-2 italic text-xs bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none"
+                className="w-full sm:w-auto gap-2 text-xs font-bold bg-[#10346E] hover:bg-[#18458F] text-white border-none rounded-xl cursor-pointer"
               >
-                <Settings className="w-4 h-4" /> Ir a Gestionar OVA
+                <Settings className="w-4 h-4" /> Gestionar OVA
               </Button>
             )}
           </div>
@@ -173,79 +173,109 @@ export default function OvaHtmlPlayer() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-background overflow-hidden relative">
-      {/* NAVEGACIÓN DEL ENCABEZADO: se oculta en pantalla completa */}
+    <div className="flex flex-col h-screen w-full bg-[#F8FAFC] dark:bg-slate-950 overflow-hidden relative">
+      {/* ─── Encabezado Institucional ─── */}
       {!isFullscreen && (
-        <header className="h-16 shrink-0 border-b border-card-border bg-card flex items-center justify-between px-6 z-10 shadow-sm">
-          <div className="flex items-center gap-4">
+        <header className="h-16 shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-4 sm:px-6 z-10 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
             <button 
               onClick={() => navigate(-1)}
-              className="p-2 rounded-xl bg-background hover:bg-white/5 text-foreground/60 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+              title="Volver a la línea"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Volver</span>
             </button>
-            <div>
-              <h1 className="text-sm font-bold text-foreground italic uppercase tracking-tighter line-clamp-1">{ova.titulo}</h1>
-              <p className="text-[10px] text-foreground/40 font-mono tracking-widest uppercase">Modo Visualización HTML</p>
+            
+            <div className="min-w-0 flex items-center gap-2.5">
+              <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                <Globe className="w-3 h-3" />
+                Paquete HTML5
+              </span>
+              <div className="min-w-0">
+                <h1 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate max-w-md sm:max-w-xl">
+                  {ova.titulo}
+                </h1>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider">
+                  Visualizador Interactivo
+                </p>
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {evaluacion && (
-               <Button 
-                 variant="primary" 
-                 size="sm" 
-                 className="gap-2 italic text-[10px] bg-[#1E3A8A] hover:bg-[#1E40AF] text-white border-none"
-                 onClick={() => setShowQuizModal(true)}
-               >
-                 EVALUACIÓN FINAL <Award className="w-3.5 h-3.5" />
-               </Button>
+              <Button 
+                variant="primary" 
+                size="sm" 
+                className="gap-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white border-none rounded-xl cursor-pointer shadow-xs"
+                onClick={() => setShowQuizModal(true)}
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Evaluación Final</span>
+              </Button>
             )}
             <Button 
               variant="outline" 
               size="sm" 
-              className="gap-2 italic text-[10px]"
+              className="gap-1.5 text-xs font-bold rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
               onClick={() => window.open(`/ova-html/${ova.id}?fullscreen=true`, '_blank')}
             >
-              EXPANDIR <ExternalLink className="w-3.5 h-3.5" />
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Pantalla Completa</span>
             </Button>
           </div>
         </header>
       )}
 
-      {/* CAPA DEL MODAL DE CUESTIONARIO */}
+      {/* ─── Modal de Cuestionario ─── */}
       {showQuizModal && evaluacion && (
-        <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col pt-8 px-4 sm:px-12 overflow-y-auto">
-           <div className="max-w-4xl w-full mx-auto pb-20">
-             <div className="flex justify-between items-center mb-10">
-               <h2 className="text-2xl font-black italic text-foreground uppercase tracking-widest">
-                 Evaluación <span className="text-[#1E3A8A]">Final</span>
-               </h2>
-               <button onClick={() => setShowQuizModal(false)} className="p-3 bg-card rounded-full hover:bg-white/10 text-foreground/60 hover:text-white transition-colors">
-                 <X className="w-6 h-6" />
-               </button>
-             </div>
-             <QuizPlayer 
-               evaluacion={evaluacion}
-               onComplete={handleQuizComplete}
-             />
-           </div>
+        <div className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex flex-col pt-8 px-4 sm:px-12 overflow-y-auto animate-in fade-in">
+          <div className="max-w-4xl w-full mx-auto pb-20">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-10 space-y-6 shadow-2xl">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/50">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Evaluación Final del OVA
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Demuestra tus competencias y conocimientos adquiridos</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowQuizModal(false)} 
+                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <QuizPlayer 
+                evaluacion={evaluacion}
+                onComplete={handleQuizComplete}
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      {/* REPRODUCTOR IFRAME con srcDoc */}
+      {/* ─── Reproductor Iframe Seguro con Permisos Completos ─── */}
       <main className="flex-1 w-full h-full relative bg-white">
         {htmlContent ? (
           <iframe 
             srcDoc={htmlContent} 
-            className="w-full h-full border-none absolute inset-0"
+            className="w-full h-full border-0 absolute inset-0 bg-white"
             title={ova.titulo}
-            sandbox="allow-scripts allow-forms"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-popups-to-escape-sandbox"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-red-500 italic font-bold">El archivo HTML está vacío o es inválido.</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-xs">
+            <p className="font-bold">El archivo HTML está vacío o es inválido.</p>
           </div>
         )}
       </main>
