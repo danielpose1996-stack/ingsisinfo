@@ -58,7 +58,7 @@ export default function OvaHtmlPlayer() {
         }
         const htmlText = await res.text();
         
-        // Extraer el directorio base del archivo HTML subido para resolver recursos relativos
+        // Extraer el directorio base del archivo HTML subido para resolver recursos relativos (imágenes, css, fuentes)
         const fileUrl = data.archivo_html_url;
         const lastSlash = fileUrl.lastIndexOf('/');
         const baseUrl = lastSlash !== -1 ? fileUrl.substring(0, lastSlash + 1) : '';
@@ -66,9 +66,10 @@ export default function OvaHtmlPlayer() {
         let processedHtml = htmlText;
         if (baseUrl) {
           const baseTag = `<base href="${baseUrl}">`;
-          const storageMockScript = `
+          const interceptorScript = `
             <script>
               (function() {
+                // 1. Mock de Storage seguro ante restricciones de iframe
                 const makeStorage = () => {
                   const store = {};
                   return {
@@ -83,17 +84,50 @@ export default function OvaHtmlPlayer() {
                 try {
                   window.localStorage;
                 } catch (e) {
-                  Object.defineProperty(window, 'localStorage', { value: makeStorage() });
+                  try { Object.defineProperty(window, 'localStorage', { value: makeStorage(), configurable: true }); } catch (err) {}
                 }
                 try {
                   window.sessionStorage;
                 } catch (e) {
-                  Object.defineProperty(window, 'sessionStorage', { value: makeStorage() });
+                  try { Object.defineProperty(window, 'sessionStorage', { value: makeStorage(), configurable: true }); } catch (err) {}
                 }
+
+                // 2. Interceptor de anclas y navegación interna:
+                // La etiqueta <base href="..."> es necesaria para cargar CSS/imágenes relativas, pero el navegador
+                // convierte los <a href="#m01"> en URLs completas hacia Supabase Storage. Al hacer clic, el navegador
+                // intenta recargar el iframe con Supabase Storage (que bloquea incrustaciones).
+                // Este listener captura el clic y realiza scrollIntoView nativo sin recarga de red.
+                document.addEventListener('click', function(e) {
+                  var a = e.target.closest('a');
+                  if (!a) return;
+                  var rawHref = a.getAttribute('href');
+                  if (!rawHref) return;
+
+                  // Anclas internas (#seccion, #m01, #formularios, etc.)
+                  if (rawHref.startsWith('#')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var targetId = rawHref.substring(1);
+                    var targetEl = document.getElementById(targetId) || document.querySelector('[name="' + targetId + '"]');
+                    if (targetEl) {
+                      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      try {
+                        history.replaceState(null, '', '#' + targetId);
+                      } catch (err) {}
+                    }
+                    return false;
+                  }
+
+                  // Enlaces externos o a otros documentos .html
+                  if (!rawHref.startsWith('javascript:')) {
+                    a.setAttribute('target', '_blank');
+                    a.setAttribute('rel', 'noopener noreferrer');
+                  }
+                }, true);
               })();
             </script>
           `;
-          const injection = baseTag + storageMockScript;
+          const injection = baseTag + interceptorScript;
           if (processedHtml.includes('<head>')) {
             processedHtml = processedHtml.replace('<head>', `<head>${injection}`);
           } else if (processedHtml.includes('<HEAD>')) {
