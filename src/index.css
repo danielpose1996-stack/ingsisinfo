@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #1E3A8A;
   --color-primary-dark: #1D4ED8;
   --color-institutional: #1E3A8A;
   --color-institutional-light: #1E40AF;
-  --color-blue-500: #1E3A8A;
   --color-blue-500: #1E3A8A;
   --color-amber-500: #d97706;
   
@@ -17,7 +18,7 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light only;
   --background: #F8FAFC;
   --text: #0F172A;
   --card-bg: #FFFFFF;
@@ -116,22 +117,6 @@
   }
 
   /* Animación de brillo flotante en malla */
-  @keyframes float-slow {
-    0%, 100% {
-      transform: translate(0px, 0px) scale(1);
-    }
-    33% {
-      transform: translate(30px, -50px) scale(1.1);
-    }
-    66% {
-      transform: translate(-20px, 20px) scale(0.95);
-    }
-  }
-
-  .animate-float-slow {
-    animation: float-slow 15s infinite ease-in-out;
-  }
-
   @keyframes float-slow {
     0%, 100% {
       transform: translate(0px, 0px) scale(1);
