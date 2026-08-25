@@ -10,18 +10,15 @@ import {
   Award,
   Clock,
   FileDown,
-  Sparkles,
   CheckCircle2,
-  AlertCircle,
   ExternalLink,
-  ChevronRight,
-  HelpCircle,
   BookOpen,
   Video,
-  ListPlus
+  ListPlus,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { extractYouTubeId, getYouTubeEmbedUrl, getYouTubeThumbnail } from '../lib/youtube';
+import { extractYouTubeId, getYouTubeEmbedUrl } from '../lib/youtube';
 import RichTextEditor from './RichTextEditor';
 import QuizBuilder from './QuizBuilder';
 import Button from './Button';
@@ -33,7 +30,6 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
   const quizFinal = courseData?.quiz_final || { activo: false, preguntas: [] };
 
   const [expandedSections, setExpandedSections] = useState({ 0: true });
-  const [activeLessonModal, setActiveLessonModal] = useState(null); // { sectionIndex, lessonIndex }
   const [activeQuizTarget, setActiveQuizTarget] = useState(null); // { type: 'section'|'lesson'|'final', sectionIndex, lessonIndex }
 
   const toggleSectionExpand = (index) => {
@@ -115,7 +111,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
       lecciones: [...currentLessons, newLesson]
     };
     onChange({ ...courseData, secciones: updated });
-    toast.success('Lección agregada a la sección');
+    toast.success('Lección agregada');
   };
 
   const handleUpdateLesson = (sectionIndex, lessonIndex, field, value) => {
@@ -201,42 +197,42 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
   }, 0) + (quizFinal.activo && quizFinal.preguntas?.length > 0 ? 1 : 0);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* ─── Encabezado Resumen del Curso ─── */}
-      <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-[#10346E] rounded-3xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* ─── Encabezado Institucional del Curso (Tema Claro) ─── */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-900/50 text-[#10346E] dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
               <Video className="w-3.5 h-3.5" />
-              <span>Estructura del Curso Multimedia</span>
+              <span>Estructura del Curso Modular</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Organizador de Secciones y Lecciones en Video
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Organizador de Secciones y Lecciones
             </h3>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Define los módulos temáticos, añade videos de YouTube mediante enlaces embebidos, adjunta notas pedagógicas y agrega quizzes interactivos.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+              Estructura las unidades temáticas del curso, vincula las lecciones con videos de YouTube, añade apuntes teóricos y asigna evaluaciones formativas.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 shrink-0">
-            <div className="text-center px-3 border-r border-white/10">
-              <span className="block text-2xl font-black text-white font-mono">{secciones.length}</span>
-              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">Secciones</span>
+          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-3.5 border border-slate-200 dark:border-slate-700/80 shrink-0">
+            <div className="text-center px-3 border-r border-slate-200 dark:border-slate-700">
+              <span className="block text-xl font-black text-slate-900 dark:text-white font-mono">{secciones.length}</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Secciones</span>
             </div>
-            <div className="text-center px-3 border-r border-white/10">
-              <span className="block text-2xl font-black text-blue-400 font-mono">{totalLecciones}</span>
-              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">Lecciones</span>
+            <div className="text-center px-3 border-r border-slate-200 dark:border-slate-700">
+              <span className="block text-xl font-black text-[#10346E] dark:text-blue-400 font-mono">{totalLecciones}</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lecciones</span>
             </div>
             <div className="text-center px-3">
-              <span className="block text-2xl font-black text-amber-400 font-mono">{totalQuizzes}</span>
-              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">Quizzes</span>
+              <span className="block text-xl font-black text-amber-600 dark:text-amber-400 font-mono">{totalQuizzes}</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Quizzes</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ─── Listado de Secciones ─── */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {secciones.map((seccion, sIdx) => {
           const isExpanded = expandedSections[sIdx] !== false;
           const lecciones = seccion.lecciones || [];
@@ -245,21 +241,21 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
           return (
             <div
               key={seccion.id || sIdx}
-              className="bg-card border border-card-border rounded-2xl overflow-hidden shadow-sm transition-all duration-200"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs transition-all duration-200"
             >
               {/* Cabecera de la Sección */}
-              <div className="p-5 sm:p-6 bg-slate-50/80 dark:bg-slate-900/80 border-b border-card-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-5 sm:p-6 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1">
                   <button
                     type="button"
                     onClick={() => toggleSectionExpand(sIdx)}
-                    className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-card-border text-foreground/70 hover:text-foreground cursor-pointer transition-colors"
+                    className="p-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer transition-colors"
                     title={isExpanded ? 'Colapsar sección' : 'Expandir sección'}
                   >
                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
 
-                  <div className="w-8 h-8 rounded-xl bg-[#10346E] text-white font-bold text-xs flex items-center justify-center shrink-0 font-mono shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-[#10346E] text-white font-bold text-xs flex items-center justify-center shrink-0 font-mono shadow-xs">
                     {sIdx + 1}
                   </div>
 
@@ -269,26 +265,26 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                       value={seccion.titulo}
                       onChange={(e) => handleUpdateSection(sIdx, 'titulo', e.target.value)}
                       placeholder="Título de la Sección (ej: Unidad 1: Fundamentos)..."
-                      className="w-full bg-transparent font-black text-sm sm:text-base text-foreground placeholder:text-foreground/30 focus:outline-none border-b border-transparent focus:border-[#10346E] pb-0.5 transition-colors"
+                      className="w-full bg-transparent font-black text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none border-b border-transparent focus:border-[#10346E] pb-0.5 transition-colors"
                     />
                     <input
                       type="text"
                       value={seccion.descripcion || ''}
                       onChange={(e) => handleUpdateSection(sIdx, 'descripcion', e.target.value)}
                       placeholder="Descripción u objetivo breve de la sección (opcional)..."
-                      className="w-full bg-transparent text-xs text-foreground/60 placeholder:text-foreground/30 focus:outline-none mt-1"
+                      className="w-full bg-transparent text-xs text-slate-500 placeholder:text-slate-400 focus:outline-none mt-1"
                     />
                   </div>
                 </div>
 
                 {/* Controles de la Sección */}
                 <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-                  <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-card-border">
+                  <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
                     <button
                       type="button"
                       disabled={sIdx === 0}
                       onClick={() => handleMoveSection(sIdx, 'up')}
-                      className="p-1 rounded-lg text-foreground/50 hover:text-foreground disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
                       title="Mover sección arriba"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -297,7 +293,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                       type="button"
                       disabled={sIdx === secciones.length - 1}
                       onClick={() => handleMoveSection(sIdx, 'down')}
-                      className="p-1 rounded-lg text-foreground/50 hover:text-foreground disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
                       title="Mover sección abajo"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -310,18 +306,18 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                     onClick={() => setActiveQuizTarget({ type: 'section', sectionIndex: sIdx })}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                       hasSectionQuiz
-                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-foreground/60 border-card-border hover:text-foreground'
+                        ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                     }`}
                   >
-                    <Award className="w-3.5 h-3.5" />
+                    <Award className="w-3.5 h-3.5 text-amber-600" />
                     <span>{hasSectionQuiz ? `Quiz de Sección (${seccion.quiz.preguntas.length})` : '+ Quiz de Sección'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleDeleteSection(sIdx)}
-                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200 dark:hover:border-red-900/50 transition-colors cursor-pointer"
                     title="Eliminar esta sección"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -336,7 +332,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="p-5 sm:p-6 space-y-6"
+                    className="p-5 sm:p-6 space-y-5"
                   >
                     {/* Lecciones de la Sección */}
                     <div className="space-y-4">
@@ -348,12 +344,12 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                         return (
                           <div
                             key={leccion.id || lIdx}
-                            className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-4 hover:border-[#10346E]/40 transition-all"
+                            className="p-5 sm:p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4 hover:border-[#10346E]/40 transition-all"
                           >
                             {/* Cabecera de la Lección */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
                               <div className="flex items-center gap-2.5 flex-1">
-                                <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-400">
+                                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#10346E] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
                                   <Video className="w-4 h-4" />
                                 </div>
                                 <input
@@ -361,30 +357,30 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                   value={leccion.titulo}
                                   onChange={(e) => handleUpdateLesson(sIdx, lIdx, 'titulo', e.target.value)}
                                   placeholder="Título de la lección..."
-                                  className="w-full bg-transparent font-bold text-sm text-foreground focus:outline-none"
+                                  className="w-full bg-transparent font-bold text-sm text-slate-900 dark:text-white focus:outline-none"
                                 />
                               </div>
 
                               <div className="flex items-center gap-2 self-end sm:self-center">
                                 {/* Duración Estimada */}
-                                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] text-foreground/70">
-                                  <Clock className="w-3 h-3 text-slate-400" />
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
+                                  <Clock className="w-3.5 h-3.5 text-slate-400" />
                                   <input
                                     type="text"
                                     value={leccion.duracion || ''}
                                     onChange={(e) => handleUpdateLesson(sIdx, lIdx, 'duracion', e.target.value)}
                                     placeholder="10 min"
-                                    className="w-16 bg-transparent text-center focus:outline-none font-medium"
+                                    className="w-16 bg-transparent text-center focus:outline-none font-bold"
                                   />
                                 </div>
 
                                 {/* Ordenar Lección */}
-                                <div className="flex items-center gap-0.5">
+                                <div className="flex items-center gap-0.5 bg-white dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700">
                                   <button
                                     type="button"
                                     disabled={lIdx === 0}
                                     onClick={() => handleMoveLesson(sIdx, lIdx, 'up')}
-                                    className="p-1 rounded text-foreground/40 hover:text-foreground disabled:opacity-20 cursor-pointer"
+                                    className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
                                     title="Mover lección arriba"
                                   >
                                     <ChevronUp className="w-3.5 h-3.5" />
@@ -393,7 +389,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                     type="button"
                                     disabled={lIdx === lecciones.length - 1}
                                     onClick={() => handleMoveLesson(sIdx, lIdx, 'down')}
-                                    className="p-1 rounded text-foreground/40 hover:text-foreground disabled:opacity-20 cursor-pointer"
+                                    className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-20 cursor-pointer"
                                     title="Mover lección abajo"
                                   >
                                     <ChevronDown className="w-3.5 h-3.5" />
@@ -403,7 +399,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteLesson(sIdx, lIdx)}
-                                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200 transition-colors cursor-pointer"
                                   title="Eliminar lección"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -415,7 +411,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                               <div className="lg:col-span-7 space-y-3">
                                 <div className="space-y-1">
-                                  <label className="flex items-center gap-1.5 text-xs font-bold text-foreground/80">
+                                  <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                     <Youtube className="w-4 h-4 text-red-600" />
                                     <span>Enlace o Iframe de YouTube *</span>
                                   </label>
@@ -424,23 +420,23 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                     value={leccion.video_url || ''}
                                     onChange={(e) => handleUpdateLesson(sIdx, lIdx, 'video_url', e.target.value)}
                                     placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
-                                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-foreground focus:border-[#10346E] focus:outline-none transition-colors"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 dark:text-slate-100 focus:border-[#10346E] focus:outline-none transition-colors shadow-2xs"
                                   />
-                                  <span className="text-[10px] text-foreground/40 block">
-                                    Pega la URL de YouTube o el código &lt;iframe&gt; completo. El sistema extraerá el reproductor automáticamente.
+                                  <span className="text-[10px] text-slate-500 block">
+                                    Pega la URL de YouTube o el bloque &lt;iframe&gt;. El sistema procesará el reproductor automáticamente.
                                   </span>
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="block text-xs font-bold text-foreground/80">
+                                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
                                     Descripción o Resumen de la Lección
                                   </label>
                                   <textarea
                                     value={leccion.descripcion || ''}
                                     onChange={(e) => handleUpdateLesson(sIdx, lIdx, 'descripcion', e.target.value)}
-                                    placeholder="Explica qué aprenderá el estudiante en este video..."
+                                    placeholder="Explica qué competencias o conceptos se explican en este video..."
                                     rows={2}
-                                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-foreground focus:border-[#10346E] focus:outline-none resize-none"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-100 focus:border-[#10346E] focus:outline-none resize-none leading-relaxed shadow-2xs"
                                   />
                                 </div>
 
@@ -451,50 +447,51 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                     onClick={() => setActiveQuizTarget({ type: 'lesson', sectionIndex: sIdx, lessonIndex: lIdx })}
                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                                       hasLessonQuiz
-                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-foreground/70 border-card-border hover:text-foreground'
+                                        ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900'
+                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                                     }`}
                                   >
-                                    <Award className="w-3.5 h-3.5" />
+                                    <Award className="w-3.5 h-3.5 text-amber-600" />
                                     <span>{hasLessonQuiz ? `Quiz de Lección (${leccion.quiz.preguntas.length})` : '+ Quiz en esta lección'}</span>
                                   </button>
 
                                   <button
                                     type="button"
                                     onClick={() => handleAddResource(sIdx, lIdx)}
-                                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-foreground/70 border border-card-border hover:text-foreground transition-all flex items-center gap-1.5 cursor-pointer"
+                                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer"
                                   >
-                                    <FileDown className="w-3.5 h-3.5" />
+                                    <FileDown className="w-3.5 h-3.5 text-[#10346E] dark:text-blue-400" />
                                     <span>+ Material / Descarga</span>
                                   </button>
                                 </div>
 
                                 {/* Listado de Recursos Descargables */}
                                 {(leccion.recursos || []).length > 0 && (
-                                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-card-border space-y-2 mt-2">
-                                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-wider block">
+                                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 mt-2 shadow-2xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                                       Recursos Descargables ({leccion.recursos.length}):
                                     </span>
                                     {leccion.recursos.map((rec, rIdx) => (
                                       <div key={rIdx} className="flex items-center gap-2">
                                         <input
                                           type="text"
-                                          placeholder="Nombre del recurso (ej: Guía PDF)..."
+                                          placeholder="Nombre del recurso (ej: Guía de Ejercicios PDF)..."
                                           value={rec.nombre}
                                           onChange={(e) => handleUpdateResource(sIdx, lIdx, rIdx, 'nombre', e.target.value)}
-                                          className="flex-1 bg-white dark:bg-slate-800 border border-card-border rounded-lg px-2.5 py-1 text-xs text-foreground focus:outline-none"
+                                          className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none"
                                         />
                                         <input
                                           type="text"
                                           placeholder="URL de descarga..."
                                           value={rec.url}
                                           onChange={(e) => handleUpdateResource(sIdx, lIdx, rIdx, 'url', e.target.value)}
-                                          className="flex-1 bg-white dark:bg-slate-800 border border-card-border rounded-lg px-2.5 py-1 text-xs font-mono text-foreground focus:outline-none"
+                                          className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
                                         />
                                         <button
                                           type="button"
                                           onClick={() => handleDeleteResource(sIdx, lIdx, rIdx)}
-                                          className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                                          className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
+                                          title="Eliminar recurso"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -506,7 +503,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
 
                               {/* Previsualización del Reproductor de Video */}
                               <div className="lg:col-span-5">
-                                <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 aspect-video relative flex items-center justify-center shadow-inner">
+                                <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black aspect-video relative flex items-center justify-center shadow-md">
                                   {videoId ? (
                                     <iframe
                                       src={embedUrl}
@@ -517,10 +514,10 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                                       allowFullScreen
                                     />
                                   ) : (
-                                    <div className="flex flex-col items-center justify-center text-center p-4 text-slate-500">
-                                      <Youtube className="w-10 h-10 mb-2 opacity-30" />
-                                      <span className="text-xs font-medium">Previsualización de Video</span>
-                                      <span className="text-[10px] text-slate-600 mt-1">Ingresa el enlace de YouTube a la izquierda</span>
+                                    <div className="flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                                      <Youtube className="w-10 h-10 mb-2 opacity-30 text-slate-500" />
+                                      <span className="text-xs font-bold text-slate-300">Previsualización de Video</span>
+                                      <span className="text-[11px] text-slate-500 mt-1">Ingresa el enlace de YouTube a la izquierda</span>
                                     </div>
                                   )}
                                 </div>
@@ -529,13 +526,13 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
 
                             {/* Apuntes y Contenido Enriquecido de la Lección */}
                             <div className="pt-2">
-                              <label className="block text-xs font-bold text-foreground/80 mb-1.5">
+                              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                 Apuntes y Contenido de Apoyo (Texto Enriquecido)
                               </label>
                               <RichTextEditor
                                 content={leccion.notas || ''}
                                 onChange={(html) => handleUpdateLesson(sIdx, lIdx, 'notas', html)}
-                                placeholder="Escribe notas, conceptos teóricos o fórmulas complementarias para esta lección..."
+                                placeholder="Escribe notas teóricas, diagramas o explicaciones complementarias para esta lección..."
                                 minHeight="120px"
                               />
                             </div>
@@ -548,7 +545,7 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
                     <button
                       type="button"
                       onClick={() => handleAddLesson(sIdx)}
-                      className="w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-[#10346E] dark:hover:border-blue-500/50 rounded-2xl text-xs font-bold text-foreground/70 hover:text-[#10346E] dark:hover:text-blue-400 bg-slate-50/50 dark:bg-slate-900/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-3 border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#10346E] dark:hover:border-blue-500 rounded-2xl text-xs font-bold text-[#10346E] dark:text-blue-400 bg-white dark:bg-slate-900/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Agregar otra Lección a esta Sección</span>
@@ -565,23 +562,23 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
       <button
         type="button"
         onClick={handleAddSection}
-        className="w-full py-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-[#10346E]/30 dark:border-blue-500/30 hover:border-[#10346E] dark:hover:border-blue-500 text-xs sm:text-sm font-bold text-[#10346E] dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+        className="w-full py-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#10346E] dark:hover:border-blue-500 text-xs sm:text-sm font-bold text-[#10346E] dark:text-blue-400 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
       >
         <ListPlus className="w-5 h-5" />
         <span>Agregar Nueva Sección al Curso</span>
       </button>
 
       {/* ─── Evaluación / Quiz Final del Curso ─── */}
-      <div className="bg-card border border-card-border rounded-2xl p-6 sm:p-8 space-y-5 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-card-border">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/50">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">Examen / Quiz Final del Curso (Opcional)</h4>
-              <p className="text-[11px] text-foreground/50">
-                Evaluación integral de certificación que abarca todas las secciones del curso.
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Examen Final del Curso (Opcional)</h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Evaluación integral de acreditación que abarca todas las secciones del curso.
               </p>
             </div>
           </div>
@@ -591,11 +588,11 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
             onClick={() => setActiveQuizTarget({ type: 'final' })}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer border ${
               quizFinal.activo && (quizFinal.preguntas?.length || 0) > 0
-                ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-foreground/70 border-card-border hover:text-foreground'
+                ? 'bg-[#10346E] text-white border-[#10346E] shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
           >
-            <Award className="w-4 h-4" />
+            <Award className="w-4 h-4 text-amber-400" />
             <span>
               {quizFinal.activo && (quizFinal.preguntas?.length || 0) > 0
                 ? `Configurar Examen Final (${quizFinal.preguntas.length} preguntas)`
@@ -605,17 +602,17 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
         </div>
 
         {quizFinal.activo && (quizFinal.preguntas?.length || 0) > 0 && (
-          <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs text-foreground font-semibold">
-                Examen final activo con {quizFinal.preguntas.length} preguntas configuradas (Nota mínima: {quizFinal.nota_minima || 60}%).
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-xs text-slate-800 dark:text-slate-200 font-bold">
+                Examen final activo con {quizFinal.preguntas.length} preguntas configuradas (Nota mínima de aprobación: {quizFinal.nota_minima || 60}%).
               </span>
             </div>
             <button
               type="button"
               onClick={() => onChange({ ...courseData, quiz_final: { activo: false, preguntas: [] } })}
-              className="text-xs text-red-500 hover:text-red-700 font-bold"
+              className="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer transition-colors"
             >
               Desactivar
             </button>
@@ -626,35 +623,35 @@ export default function CourseStructureEditor({ courseData, onChange, onFileUplo
       {/* ─── Modal de Configuración de Quizzes (Sección / Lección / Final) ─── */}
       <AnimatePresence>
         {activeQuizTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-card border border-card-border rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col"
             >
               {/* Header del Modal */}
-              <div className="p-6 border-b border-card-border flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10">
+              <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-10">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
+                  <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/50">
                     <Award className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-foreground">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">
                       {activeQuizTarget.type === 'final'
                         ? 'Examen Final del Curso'
                         : activeQuizTarget.type === 'section'
                         ? `Quiz de la Sección ${activeQuizTarget.sectionIndex + 1}`
                         : `Quiz de la Lección ${activeQuizTarget.lessonIndex + 1}`}
                     </h3>
-                    <p className="text-xs text-foreground/50">Configuración de preguntas y criterios de aprobación</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Configuración de preguntas y criterios de aprobación</p>
                   </div>
                 </div>
 
                 <Button
                   size="sm"
                   onClick={() => setActiveQuizTarget(null)}
-                  className="bg-[#10346E] text-white font-bold text-xs"
+                  className="bg-[#10346E] hover:bg-[#18458F] text-white font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Guardar y Cerrar
                 </Button>
