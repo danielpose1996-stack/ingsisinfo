@@ -126,8 +126,8 @@ export default function AdminDashboard() {
   });
 
   // Estado de los filtros
-  const [searchUser, setSearchUser] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [searchUserTerm, setSearchUserTerm] = useState('');
+  const [filterUserRol, setFilterUserRol] = useState('');
   const [searchSeguimiento, setSearchSeguimiento] = useState('');
   const [filterLineaSeguimiento, setFilterLineaSeguimiento] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -639,11 +639,11 @@ export default function AdminDashboard() {
                     <tbody className="divide-y divide-card-border">
                       {(() => {
                         const filteredUsers = usuarios.filter(u => {
-                          const fullName = `${u.nombre} ${u.apellido}`;
+                          const fullName = `${u.nombre || ''} ${u.apellido || ''}`;
                           const term = normalize(searchUserTerm);
                           const matchesSearch = !term || 
                             normalize(fullName).includes(term) || 
-                            normalize(u.email).includes(term);
+                            normalize(u.email || '').includes(term);
                           
                           const matchesRol = !filterUserRol || u.rol === filterUserRol;
                           
@@ -653,7 +653,7 @@ export default function AdminDashboard() {
                         if (filteredUsers.length === 0) {
                           return (
                             <tr>
-                              <td colSpan="5" className="px-6 py-20 text-center text-foreground/30 italic">
+                              <td colSpan="5" className="px-6 py-20 text-center text-foreground/40 italic">
                                 No se encontraron usuarios que coincidan con la búsqueda.
                               </td>
                             </tr>
@@ -661,42 +661,46 @@ export default function AdminDashboard() {
                         }
 
                         return filteredUsers.map(u => (
-                        <tr key={u.id} className="hover:bg-background/40 transition-colors group">
-                          <td className="px-6 py-5">
+                        <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-card flex items-center justify-center text-xs font-bold text-[#1E3A8A] border border-card-border italic shadow-sm group-hover:scale-105 transition-transform">
-                                {u.nombre[0]}
+                              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-xs font-black text-[#10346E] dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/40 shadow-xs group-hover:scale-105 transition-transform uppercase">
+                                {u.nombre?.[0] || u.email?.[0] || 'U'}
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-foreground italic tracking-tight">{u.nombre} {u.apellido}</p>
-                                <p className="text-[10px] text-foreground/40 font-medium">{u.email}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-foreground truncate tracking-tight">
+                                  {u.nombre || 'Usuario'} {u.apellido || ''}
+                                </p>
+                                <p className="text-[11px] text-foreground/50 font-mono truncate">{u.email || '—'}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-5 border-0">
+                          <td className="px-6 py-4 border-0">
                             <Badge variant={u.rol === 'admin' ? 'red' : u.rol === 'docente' ? 'blue' : 'amber'}>
                               {u.rol?.toUpperCase()}
                             </Badge>
                           </td>
-                          <td className="px-6 py-5 text-sm text-foreground/60 font-medium italic">
-                            {u.rol === 'docente' ? u.linea_investigacion : u.carrera || '—'}
+                          <td className="px-6 py-4 text-xs font-semibold text-foreground/70">
+                            {u.rol === 'docente' ? (u.linea_investigacion || 'Línea no asignada') : (u.carrera || 'Ingeniería de Sistemas')}
                           </td>
-                          <td className="px-6 py-5 text-xs text-foreground/40 font-mono italic">
-                            {new Date(u.created_at).toLocaleDateString()}
+                          <td className="px-6 py-4 text-xs text-foreground/50 font-mono">
+                            {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
                           </td>
-                          <td className="px-6 py-5 text-right">
-                            <div className="flex justify-end gap-2 group-hover:opacity-100 transition-opacity">
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-1.5">
                               <button
                                 onClick={() => handleEditClick(u)}
-                                className="p-2 rounded-lg bg-card hover:bg-[#1E3A8A]/10 text-foreground/40 hover:text-[#1E3A8A] border border-card-border"
+                                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-foreground/60 hover:text-[#10346E] dark:hover:text-blue-400 border border-card-border cursor-pointer transition-colors"
+                                title="Editar permisos"
                               >
-                                <Edit className="w-4 h-4" />
+                                <Edit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(u.id)}
-                                className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-foreground/40 hover:text-red-500 border border-red-500/10"
+                                className="p-2 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-900/40 cursor-pointer transition-colors"
+                                title="Eliminar usuario"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
