@@ -27,7 +27,10 @@ import {
   ArrowRight,
   Sparkles,
   Layers,
-  GraduationCap
+  GraduationCap,
+  Video,
+  Play,
+  Filter
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -40,6 +43,7 @@ export default function StudentDashboard() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filterType, setFilterType] = useState('todos'); // 'todos' | 'cursos' | 'ovas'
 
   // Estado de edición de perfil
   const [editProfileData, setEditProfileData] = useState({
@@ -108,6 +112,12 @@ export default function StudentDashboard() {
   const promedioPuntaje = resultadosOvas.length > 0 
     ? Math.round(resultadosOvas.reduce((acc, r) => acc + (r.mejor_puntaje || 0), 0) / resultadosOvas.length)
     : 0;
+
+  const filteredResultados = resultadosOvas.filter(res => {
+    if (filterType === 'cursos') return res.ova?.tipo === 'curso';
+    if (filterType === 'ovas') return res.ova?.tipo !== 'curso';
+    return true;
+  });
 
   if (loading) {
     return (
@@ -187,24 +197,24 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase tracking-wider">OVAs Evaluados</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Contenidos Cursados</span>
             <Layers className="w-4 h-4 text-[#10346E] dark:text-blue-400" />
           </div>
           <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
             {resultadosOvas.length}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">Objetos virtuales cursados</p>
+          <p className="text-[10px] text-slate-400 font-medium">OVAs y Cursos iniciados</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase tracking-wider">OVAs Aprobados</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Aprobados / Realizados</span>
             <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
             {ovasAprobados}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">Evaluaciones superadas</p>
+          <p className="text-[10px] text-slate-400 font-medium">Completados satisfactoriamente</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
@@ -215,7 +225,7 @@ export default function StudentDashboard() {
           <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
             {promedioPuntaje}<span className="text-sm font-normal text-slate-400">/100</span>
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">Calificación media de quizzes</p>
+          <p className="text-[10px] text-slate-400 font-medium">Calificación media de pruebas</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-2">
@@ -226,7 +236,7 @@ export default function StudentDashboard() {
           <p className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white">
             {totalIntentos}
           </p>
-          <p className="text-[10px] text-slate-400 font-medium">Total de repasos y pruebas</p>
+          <p className="text-[10px] text-slate-400 font-medium">Total de sesiones y repasos</p>
         </div>
       </div>
 
@@ -235,27 +245,62 @@ export default function StudentDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h2 className="text-xl font-bold text-[#0F172A] dark:text-white tracking-tight uppercase">
-              Mis Evaluaciones y Quizzes
+              Mis Evaluaciones, Cursos y OVAs
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Historial de resultados obtenidos en los Objetos Virtuales de Aprendizaje
+              Historial de calificaciones y progreso en cursos de video y Objetos Virtuales de Aprendizaje
             </p>
           </div>
 
-          <button
-            onClick={() => navigate('/modulos')}
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#10346E] dark:text-blue-400 hover:underline uppercase tracking-wider cursor-pointer"
-          >
-            <span>Ver todas las Líneas de Aprendizaje</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          {/* Filtros de Pestaña */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => setFilterType('todos')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                filterType === 'todos'
+                  ? 'bg-white dark:bg-slate-900 text-[#10346E] dark:text-blue-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              Todos ({resultadosOvas.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterType('cursos')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                filterType === 'cursos'
+                  ? 'bg-white dark:bg-slate-900 text-[#10346E] dark:text-blue-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Video className="w-3.5 h-3.5" />
+              <span>Cursos Video ({resultadosOvas.filter(r => r.ova?.tipo === 'curso').length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterType('ovas')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                filterType === 'ovas'
+                  ? 'bg-white dark:bg-slate-900 text-[#10346E] dark:text-blue-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>OVAs ({resultadosOvas.filter(r => r.ova?.tipo !== 'curso').length})</span>
+            </button>
+          </div>
         </div>
 
-        {resultadosOvas.length > 0 ? (
+        {filteredResultados.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {resultadosOvas.map((res) => {
+            {filteredResultados.map((res) => {
               const ova = res.ova;
+              const isCurso = ova?.tipo === 'curso';
               const moduloNombre = ova?.modulos?.nombre || 'Informática';
+              const detalle = res.respuestas_detalle;
+              const avancePorcentaje = detalle?.porcentaje_avance ?? (res.completado ? 100 : Math.min(res.mejor_puntaje || 0, 100));
+
               return (
                 <div
                   key={res.id}
@@ -268,9 +313,14 @@ export default function StudentDashboard() {
                         <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#10346E] dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider border border-blue-100 dark:border-blue-900/50 truncate">
                           {moduloNombre}
                         </span>
-                        {ova?.tipo === 'curso' && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
-                            Curso
+                        {isCurso ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+                            <Video className="w-3 h-3" />
+                            <span>Curso Video</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                            OVA Interactivo
                           </span>
                         )}
                       </div>
@@ -282,7 +332,7 @@ export default function StudentDashboard() {
                             : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60'
                         }`}
                       >
-                        {res.completado ? (ova?.tipo === 'curso' ? 'Curso Completado' : 'Aprobado') : 'En Progreso'}
+                        {res.completado ? (isCurso ? 'Curso Completado' : 'Aprobado') : 'En Progreso'}
                       </span>
                     </div>
 
@@ -291,26 +341,43 @@ export default function StudentDashboard() {
                       {ova?.titulo || 'Objeto Virtual de Aprendizaje'}
                     </h3>
 
-                    {/* Barra de Puntaje */}
-                    <div className="space-y-1.5 pt-2">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400 font-medium">Mejor Calificación</span>
-                        <span className="font-bold text-[#0F172A] dark:text-white text-sm">
-                          {res.mejor_puntaje || 0}%
-                        </span>
+                    {/* Barra de Avance y Calificación */}
+                    <div className="space-y-3 pt-2">
+                      {/* Calificación / Nota */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400 font-medium">
+                            {isCurso ? 'Nota Media Evaluaciones' : 'Mejor Calificación'}
+                          </span>
+                          <span className="font-bold text-[#0F172A] dark:text-white text-sm">
+                            {res.mejor_puntaje || 0}%
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              (res.mejor_puntaje || 0) >= 60 ? 'bg-emerald-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${Math.min(res.mejor_puntaje || 0, 100)}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            (res.mejor_puntaje || 0) >= 60 ? 'bg-emerald-500' : 'bg-amber-500'
-                          }`}
-                          style={{ width: `${Math.min(res.mejor_puntaje || 0, 100)}%` }}
-                        />
-                      </div>
+
+                      {/* Progreso del curso si aplica */}
+                      {isCurso && detalle && (
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500 dark:text-slate-400">
+                            Avance de contenidos:
+                          </span>
+                          <span className="font-bold text-[#10346E] dark:text-blue-400 font-mono">
+                            {detalle.completados_count || 0} / {detalle.total_items || 0} ({avancePorcentaje}%)
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Metadatos y Botón de Repaso */}
+                  {/* Metadatos y Botón de Acción */}
                   <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
                       <span>Intentos: <strong className="text-slate-600 dark:text-slate-300">{res.intentos || 1}</strong></span>
@@ -319,10 +386,30 @@ export default function StudentDashboard() {
 
                     <button
                       onClick={() => navigate('/modulos')}
-                      className="w-full py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[#10346E] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        isCurso && !res.completado
+                          ? 'bg-[#10346E] hover:bg-[#18458F] text-white shadow-xs'
+                          : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[#10346E] dark:text-blue-300'
+                      }`}
                     >
-                      <BookOpen className="w-4 h-4" />
-                      <span>Repasar en Aula Virtual</span>
+                      {isCurso ? (
+                        res.completado ? (
+                          <>
+                            <BookOpen className="w-4 h-4" />
+                            <span>Repasar Curso de Video</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-4 h-4" />
+                            <span>Continuar Curso de Video</span>
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <BookOpen className="w-4 h-4" />
+                          <span>Repasar en Aula Virtual</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -334,9 +421,15 @@ export default function StudentDashboard() {
             <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-[#10346E] dark:text-blue-400">
               <GraduationCap className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-foreground">Aún no has realizado evaluaciones</h3>
+            <h3 className="text-xl font-bold text-foreground">
+              {filterType === 'cursos' 
+                ? 'No tienes cursos de video en progreso' 
+                : filterType === 'ovas'
+                ? 'No tienes OVAs evaluados todavía'
+                : 'Aún no has realizado evaluaciones'}
+            </h3>
             <p className="text-foreground/50 text-xs max-w-sm leading-relaxed">
-              Explora las líneas de aprendizaje de ingeniería informática, revisa los contenidos interactivos y presenta los quizzes para registrar tu progreso.
+              Explora las líneas de aprendizaje de ingeniería informática, revisa los cursos en video y presenta los quizzes para registrar tu progreso.
             </p>
             <Button
               onClick={() => navigate('/modulos')}

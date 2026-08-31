@@ -439,17 +439,18 @@ export async function subirArchivoOva(file, pathPrefix = 'ovas') {
 // ==========================================
 // SEGUIMIENTO Y MÉTRICAS DE OVAs
 // ==========================================
-export async function registrarResultadoOva(perfilId, ovaId, puntaje, aprobado) {
+export async function registrarResultadoOva(perfilId, ovaId, puntaje, aprobado, respuestasDetalle = null) {
     try {
         const { data: current } = await supabase
             .from('resultados_ovas')
-            .select('mejor_puntaje, intentos, completado')
+            .select('mejor_puntaje, intentos, completado, respuestas_detalle')
             .eq('perfil_id', perfilId)
             .eq('ova_id', ovaId)
             .single();
 
         const intentos = (current?.intentos || 0) + 1;
         const mejorPuntaje = Math.max(current?.mejor_puntaje || 0, puntaje);
+        const finalRespuestasDetalle = respuestasDetalle !== null ? respuestasDetalle : (current?.respuestas_detalle || null);
 
         const { data, error } = await supabase
             .from('resultados_ovas')
@@ -460,6 +461,7 @@ export async function registrarResultadoOva(perfilId, ovaId, puntaje, aprobado) 
                 mejor_puntaje: mejorPuntaje,
                 ultima_calificacion: puntaje,
                 completado: aprobado || (current?.completado || false),
+                respuestas_detalle: finalRespuestasDetalle,
                 updated_at: new Date().toISOString()
             }, {
                 onConflict: 'perfil_id, ova_id'
@@ -481,8 +483,8 @@ export async function obtenerSeguimientoOvas() {
             .from('resultados_ovas')
             .select(`
                 *,
-                perfil:perfil_id ( nombre, apellido, email ),
-                ova:ova_id ( titulo, modulo_id, modulos:modulo_id ( nombre ) )
+                perfil:perfil_id ( id, nombre, apellido, email ),
+                ova:ova_id ( id, titulo, tipo, modulo_id, modulos:modulo_id ( id, nombre ) )
             `)
             .order('updated_at', { ascending: false });
 
@@ -505,6 +507,7 @@ export async function obtenerMisResultadosOvas(perfilId) {
                     titulo,
                     descripcion,
                     imagen_portada,
+                    tipo,
                     modulo_id,
                     modulos:modulo_id ( id, nombre )
                 )

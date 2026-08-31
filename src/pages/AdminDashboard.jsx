@@ -69,7 +69,10 @@ import {
   UserCheck,
   Info,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  Video,
+  CheckCircle2,
+  Award
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -125,11 +128,15 @@ export default function AdminDashboard() {
     linea_investigacion: ''
   });
 
-  // Estado de los filtros
+  // Estado de los filtros y detalle de seguimiento
   const [searchUserTerm, setSearchUserTerm] = useState('');
   const [filterUserRol, setFilterUserRol] = useState('');
   const [searchSeguimiento, setSearchSeguimiento] = useState('');
+  const [filterOvaSeguimiento, setFilterOvaSeguimiento] = useState('');
+  const [filterTipoSeguimiento, setFilterTipoSeguimiento] = useState('');
   const [filterLineaSeguimiento, setFilterLineaSeguimiento] = useState('');
+  const [selectedSeguimientoDetalle, setSelectedSeguimientoDetalle] = useState(null);
+  const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState(null);
@@ -882,29 +889,46 @@ export default function AdminDashboard() {
             {activeTab === 'seguimiento' && (
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Buscador de estudiante */}
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
                       <input
                         type="text"
-                        placeholder="Buscar estudiante..."
-                        value={searchEstudiante}
-                        onChange={(e) => setSearchEstudiante(e.target.value)}
-                        className="bg-card border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-foreground focus:border-[#1E3A8A]/50 min-w-[280px] outline-none italic transition-all"
+                        placeholder="Buscar estudiante o email..."
+                        value={searchSeguimiento}
+                        onChange={(e) => setSearchSeguimiento(e.target.value)}
+                        className="bg-card border border-card-border rounded-xl py-2.5 pl-10 pr-4 text-xs sm:text-sm text-foreground focus:border-[#1E3A8A]/50 min-w-[240px] sm:min-w-[280px] outline-none shadow-xs transition-all"
                       />
                     </div>
+
+                    {/* Filtro por Tipo de OVA */}
                     <select
-                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none italic shadow-sm transition-all"
-                      value={filterOva}
-                      onChange={(e) => setFilterOva(e.target.value)}
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-3 text-xs sm:text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none shadow-xs transition-all"
+                      value={filterTipoSeguimiento}
+                      onChange={(e) => setFilterTipoSeguimiento(e.target.value)}
                     >
-                      <option value="">Todas las OVAs</option>
+                      <option value="">Todos los Tipos</option>
+                      <option value="curso">📹 Cursos en Video</option>
+                      <option value="manual">📖 OVAs Interactivos</option>
+                      <option value="html">🌐 OVAs HTML</option>
+                    </select>
+
+                    {/* Filtro por OVA específico */}
+                    <select
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-3 text-xs sm:text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none shadow-xs transition-all max-w-[200px] truncate"
+                      value={filterOvaSeguimiento}
+                      onChange={(e) => setFilterOvaSeguimiento(e.target.value)}
+                    >
+                      <option value="">Todos los Contenidos</option>
                       {[...new Set(seguimientoOvas.map(s => s.ova?.titulo))].filter(Boolean).map(titulo => (
                         <option key={titulo} value={titulo}>{titulo}</option>
                       ))}
                     </select>
+
+                    {/* Filtro por Línea */}
                     <select
-                      className="bg-background border border-card-border rounded-xl py-2.5 px-4 text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none italic shadow-sm transition-all"
+                      className="bg-background border border-card-border rounded-xl py-2.5 px-3 text-xs sm:text-sm text-foreground focus:border-[#1E3A8A]/50 outline-none shadow-xs transition-all"
                       value={filterLineaSeguimiento}
                       onChange={(e) => setFilterLineaSeguimiento(e.target.value)}
                     >
@@ -914,42 +938,78 @@ export default function AdminDashboard() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={handleDeleteAllSeguimiento} 
-                      className="gap-2 italic text-[10px] tracking-widest font-black text-red-500 hover:bg-red-500/10 border-red-500/20"
+                      className="gap-1.5 text-[11px] font-bold text-red-500 hover:bg-red-500/10 border-red-500/20"
                     >
-                      <Trash2 className="w-3 h-3" /> LIMPIAR TODO
+                      <Trash2 className="w-3.5 h-3.5" /> LIMPIAR TODO
                     </Button>
-                    <Button variant="outline" size="sm" onClick={loadSeguimiento} className="gap-2 italic text-[10px] tracking-widest font-black">
-                      <TrendingUp className="w-3 h-3" /> ACTUALIZAR DATOS
+                    <Button variant="outline" size="sm" onClick={loadSeguimiento} className="gap-1.5 text-[11px] font-bold">
+                      <TrendingUp className="w-3.5 h-3.5" /> ACTUALIZAR
                     </Button>
                   </div>
                 </div>
 
                 {/* Resumen destacado de métricas */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <GlassCard className="p-6 border-[#1E3A8A]/20 bg-[#1E3A8A]/5">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-[#1E3A8A]/10 border border-[#1E3A8A]/20">
-                        <FileCheck className="w-6 h-6 text-[#1E3A8A]" />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <GlassCard className="p-5 border-card-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#10346E] dark:text-blue-400">
+                        <FileCheck className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-2xl font-black text-foreground italic leading-none">
-                          {(() => {
-                            const filtered = seguimientoOvas.filter(s => {
-                              const matchSearch = (s.perfil?.nombre + ' ' + s.perfil?.apellido).toLowerCase().includes(searchEstudiante.toLowerCase()) || 
-                                                s.perfil?.email.toLowerCase().includes(searchEstudiante.toLowerCase());
-                              const matchOva = !filterOva || s.ova?.titulo === filterOva;
-                              const matchLinea = !filterLineaSeguimiento || s.ova?.modulos?.nombre === filterLineaSeguimiento;
-                              return matchSearch && matchOva && matchLinea;
-                            });
-                            return new Set(filtered.filter(s => s.completado).map(s => s.perfil?.id)).size;
-                          })()}
+                        <p className="text-xl sm:text-2xl font-black text-foreground font-mono leading-none">
+                          {seguimientoOvas.length}
                         </p>
-                        <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest italic mt-1">Usuarios Completados</p>
+                        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mt-1">Total Registros</p>
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  <GlassCard className="p-5 border-card-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+                        <Video className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono leading-none">
+                          {seguimientoOvas.filter(s => s.ova?.tipo === 'curso').length}
+                        </p>
+                        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mt-1">Cursos de Video</p>
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  <GlassCard className="p-5 border-card-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono leading-none">
+                          {seguimientoOvas.filter(s => s.completado).length}
+                        </p>
+                        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mt-1">Completados / Aprobados</p>
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  <GlassCard className="p-5 border-card-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-black text-foreground font-mono leading-none">
+                          {seguimientoOvas.length > 0
+                            ? Math.round(seguimientoOvas.reduce((acc, s) => acc + (s.mejor_puntaje || 0), 0) / seguimientoOvas.length)
+                            : 0}%
+                        </p>
+                        <p className="text-[10px] text-foreground/50 font-bold uppercase tracking-wider mt-1">Promedio General</p>
                       </div>
                     </div>
                   </GlassCard>
@@ -960,83 +1020,139 @@ export default function AdminDashboard() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-card/50 border-b border-card-border">
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">Estudiante / Usuario</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic">OVA / Módulo</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Intentos</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Puntaje Máximo</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Última Nota</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-center">Estado</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-right">Actualización</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] italic text-right">Acciones</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em]">Estudiante / Usuario</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em]">Contenido & Tipo</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-center">Intentos</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-center">Mejor Nota</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-center">Última Nota</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-center">Estado</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-right">Actualización</th>
+                          <th className="px-6 py-4 text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] text-right">Acciones</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-card-border">
                         {seguimientoOvas
                           .filter(s => {
-                            const matchSearch = (s.perfil?.nombre + ' ' + s.perfil?.apellido).toLowerCase().includes(searchEstudiante.toLowerCase()) || 
-                                              s.perfil?.email.toLowerCase().includes(searchEstudiante.toLowerCase());
-                            const matchOva = !filterOva || s.ova?.titulo === filterOva;
+                            const fullName = `${s.perfil?.nombre || ''} ${s.perfil?.apellido || ''}`;
+                            const matchSearch = !searchSeguimiento || 
+                              normalize(fullName).includes(normalize(searchSeguimiento)) || 
+                              normalize(s.perfil?.email || '').includes(normalize(searchSeguimiento));
+                            
+                            const matchTipo = !filterTipoSeguimiento || 
+                              (filterTipoSeguimiento === 'curso' ? s.ova?.tipo === 'curso' : 
+                               filterTipoSeguimiento === 'html' ? s.ova?.tipo === 'html' : 
+                               (s.ova?.tipo === 'manual' || !s.ova?.tipo));
+
+                            const matchOva = !filterOvaSeguimiento || s.ova?.titulo === filterOvaSeguimiento;
                             const matchLinea = !filterLineaSeguimiento || s.ova?.modulos?.nombre === filterLineaSeguimiento;
-                            return matchSearch && matchOva && matchLinea;
+                            
+                            return matchSearch && matchTipo && matchOva && matchLinea;
                           })
-                          .map(s => (
-                            <tr key={s.id} className="hover:bg-white/[0.01] transition-colors group">
-                              <td className="px-6 py-5">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[10px] font-black text-[#1E3A8A] border border-[#1E3A8A]/20 italic">
-                                    {s.perfil?.nombre?.[0]}
+                          .map(s => {
+                            const isCurso = s.ova?.tipo === 'curso';
+                            const isHtml = s.ova?.tipo === 'html';
+                            const detalle = s.respuestas_detalle;
+
+                            return (
+                              <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-[10px] font-black text-[#10346E] dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/40 uppercase">
+                                      {s.perfil?.nombre?.[0] || 'E'}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-bold text-foreground">
+                                        {s.perfil?.nombre} {s.perfil?.apellido}
+                                      </p>
+                                      <p className="text-[11px] text-foreground/50 font-mono">{s.perfil?.email}</p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="text-sm font-bold text-foreground italic">{s.perfil?.nombre} {s.perfil?.apellido}</p>
-                                    <p className="text-[10px] text-foreground/30 font-medium">{s.perfil?.email}</p>
+                                </td>
+
+                                <td className="px-6 py-4">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <p className="text-sm font-bold text-foreground leading-tight">{s.ova?.titulo || 'Contenido'}</p>
+                                      {isCurso ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                          <Video className="w-3 h-3" />
+                                          <span>Curso Video</span>
+                                        </span>
+                                      ) : isHtml ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                          <span>OVA HTML</span>
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                          <span>OVA Manual</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[10px] text-[#10346E]/70 dark:text-blue-400/70 font-semibold uppercase tracking-wider">
+                                      {s.ova?.modulos?.nombre || 'Línea de Aprendizaje'}
+                                    </p>
                                   </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-5">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="text-sm font-bold text-foreground italic leading-tight">{s.ova?.titulo}</p>
-                                  {s.ova?.tipo === 'curso' && (
-                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                                      Curso
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-[#1E3A8A]/50 font-black uppercase tracking-widest italic">{s.ova?.modulos?.nombre}</p>
-                              </td>
-                              <td className="px-6 py-5 text-center">
-                                <span className="text-sm font-black text-foreground/60 italic font-mono">{s.intentos}</span>
-                              </td>
-                              <td className="px-6 py-5 text-center">
-                                <span className={`text-base font-black italic ${s.mejor_puntaje >= 60 ? 'text-[#1E3A8A]' : 'text-red-400'}`}>
-                                  {s.mejor_puntaje}%
-                                </span>
-                              </td>
-                              <td className="px-6 py-5 text-center">
-                                <span className="text-sm font-bold text-foreground/40 italic">{s.ultima_calificacion}%</span>
-                              </td>
-                              <td className="px-6 py-5 text-center">
-                                <Badge variant={s.completado ? 'emerald' : 'amber'} size="sm" className="italic">
-                                  {s.completado ? 'COMPLETADO' : 'PENDIENTE'}
-                                </Badge>
-                              </td>
-                              <td className="px-6 py-5 text-right text-[10px] text-foreground/30 font-bold italic uppercase tracking-tighter">
-                                {new Date(s.updated_at).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-5 text-right">
-                                <button
-                                  onClick={() => handleDeleteSeguimiento(s.id)}
-                                  className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-foreground/20 hover:text-red-500 border border-red-500/10 transition-all"
-                                  title="Eliminar registro"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                </td>
+
+                                <td className="px-6 py-4 text-center">
+                                  <span className="text-sm font-bold text-foreground/70 font-mono">{s.intentos || 1}</span>
+                                </td>
+
+                                <td className="px-6 py-4 text-center">
+                                  <span className={`text-sm font-black font-mono ${s.mejor_puntaje >= 60 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-500'}`}>
+                                    {s.mejor_puntaje || 0}%
+                                  </span>
+                                </td>
+
+                                <td className="px-6 py-4 text-center">
+                                  <span className="text-sm font-bold text-foreground/50 font-mono">{s.ultima_calificacion || 0}%</span>
+                                </td>
+
+                                <td className="px-6 py-4 text-center">
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                      s.completado
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60'
+                                        : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60'
+                                    }`}
+                                  >
+                                    {s.completado ? (isCurso ? 'COMPLETADO' : 'APROBADO') : 'EN PROGRESO'}
+                                  </span>
+                                </td>
+
+                                <td className="px-6 py-4 text-right text-[11px] text-foreground/40 font-mono">
+                                  {s.updated_at ? new Date(s.updated_at).toLocaleDateString() : '—'}
+                                </td>
+
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedSeguimientoDetalle(s);
+                                        setIsDetalleModalOpen(true);
+                                      }}
+                                      className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 text-[#10346E] dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/40 transition-colors cursor-pointer"
+                                      title="Ver desglose de lecciones y evaluaciones"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteSeguimiento(s.id)}
+                                      className="p-2 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-900/40 transition-colors cursor-pointer"
+                                      title="Eliminar registro"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+
                         {seguimientoOvas.length === 0 && !loading && (
                           <tr>
-                            <td colSpan="7" className="px-6 py-20 text-center text-foreground/30 italic">
-                              <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                            <td colSpan="8" className="px-6 py-20 text-center text-foreground/40 italic">
+                              <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-20" />
                               No se han registrado resultados de evaluaciones todavía.
                             </td>
                           </tr>
@@ -1451,6 +1567,163 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+      </Modal>
+
+      {/* Modal de Detalle de Seguimiento y Calificaciones */}
+      <Modal
+        isOpen={isDetalleModalOpen}
+        onClose={() => {
+          setIsDetalleModalOpen(false);
+          setSelectedSeguimientoDetalle(null);
+        }}
+        title="Detalle de Seguimiento y Evaluación"
+      >
+        {selectedSeguimientoDetalle && (() => {
+          const s = selectedSeguimientoDetalle;
+          const isCurso = s.ova?.tipo === 'curso';
+          const detalle = s.respuestas_detalle;
+          const quizzes = detalle?.quizzes_detalle || [];
+
+          return (
+            <div className="space-y-6">
+              {/* Encabezado del Estudiante y Contenido */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#10346E] text-white flex items-center justify-center font-bold text-sm">
+                      {s.perfil?.nombre?.[0] || 'E'}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-foreground">
+                        {s.perfil?.nombre} {s.perfil?.apellido}
+                      </h4>
+                      <p className="text-xs text-foreground/50 font-mono">{s.perfil?.email}</p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      s.completado
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60'
+                        : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60'
+                    }`}
+                  >
+                    {s.completado ? (isCurso ? 'Curso Completado' : 'Aprobado') : 'En Progreso'}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground truncate">{s.ova?.titulo}</p>
+                    <p className="text-[10px] text-[#10346E] dark:text-blue-400 font-semibold uppercase">
+                      {s.ova?.modulos?.nombre}
+                    </p>
+                  </div>
+                  {isCurso ? (
+                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+                      Curso Video
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                      OVA Interactivo
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Métricas Principales */}
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 rounded-xl bg-card border border-card-border shadow-xs">
+                  <span className="text-[10px] text-foreground/40 font-bold uppercase block mb-0.5">Mejor Nota</span>
+                  <span className={`text-xl font-black font-mono ${s.mejor_puntaje >= 60 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-500'}`}>
+                    {s.mejor_puntaje || 0}%
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-card border border-card-border shadow-xs">
+                  <span className="text-[10px] text-foreground/40 font-bold uppercase block mb-0.5">Última Nota</span>
+                  <span className="text-xl font-black text-foreground font-mono">
+                    {s.ultima_calificacion || 0}%
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-card border border-card-border shadow-xs">
+                  <span className="text-[10px] text-foreground/40 font-bold uppercase block mb-0.5">Intentos</span>
+                  <span className="text-xl font-black text-foreground font-mono">
+                    {s.intentos || 1}
+                  </span>
+                </div>
+              </div>
+
+              {/* Si es Curso en Video: Mostrar avance de contenidos y desglose de quizzes */}
+              {isCurso && (
+                <div className="space-y-4">
+                  {/* Barra de progreso global del curso */}
+                  <div className="p-4 rounded-xl bg-card border border-card-border space-y-2">
+                    <div className="flex justify-between items-center text-xs font-semibold">
+                      <span className="text-foreground/70">Avance de Lecciones y Quizzes</span>
+                      <span className="text-[#10346E] dark:text-blue-400 font-bold font-mono">
+                        {detalle?.completados_count || 0} de {detalle?.total_items || 0} completados ({detalle?.porcentaje_avance || (s.completado ? 100 : 0)}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className="h-full bg-[#10346E] dark:bg-blue-500 rounded-full transition-all duration-300"
+                        style={{ width: `${detalle?.porcentaje_avance || (s.completado ? 100 : 0)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Detalle de Quizzes individuales */}
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                      Evaluaciones y Quizzes del Curso ({quizzes.length})
+                    </h5>
+
+                    {quizzes.length > 0 ? (
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {quizzes.map((q, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between gap-3 text-xs"
+                          >
+                            <div className="min-w-0">
+                              <p className="font-bold text-foreground truncate">{q.titulo}</p>
+                              <span className="text-[10px] text-foreground/40">{q.seccion}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-bold text-xs text-foreground">
+                                {q.puntaje !== null ? `${q.puntaje}%` : 'Sin presentar'}
+                              </span>
+                              {q.puntaje !== null ? (
+                                <Badge variant={q.aprobado ? 'emerald' : 'amber'} size="sm">
+                                  {q.aprobado ? 'APROBADO' : 'NO SUPERADO'}
+                                </Badge>
+                              ) : (
+                                <Badge size="sm">PENDIENTE</Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-foreground/40 italic p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-dashed border-card-border text-center">
+                        Este curso no tiene evaluaciones individuales configuradas.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Pie con timestamp */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-foreground/40">
+                <span>Última interacción: {s.updated_at ? new Date(s.updated_at).toLocaleString() : '—'}</span>
+                <Button size="sm" variant="outline" onClick={() => setIsDetalleModalOpen(false)}>
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
     </div>
   );

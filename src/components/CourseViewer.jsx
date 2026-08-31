@@ -27,11 +27,11 @@ import { sanitizeHTML } from '../lib/security';
 import QuizPlayer from './QuizPlayer';
 import Button from './Button';
 import { useAuth } from '../context/AuthContext';
-import { registrarResultadoOva } from '../lib/supabase';
+import { registrarResultadoOva, obtenerMisResultadosOvas } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
 export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate }) {
-  const { user } = useAuth();
+  const { user, perfil } = useAuth();
 
   // Parsear estructura de contenido
   const rawContenido = ova?.contenido;
@@ -118,7 +118,8 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
   // Estado de progreso guardado
-  const storageKey = `sisinfo_course_${ova?.id}_${user?.id || 'guest'}`;
+  const profileId = perfil?.id || user?.id || 'guest';
+  const storageKey = `sisinfo_course_${ova?.id}_${profileId}`;
   const [progressState, setProgressState] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKey);
@@ -133,19 +134,51 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
     };
   });
 
+  // Sincronizar con el progreso remoto previamente guardado en Supabase
+  useEffect(() => {
+    async function syncExistingProgress() {
+      if (!perfil?.id || !ova?.id) return;
+      try {
+        const misResultados = await obtenerMisResultadosOvas(perfil.id);
+        const match = misResultados.find(r => r.ova_id === ova.id);
+        if (match?.respuestas_detalle) {
+          const remote = match.respuestas_detalle;
+          setProgressState(prev => {
+            const merged = {
+              completedItems: { ...(remote.completedItems || {}), ...(prev.completedItems || {}) },
+              quizScores: { ...(remote.quizScores || {}), ...(prev.quizScores || {}) },
+              courseCompleted: remote.courseCompleted || prev.courseCompleted || match.completado || false
+            };
+            try {
+              localStorage.setItem(storageKey, JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      } catch (e) {
+        console.error("Error al sincronizar progreso previo del curso:", e);
+      }
+    }
+    syncExistingProgress();
+  }, [perfil?.id, ova?.id, storageKey]);
+
   // Guardar progreso en localStorage y Supabase cuando cambia
   const updateProgress = useCallback(async (newCompleted, newScores = {}) => {
+    const updatedCompleted = { ...progressState.completedItems, ...newCompleted };
+    const updatedScores = { ...progressState.quizScores, ...newScores };
+
+    const allRequiredFinished = flatItems.length > 0 && flatItems.every(it => updatedCompleted[it.id]);
+    const isCompletedNow = progressState.courseCompleted || allRequiredFinished;
+
     const updatedState = {
-      completedItems: { ...progressState.completedItems, ...newCompleted },
-      quizScores: { ...progressState.quizScores, ...newScores },
-      courseCompleted: progressState.courseCompleted
+      completedItems: updatedCompleted,
+      quizScores: updatedScores,
+      courseCompleted: isCompletedNow
     };
 
-    const allRequiredFinished = flatItems.length > 0 && flatItems.every(it => updatedState.completedItems[it.id]);
-    if (allRequiredFinished && !updatedState.courseCompleted) {
-      updatedState.courseCompleted = true;
+    if (allRequiredFinished && !progressState.courseCompleted) {
       setShowCelebrationModal(true);
-      toast.success('Has completado todos los contenidos del curso con éxito.');
+      toast.success('¡Has completado todos los contenidos y evaluaciones del curso con éxito!');
     }
 
     setProgressState(updatedState);
@@ -155,17 +188,43 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
       // Ignorar error de storage
     }
 
-    if (user?.id && ova?.id) {
+    const targetProfileId = perfil?.id;
+    if (targetProfileId && ova?.id) {
       try {
-        const scores = Object.values(updatedState.quizScores);
-        const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 100;
-        await registrarResultadoOva(user.id, ova.id, avgScore, updatedState.courseCompleted || allRequiredFinished);
+        const scores = Object.values(updatedScores);
+        // Calcular promedio de evaluaciones si hay quizzes; si no hay, dar 100 si está completado
+        const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : (isCompletedNow ? 100 : 0);
+
+        const totalItemsCount = flatItems.length;
+        const completedCount = Object.keys(updatedCompleted).filter(k => updatedCompleted[k]).length;
+        const progressPercentage = totalItemsCount > 0 ? Math.round((completedCount / totalItemsCount) * 100) : 0;
+
+        const detalle = {
+          total_items: totalItemsCount,
+          completados_count: completedCount,
+          porcentaje_avance: progressPercentage,
+          completedItems: updatedCompleted,
+          quizScores: updatedScores,
+          courseCompleted: isCompletedNow,
+          quizzes_detalle: flatItems
+            .filter(it => it.type.includes('quiz'))
+            .map(q => ({
+              id: q.id,
+              titulo: q.title,
+              tipo: q.type,
+              seccion: q.sectionTitle,
+              puntaje: updatedScores[q.id] ?? null,
+              aprobado: updatedScores[q.id] !== undefined ? updatedScores[q.id] >= (q.data?.nota_minima || 60) : false
+            }))
+        };
+
+        await registrarResultadoOva(targetProfileId, ova.id, avgScore, isCompletedNow, detalle);
         onProgressUpdate?.();
       } catch (err) {
         console.error('Error al registrar resultado en Supabase:', err);
       }
     }
-  }, [flatItems, ova?.id, user?.id, storageKey, progressState, onProgressUpdate]);
+  }, [flatItems, ova?.id, perfil?.id, storageKey, progressState, onProgressUpdate]);
 
   const currentItem = flatItems[currentIndex] || flatItems[0];
 
@@ -185,16 +244,17 @@ export default function CourseViewer({ ova, modulo, onClose, onProgressUpdate })
     }
   };
 
-  const handleQuizFinished = (result) => {
+  const handleQuizFinished = (score, percentage, passed) => {
     if (!currentItem) return;
-    const score = result.percentage || 0;
-    const isApproved = score >= (currentItem.data?.nota_minima || 60);
+    const finalPercentage = typeof percentage === 'number' ? percentage : (typeof score === 'number' ? score : (score?.percentage || 0));
+    const minScore = currentItem.data?.nota_minima || 60;
+    const isApproved = typeof passed === 'boolean' ? passed : finalPercentage >= minScore;
 
     const newCompleted = { [currentItem.id]: isApproved || true };
-    const newScores = { [currentItem.id]: score };
+    const newScores = { [currentItem.id]: finalPercentage };
     updateProgress(newCompleted, newScores);
 
-    toast.success(`Evaluación finalizada con ${score}% de calificación`);
+    toast.success(`Evaluación finalizada con ${finalPercentage}% de calificación`);
   };
 
   const totalItemsCount = flatItems.length;
