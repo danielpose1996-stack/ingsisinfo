@@ -535,6 +535,6 @@ export async function eliminarTodoSeguimiento() {
     const { error } = await supabase
         .from('resultados_ovas')
         .delete()
-        .neq('id', 0);
+        .not('id', 'is', null);
     if (error) throw error;
 }
