@@ -6,6 +6,9 @@ import Modal from '../components/Modal';
 import {
   FileText,
   Calendar,
+  Clock,
+  Tag,
+  Maximize2,
   Image as ImageIcon,
   ChevronRight,
   ArrowRight,
@@ -380,48 +383,129 @@ export default function Home() {
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
         title="Detalles del Evento"
-        maxWidth="max-w-2xl"
+        maxWidth="max-w-3xl"
       >
-        {selectedEvent && (
-          <div className="space-y-6">
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
+        {selectedEvent && (() => {
+          const eventDate = new Date(selectedEvent.fecha_evento);
+          const isValidDate = !isNaN(eventDate.getTime());
+          const formattedDate = isValidDate
+            ? eventDate.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              }).replace(/^\w/, c => c.toUpperCase())
+            : selectedEvent.fecha_evento;
+          const formattedTime = isValidDate
+            ? eventDate.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : '';
+
+          return (
+            <div className="space-y-6">
+              {/* Contenedor del Afiche / Imagen (Zero-Crop con fondo ambiental) */}
               {selectedEvent.imagen_url ? (
-                <img
-                  src={selectedEvent.imagen_url}
-                  alt={selectedEvent.titulo}
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950/5 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-center justify-center p-3 sm:p-5 min-h-[280px]">
+                  {/* Fondo ambiental desenfocado */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center scale-125 blur-2xl opacity-20 dark:opacity-35 pointer-events-none"
+                    style={{ backgroundImage: `url(${selectedEvent.imagen_url})` }}
+                  />
+
+                  {/* Imagen completa sin recortes */}
+                  <img
+                    src={selectedEvent.imagen_url}
+                    alt={selectedEvent.titulo}
+                    className="relative z-1 max-h-[60vh] sm:max-h-[520px] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                  />
+
+                  {/* Botón flotante para ver afiche completo en alta resolución */}
+                  <a
+                    href={selectedEvent.imagen_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/65 hover:bg-black/85 text-white text-xs font-semibold backdrop-blur-md transition-all shadow-sm hover:scale-105"
+                    title="Abrir imagen completa en pestaña nueva"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Ver afiche</span>
+                  </a>
+                </div>
               ) : (
-                <div className="w-full h-full bg-slate-100 flex items-center justify-center text-5xl">
-                  📅
+                <div className="w-full h-44 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-400">
+                  <Calendar className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+                  <span className="text-xs font-medium">Evento del Semillero SISINFO</span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white bg-black/50 backdrop-blur-xs px-3 py-1.5 rounded-full font-semibold">
-                <Calendar className="w-3.5 h-3.5" />
-                {new Date(selectedEvent.fecha_evento).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+
+              {/* Barra de Metadatos (Fecha, Hora, Tipo) fuera del afiche */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                {formattedDate && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-[#15326C] dark:text-blue-300 text-xs font-bold shadow-2xs">
+                    <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span>{formattedDate}</span>
+                  </div>
+                )}
+
+                {formattedTime && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold">
+                    <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+                    <span>{formattedTime} hrs</span>
+                  </div>
+                )}
+
+                {selectedEvent.tipo && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                    <Tag className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>{selectedEvent.tipo === 'proximo' ? 'Próximo Evento' : selectedEvent.tipo}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Título y Descripción del Evento */}
+              <div className="space-y-3">
+                <h3 className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-white tracking-tight leading-snug">
+                  {selectedEvent.titulo}
+                </h3>
+                {selectedEvent.descripcion ? (
+                  <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+                    {selectedEvent.descripcion}
+                  </p>
+                ) : (
+                  <p className="text-slate-400 dark:text-slate-500 text-sm italic">
+                    Sin descripción adicional para este evento.
+                  </p>
+                )}
+              </div>
+
+              {/* Acciones de Cierre y Enlace */}
+              <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                {selectedEvent.imagen_url ? (
+                  <a
+                    href={selectedEvent.imagen_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[#15326C] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Abrir afiche original</span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
-
-            <div className="space-y-3">
-              <h3 className="text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">
-                {selectedEvent.titulo}
-              </h3>
-              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                {selectedEvent.descripcion || 'Sin descripción detallada.'}
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="px-6 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs border border-slate-200 cursor-pointer"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
 
       {/* Modal Foto Galería */}
