@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, ChevronRight, ExternalLink } from 'lucide-react';
+import { parseLocalDate } from '../lib/dateUtils';
 
 export default function NewsCard({ noticia, onClick }) {
   const { titulo, contenido, fecha, imagen_url, enlace_url } = noticia;
@@ -38,7 +39,7 @@ export default function NewsCard({ noticia, onClick }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs text-white text-[11px] font-semibold z-10">
           <Calendar className="w-3.5 h-3.5 text-white/90" aria-hidden="true" />
-          <span>{new Date(fecha).toLocaleDateString()}</span>
+          <span>{parseLocalDate(fecha)?.toLocaleDateString('es-ES') || fecha}</span>
         </div>
       </div>
 

@@ -1,11 +1,12 @@
 import React from 'react';
 import { CalendarDays } from 'lucide-react';
+import { parseLocalDate } from '../lib/dateUtils';
 
 export default function EventItem({ evento }) {
   const { titulo, fecha_evento, descripcion, imagen_url } = evento;
-  const date = new Date(fecha_evento);
-  const day = date.getDate();
-  const month = date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase();
+  const date = parseLocalDate(fecha_evento);
+  const day = date ? date.getDate() : '';
+  const month = date ? date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase() : '';
 
   return (
     <div className="flex gap-4 p-4 rounded-xl hover:bg-card transition-colors border border-transparent hover:border-card-border group bg-card/40">

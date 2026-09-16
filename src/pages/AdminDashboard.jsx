@@ -25,6 +25,7 @@ import {
   eliminarTodoSeguimiento
 } from '../lib/supabase';
 import { sanitizeText } from '../lib/security';
+import { parseLocalDate, toLocalDatetimeInput } from '../lib/dateUtils';
 import { useEmailValidation } from '../hooks/useEmailValidation';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -289,7 +290,7 @@ export default function AdminDashboard() {
     } else {
       setPublicForm(
         type === 'noticia' ? { titulo: '', contenido: '', imagen_url: '', enlace_url: '', pdf_url: '', fecha: new Date().toISOString().split('T')[0] } :
-        type === 'evento' ? { titulo: '', descripcion: '', fecha_evento: new Date().toISOString().split('T')[0], tipo: 'proximo', imagen_url: '' } :
+        type === 'evento' ? { titulo: '', descripcion: '', fecha_evento: toLocalDatetimeInput(new Date()), tipo: 'proximo', imagen_url: '' } :
         { titulo: '', imagen_url: '', evento_id: null }
       );
     }
@@ -822,8 +823,8 @@ export default function AdminDashboard() {
                           <div key={e.id} className="flex items-center justify-between p-5 bg-card rounded-2xl border border-card-border group hover:border-blue-500/30 transition-all">
                             <div className="flex items-center gap-6">
                               <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
-                                <span className="text-xs font-black uppercase tracking-tighter italic">{new Date(e.fecha_evento).toLocaleString('es', { month: 'short' })}</span>
-                                <span className="text-xl font-black leading-none">{new Date(e.fecha_evento).getDate()}</span>
+                                <span className="text-xs font-black uppercase tracking-tighter italic">{parseLocalDate(e.fecha_evento)?.toLocaleString('es', { month: 'short' })}</span>
+                                <span className="text-xl font-black leading-none">{parseLocalDate(e.fecha_evento)?.getDate()}</span>
                               </div>
                               {e.imagen_url && (
                                 <div className="w-14 h-14 rounded-xl overflow-hidden border border-card-border">
@@ -1356,52 +1357,115 @@ export default function AdminDashboard() {
           )}
 
           {publicType === 'evento' && (
-            <>
-              <input
-                type="text"
-                placeholder="Título del evento"
-                value={publicForm.titulo || ''}
-                onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
-                required
-              />
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground/70 mb-1.5 block">
+                  Título del Evento
+                </label>
                 <input
-                  type="datetime-local"
-                  value={publicForm.fecha_evento ? new Date(publicForm.fecha_evento).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setPublicForm({...publicForm, fecha_evento: e.target.value})}
+                  type="text"
+                  placeholder="Ej. Taller: ¡No muerdas el anzuelo!"
+                  value={publicForm.titulo || ''}
+                  onChange={(e) => setPublicForm({...publicForm, titulo: e.target.value})}
                   className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
                   required
                 />
-                <select
-                  value={publicForm.tipo || 'proximo'}
-                  onChange={(e) => setPublicForm({...publicForm, tipo: e.target.value})}
-                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
-                >
-                  <option value="proximo">Próximo</option>
-                  <option value="pasado">Pasado / Archivo</option>
-                </select>
-                <div className="relative">
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-foreground/70 mb-1.5 block">
+                    Fecha y Hora del Evento
+                  </label>
                   <input
-                    type="file"
-                    accept="image/*"
-                onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    type="datetime-local"
+                    value={toLocalDatetimeInput(publicForm.fecha_evento)}
+                    onChange={(e) => setPublicForm({...publicForm, fecha_evento: e.target.value})}
+                    className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
+                    required
                   />
-                  <div className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground/40 flex items-center justify-between">
-                    <span>{publicForm.imagen_url ? 'Imagen cargada' : 'Subir Imagen'}</span>
-                    <ImageIcon className="w-4 h-4" />
-                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-foreground/70 mb-1.5 block">
+                    Estado del Evento
+                  </label>
+                  <select
+                    value={publicForm.tipo || 'proximo'}
+                    onChange={(e) => setPublicForm({...publicForm, tipo: e.target.value})}
+                    className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none"
+                  >
+                    <option value="proximo">Próximo</option>
+                    <option value="pasado">Pasado / Archivo</option>
+                  </select>
                 </div>
               </div>
-              <textarea
-                placeholder="Descripción corta..."
-                value={publicForm.descripcion || ''}
-                onChange={(e) => setPublicForm({...publicForm, descripcion: e.target.value})}
-                className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none min-h-[100px]"
-                required
-              />
-            </>
+
+              {/* Zona de Afiche con vista previa interactiva */}
+              <div>
+                <label className="text-xs font-semibold text-foreground/70 mb-1.5 block">
+                  Afiche o Imagen Promocional (Opcional)
+                </label>
+                {publicForm.imagen_url ? (
+                  <div className="relative w-full rounded-2xl overflow-hidden border border-card-border bg-slate-950/5 dark:bg-slate-900/50 p-3 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0 border border-card-border">
+                        <img src={publicForm.imagen_url} alt="Vista previa afiche" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-foreground truncate">Afiche cargado</p>
+                        <p className="text-[11px] text-foreground/50 truncate">Haz clic en Cambiar para seleccionar otra imagen</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className="relative cursor-pointer px-3 py-1.5 rounded-lg bg-card hover:bg-slate-100 dark:hover:bg-slate-800 border border-card-border text-xs font-semibold text-foreground transition-colors">
+                        <span>Cambiar</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setPublicForm({...publicForm, imagen_url: ''})}
+                        className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 text-red-500 transition-colors"
+                        title="Eliminar afiche"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative w-full rounded-2xl border-2 border-dashed border-card-border hover:border-[#1E3A8A]/60 bg-card/40 transition-colors p-5 flex flex-col items-center justify-center text-center group cursor-pointer">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-105 transition-transform">
+                      <ImageIcon className="w-5 h-5" />
+                    </div>
+                    <p className="text-xs font-bold text-foreground">Subir afiche o volante del evento</p>
+                    <p className="text-[11px] text-foreground/50 mt-0.5">PNG, JPG, WebP (Se visualizará completo sin recortes)</p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handlePublicFileUpload(e, 'imagen_url')}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground/70 mb-1.5 block">
+                  Descripción del Evento
+                </label>
+                <textarea
+                  placeholder="Detalles del evento, expositores, requisitos, etc..."
+                  value={publicForm.descripcion || ''}
+                  onChange={(e) => setPublicForm({...publicForm, descripcion: e.target.value})}
+                  className="w-full bg-card border border-card-border rounded-xl py-3 px-4 text-sm text-foreground focus:border-[#1E3A8A] outline-none min-h-[100px]"
+                  required
+                />
+              </div>
+            </div>
           )}
 
           {publicType === 'galeria' && (

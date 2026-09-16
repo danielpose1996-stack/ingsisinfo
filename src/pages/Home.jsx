@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { obtenerNoticias, obtenerEventos, obtenerGaleria, supabase } from '../lib/supabase';
 import NewsCard from '../components/NewsCard';
 import Modal from '../components/Modal';
+import { parseLocalDate, formatFriendlyDate } from '../lib/dateUtils';
 import {
   FileText,
   Calendar,
@@ -197,9 +198,9 @@ export default function Home() {
                 ))
               ) : eventos.length > 0 ? (
                 eventos.map((e) => {
-                  const date = new Date(e.fecha_evento);
-                  const day = date.getDate();
-                  const month = date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+                  const date = parseLocalDate(e.fecha_evento);
+                  const day = date ? date.getDate() : '';
+                  const month = date ? date.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '') : '';
                   return (
                     <div
                       key={e.id}
@@ -331,7 +332,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white bg-black/50 backdrop-blur-xs px-3 py-1.5 rounded-full font-semibold">
                 <Calendar className="w-3.5 h-3.5" />
-                {new Date(selectedNews.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {formatFriendlyDate(selectedNews.fecha)}
               </div>
             </div>
 
@@ -386,8 +387,8 @@ export default function Home() {
         maxWidth="max-w-3xl"
       >
         {selectedEvent && (() => {
-          const eventDate = new Date(selectedEvent.fecha_evento);
-          const isValidDate = !isNaN(eventDate.getTime());
+          const eventDate = parseLocalDate(selectedEvent.fecha_evento);
+          const isValidDate = !!eventDate;
           const formattedDate = isValidDate
             ? eventDate.toLocaleDateString('es-ES', {
                 weekday: 'long',
@@ -396,7 +397,12 @@ export default function Home() {
                 year: 'numeric'
               }).replace(/^\w/, c => c.toUpperCase())
             : selectedEvent.fecha_evento;
-          const formattedTime = isValidDate
+          
+          const hasSpecificTime = typeof selectedEvent.fecha_evento === 'string' &&
+            selectedEvent.fecha_evento.includes('T') &&
+            !selectedEvent.fecha_evento.includes('T00:00');
+
+          const formattedTime = (isValidDate && hasSpecificTime)
             ? eventDate.toLocaleTimeString('es-ES', {
                 hour: '2-digit',
                 minute: '2-digit'
